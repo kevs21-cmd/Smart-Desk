@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PGPC | Learning Management System</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3B82F6',
+        secondary: '#1E40AF'
+      },
+      borderRadius: {
+        'none': '0px',
+        'sm': '4px',
+        DEFAULT: '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'full': '9999px',
+        'button': '8px'
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+
+
+<style>
+  :where([class^="ri-"])::before { content: "\f3c2"; }
+  body { background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); }
+  .login-container { background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); }
+  .input-field { transition: all .3s ease; }
+  .input-field:focus { box-shadow: 0 0 0 3px rgba(59,130,246,.1); }
+  .captcha-container { background:#f8fafc; border:2px dashed #cbd5e1; }
+  .error-message { animation: slideDown .3s ease; }
+  @keyframes slideDown {
+    from { opacity:0; transform:translateY(-10px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+  /* Mobile menu */
+  #mobileNav { transition: transform .3s ease; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ==================== HEADER ==================== -->
+<header class="w-full bg-white shadow-sm border-b border-gray-200 py-4 sticky top-0 z-50">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center">
+        <img src="{{ url_for('static', filename='images/fav.png') }}"
+            alt="PGPC Logo"
+            class="w-14 h-14 object-contain mr-3">
+
+        <span class="hidden sm:inline ml-3 text-base sm:text-lg font-semibold text-gray-800">
+            Learning Management System
+        </span>
+    </div>
+
+
+      <!-- Desktop Nav -->
+      <nav class="hidden md:flex items-center space-x-6 lg:space-x-8">
+        <a href="#features" class="text-gray-600 hover:text-primary transition-colors">Features</a>
+        <a href="#about" class="text-gray-600 hover:text-primary transition-colors">About</a>
+        <a href="#contact" class="text-gray-600 hover:text-primary transition-colors">Contact</a>
+        <a href="/login" id="loginModal" class="!rounded-button whitespace-nowrap bg-primary text-white px-5 py-2 hover:bg-secondary transition-colors">
+          Login
+        </a>
+      </nav>
+
+      <!-- Mobile Hamburger -->
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-gray-600 text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav (hidden by default) -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg">
+    <a href="#features" class="px-6 py-3 text-gray-700 hover:bg-gray-50">Features</a>
+    <a href="#about" class="px-6 py-3 text-gray-700 hover:bg-gray-50">About</a>
+    <a href="#contact" class="px-6 py-3 text-gray-700 hover:bg-gray-50">Contact</a>
+    <a href="/login" id="mobileLoginBtn" class="mx-6 my-3 !rounded-button w-full bg-primary text-white py-2 hover:bg-secondary">
+      Login
+    </a>
+  </nav>
+</header>
+
+<!-- ==================== HERO ==================== -->
+<main>
+  <section class="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center"
+          style="background-image: url('/static/images/_DSC2372.JPG'); 
+       background-size: cover; 
+       background-position: center; 
+       background-blend-mode: overlay;">
+    <div class="absolute inset-0 bg-gradient-to-r from-white/90 via-white/95 to-transparent"></div>
+    <div class="relative max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div class="space-y-6 sm:space-y-8">
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+            Transform Your <span class="text-primary">Learning</span> Experience
+          </h1>
+          <p class="text-lg sm:text-xl text-gray-600">
+            Join thousands of students and educators on our comprehensive learning management system.
+          </p>
+
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <a href="/login" id="studentLoginBtn" class="!rounded-button w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-primary text-white font-semibold hover:bg-secondary transition-colors">
+              <i class="ri-graduation-cap-line mr-2"></i>  Login
+            </a>
+            <a href="#about" id="teacherLoginBtn" class="!rounded-button w-full sm:w-auto flex items-center justify-center px-6 py-3 bg-white text-primary border-2 border-primary font-semibold hover:bg-primary hover:text-white transition-colors">
+              <i class="ri-user-2-line mr-2"></i> About
+            </a>
+
+          </div>
+
+          <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-gray-600">
+            <div class="flex items-center"><i class="ri-check-line text-green-500 mr-1"></i>Easy to Use</div>
+            <div class="flex items-center"><i class="ri-check-line text-green-500 mr-1"></i>24/7 Support</div>
+            <div class="flex items-center"><i class="ri-check-line text-green-500 mr-1"></i>Mobile Friendly</div>
+          </div>
+        </div>
+        <!-- empty column for image spacing on large screens -->
+        <div class="hidden lg:block"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FEATURES ==================== -->
+  <section id="features" class="py-12 sm:py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">Why Choose EduPlatform?</h2>
+        <p class="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">Discover powerful features designed to enhance your learning and teaching experience</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Feature cards – unchanged content, responsive grid -->
+        <div class="bg-gradient-to-br from-blue-50 to-white p-6 rounded-2xl border border-blue-100 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center mb-5"><i class="ri-book-open-line text-white"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Interactive Courses</h3>
+          <p class="text-gray-600">Engage with multimedia content, quizzes, and assignments designed for effective learning outcomes.</p>
+        </div>
+        <!-- Repeat for the other 5 cards – same structure -->
+        <div class="bg-gradient-to-br from-purple-50 to-white p-6 rounded-2xl border border-purple-100 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center mb-5"><i class="ri-line-chart-line text-white"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Progress Tracking</h3>
+          <p class="text-gray-600">Monitor your learning journey with detailed analytics and personalized progress reports.</p>
+        </div>
+        <div class="bg-gradient-to-br from-green-50 to-white p-6 rounded-2xl border border-green-100 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center mb-5"><i class="ri-team-line text-white"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Collaboration Tools</h3>
+          <p class="text-gray-600">Connect with classmates and instructors through discussion forums, group projects, and messaging.</p>
+        </div>
+        <div class="bg-gradient-to-br from-orange-50 to-white p-6 rounded-2xl border border-orange-100 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 bg-orange-600 rounded-xl flex items-center justify-center mb-5"><i class="ri-smartphone-line text-white"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Mobile Access</h3>
+          <p class="text-gray-600">Learn anywhere, anytime with our responsive design and mobile-optimized interface.</p>
+        </div>
+        <div class="bg-gradient-to-br from-red-50 to-white p-6 rounded-2xl border border-red-100 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 bg-red-600 rounded-xl flex items-center justify-center mb-5"><i class="ri-shield-check-line text-white"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">Secure Platform</h3>
+          <p class="text-gray-600">Your data is protected with enterprise-grade security and privacy controls.</p>
+        </div>
+        <div class="bg-gradient-to-br from-indigo-50 to-white p-6 rounded-2xl border border-indigo-100 hover:shadow-lg transition-shadow">
+          <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center mb-5"><i class="ri-customer-service-2-line text-white"></i></div>
+          <h3 class="text-xl font-semibold text-gray-900 mb-3">24/7 Support</h3>
+          <p class="text-gray-600">Get help when you need it with our dedicated support team and comprehensive resources.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOR STUDENTS ==================== -->
+  <section class="py-12 sm:py-20 bg-gradient-to-br from-gray-50 to-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div class="space-y-6">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">For Students</h2>
+          <p class="text-lg sm:text-xl text-gray-600">Access your courses, track assignments, and collaborate with peers in an intuitive learning environment.</p>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0"><i class="ri-check-line text-white text-xs"></i></div>
+              <div><h4 class="font-semibold text-gray-900">Personalized Dashboard</h4><p class="text-gray-600">View upcoming assignments, course progress, and important announcements at a glance.</p></div>
+            </div>
+            <!-- repeat other 2 items -->
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0"><i class="ri-check-line text-white text-xs"></i></div>
+              <div><h4 class="font-semibold text-gray-900">Interactive Learning</h4><p class="text-gray-600">Engage with multimedia content, participate in discussions, and submit assignments seamlessly.</p></div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0"><i class="ri-check-line text-white text-xs"></i></div>
+              <div><h4 class="font-semibold text-gray-900">Grade Tracking</h4><p class="text-gray-600">Monitor your academic progress with real-time grade updates and performance analytics.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="relative">
+          <img src="/static/images/_DSC2398.JPG"
+            alt="Student Dashboard"
+            class="rounded-2xl shadow-2xl w-full object-cover">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== FOR TEACHERS ==================== -->
+  <section class="py-12 sm:py-20 bg-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6">
+      <div class="grid lg:grid-cols-2 gap-10 items-center">
+        <div class="order-2 lg:order-1 relative">
+          <img src="https://readdy.ai/api/search-image?query=teacher%20using%20digital%20tools%20for%20course%20management%20creating%20assignments%20and%20monitoring%20student%20progress%20professional%20educational%20technology%20setup%20clean%20modern%20environment&width=600&height=500&seq=teacher1&orientation=landscape"
+               alt="Teacher Dashboard" class="rounded-2xl shadow-2xl w-full object-cover">
+        </div>
+        <div class="order-1 lg:order-2 space-y-6">
+          <h2 class="text-3xl sm:text-4xl font-bold text-gray-900">For Teachers</h2>
+          <p class="text-lg sm:text-xl text-gray-600">Create engaging courses, manage student progress, and streamline your teaching workflow with powerful tools.</p>
+          <div class="space-y-4">
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0"><i class="ri-check-line text-white text-xs"></i></div>
+              <div><h4 class="font-semibold text-gray-900">Course Builder</h4><p class="text-gray-600">Design interactive courses with multimedia content, quizzes, and structured learning paths.</p></div>
+            </div>
+            <!-- repeat other 2 items -->
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0"><i class="ri-check-line text-white text-xs"></i></div>
+              <div><h4 class="font-semibold text-gray-900">Assessment Tools</h4><p class="text-gray-600">Create and grade assignments efficiently with automated tools and detailed analytics.</p></div>
+            </div>
+            <div class="flex items-start space-x-3">
+              <div class="w-6 h-6 bg-secondary rounded-full flex items-center justify-center flex-shrink-0"><i class="ri-check-line text-white text-xs"></i></div>
+              <div><h4 class="font-semibold text-gray-900">Class Management</h4><p class="text-gray-600">Monitor student engagement, track progress, and communicate effectively with your class.</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ABOUT / STATS ==================== -->
+  <section id="about" class="py-12 sm:py-20 bg-gradient-to-br from-primary/5 to-secondary/5">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <h2 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Join Our Learning Community</h2>
+      <p class="text-lg sm:text-xl text-gray-600 mb-10">Thousands of students and educators worldwide trust EduPlatform for their learning and teaching needs.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        <div><div class="text-3xl sm:text-4xl font-bold text-primary">50K+</div><div class="text-gray-600">Active Students</div></div>
+        <div><div class="text-3xl sm:text-4xl font-bold text-primary">2,500+</div><div class="text-gray-600">Expert Teachers</div></div>
+        <div><div class="text-3xl sm:text-4xl font-bold text-primary">10K+</div><div class="text-gray-600">Courses Available</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ==================== FOOTER ==================== -->
+<footer id="contact" class="bg-gray-900 text-white py-12">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div class="space-y-4">
+        <div class="flex items-center"><h1 class="text-xl font-['Pacifico'] text-primary">logo</h1><span class="ml-2 font-semibold">EduPlatform</span></div>
+        <p class="text-gray-400 text-sm">Empowering education through innovative technology and comprehensive learning solutions.</p>
+        <div class="flex space-x-3">
+          <a href="#" class="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary"><i class="ri-facebook-fill"></i></a>
+          <a href="#" class="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary"><i class="ri-twitter-fill"></i></a>
+          <a href="#" class="w-9 h-9 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary"><i class="ri-linkedin-fill"></i></a>
+        </div>
+      </div>
+      <div class="space-y-3"><h3 class="font-semibold text-lg">Quick Links</h3>
+        <a href="#features" class="block text-gray-400 hover:text-white text-sm">Features</a>
+        <a href="#about" class="block text-gray-400 hover:text-white text-sm">About Us</a>
+        <a href="#" class="block text-gray-400 hover:text-white text-sm">Courses</a>
+        <a href="#" class="block text-gray-400 hover:text-white text-sm">Pricing</a>
+      </div>
+      <div class="space-y-3"><h3 class="font-semibold text-lg">Support</h3>
+        <a href="#" class="block text-gray-400 hover:text-white text-sm">Help Center</a>
+        <a href="#" class="block text-gray-400 hover:text-white text-sm">Contact Support</a>
+        <a href="#" class="block text-gray-400 hover:text-white text-sm">System Status</a>
+        <a href="#" class="block text-gray-400 hover:text-white text-sm">Documentation</a>
+      </div>
+      <div class="space-y-3"><h3 class="font-semibold text-lg">Contact Info</h3>
+        <div class="flex items-center space-x-2 text-sm text-gray-400"><i class="ri-mail-line text-primary"></i><span>support@eduplatform.com</span></div>
+        <div class="flex items-center space-x-2 text-sm text-gray-400"><i class="ri-phone-line text-primary"></i><span>+1 (555) 123-4567</span></div>
+        <div class="flex items-center space-x-2 text-sm text-gray-400"><i class="ri-map-pin-line text-primary"></i><span>123 Education Ave, Learning City</span></div>
+      </div>
+    </div>
+    <div class="border-t border-gray-800 mt-10 pt-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-400">
+      <div>© 2024 EduPlatform. All rights reserved.</div>
+      <div class="flex space-x-4 mt-3 sm:mt-0">
+        <a href="#" class="hover:text-white">Privacy Policy</a>
+        <a href="#" class="hover:text-white">Terms of Service</a>
+        <a href="#" class="hover:text-white">Cookie Policy</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const loginModal = document.getElementById('loginModal');
+  const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+  const loginOverlay = document.getElementById('loginModalOverlay');
+  const closeBtn = document.getElementById('closeModal');
+  const studentBtn = document.getElementById('studentLoginBtn');
+  const teacherBtn = document.getElementById('teacherLoginBtn');
+  const modalStudent = document.getElementById('modalStudentLogin');
+  const modalTeacher = document.getElementById('modalTeacherLogin');
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+
+  // Modal
+  const openModal = () => { loginOverlay.classList.remove('hidden'); document.body.style.overflow='hidden'; };
+  const closeModal = () => { loginOverlay.classList.add('hidden'); document.body.style.overflow='auto'; };
+  loginModal?.addEventListener('click', openModal);
+  mobileLoginBtn?.addEventListener('click', openModal);
+  closeBtn?.addEventListener('click', closeModal);
+  loginOverlay.addEventListener('click', e => { if (e.target===loginOverlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key==='Escape' && !loginOverlay.classList.contains('hidden')) closeModal(); });
+
+  // Redirects
+  const toStudent = () => location.href = '/login';
+  const toTeacher = () => location.href = '#about';
+  studentBtn?.addEventListener('click', toStudent);
+  teacherBtn?.addEventListener('click', toTeacher);
+  modalStudent?.addEventListener('click', toStudent);
+  modalTeacher?.addEventListener('click', toTeacher);
+
+  // Mobile menu toggle
+  mobileMenuBtn?.addEventListener('click', () => {
+    mobileNav.classList.toggle('hidden');
+    mobileNav.classList.toggle('flex');
+  });
+
+  // Smooth scroll
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(a.getAttribute('href'));
+      target?.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+});
+</script>
+</body>
+</html>

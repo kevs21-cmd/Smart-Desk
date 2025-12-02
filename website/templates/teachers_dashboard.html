@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PGPC LMS | Dashboard</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        secondary: '#8b5cf6'
+      },
+      borderRadius: {
+        'none': '0px',
+        'sm': '4px',
+        DEFAULT: '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'full': '9999px',
+        'button': '8px'
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+<style>
+  :where([class^="ri-"])::before { content: "\f3c2"; }
+  #mobileNav, #notification-popup { transition: transform .3s ease; }
+  .tab-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab-container::-webkit-scrollbar { display: none; }
+  .tab-container { -ms-overflow-style: none; scrollbar-width: none; }
+  .modal-open { overflow: hidden; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo & Course Title -->
+<div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+
+  <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+
+  <div class="text-base sm:text-xl font-semibold text-gray-900 truncate">
+    Learning Management System
+  </div>
+
+</div>
+
+
+      <!-- Desktop Actions -->
+    
+
+       
+
+        <!-- Profile - WITH PROPER POSITIONING -->
+        <div class="relative flex items-center space-x-2">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+          <div class="text-xs sm:text-sm hidden lg:block">
+            <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+            <div class="text-gray-500">Faculty</div>
+          </div>
+          <button id="profile-dropdown-button" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-700">
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+
+          <!-- Dropdown Menu - Now correctly positioned under the arrow -->
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-gray-600 text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100 relative">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div class="text-sm">
+          <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">Faculty</div>
+        </div>
+      </div>
+      <button id="mobileProfileBtn" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-700">
+        <i class="ri-arrow-down-s-line"></i>
+      </button>
+
+      <!-- Mobile Dropdown - Positioned correctly under mobile header -->
+      <div id="mobile-profile-dropdown" class="hidden absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+        <div class="py-2">
+          <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+          <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+          <div class="border-t border-gray-100 my-1"></div>
+          <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/teacher_lms" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-book-line mr-2"></i>Courses</a>
+      <a href="/create_meeting" target="_blank" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-video-line mr-2"></i>Create Meeting</a>
+      <a href="/edit_profile" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-user-line mr-2"></i>Edit Profile</a>
+      <a href="/settings" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-settings-3-line mr-2"></i>Settings</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700 flex items-center"><i class="ri-logout-box-line mr-2"></i>Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Rest of your page (unchanged) -->
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-white border-b border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <span class="text-gray-900 font-medium">Dashboard</span>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <a href="/teacher_lms" class="hover:text-primary" id="view-courses">Courses</a>
+  </nav>
+</div>
+
+<!-- Welcome Section -->
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 py-6 sm:py-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      <div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-1 sm:mb-2">Welcome back, {{ user.full_name }}!</h1>
+        <p class="text-sm sm:text-base lg:text-lg text-gray-600">Here's what's happening with your courses today</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="px-4 sm:px-6 py-4 sm:py-6">
+  <div class="max-w-6xl mx-auto">
+    <!-- Calendar + Quick Actions (unchanged) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+      <div class="lg:col-span-2 bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-4">Calendar</h3>
+        <div class="flex items-center justify-between mb-4">
+          <button id="prevMonth" class="p-2 rounded hover:bg-gray-100"><i class="ri-arrow-left-s-line text-xl"></i></button>
+          <h2 id="calendarMonth" class="text-lg font-semibold text-gray-800"></h2>
+          <button id="nextMonth" class="p-2 rounded hover:bg-gray-100"><i class="ri-arrow-right-s-line text-xl"></i></button>
+        </div>
+        <div class="grid grid-cols-7 text-center text-xs sm:text-sm font-medium text-gray-500 mb-2">
+          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div id="calendarGrid" class="grid grid-cols-7 gap-1 sm:gap-2 text-center"></div>
+      </div>
+
+      <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Quick Actions</h3>
+        <div class="space-y-2 sm:space-y-3">
+          <a href="/teacher_lms" class="w-full flex items-center px-3 sm:px-4 py-2 sm:py-3 bg-primary text-white rounded-button hover:bg-blue-600 text-xs sm:text-sm text-left">Manage All Courses</a>
+          <a href="/upload_obtlp" target="_blank" class="w-full flex items-center px-3 sm:px-4 py-2 sm:py-3 bg-green-500 text-white rounded-button hover:bg-green-600 text-xs sm:text-sm text-left">Manage OBTLP</a>
+          <a href="/error" class="w-full flex items-center px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 text-gray-700 rounded-button hover:bg-gray-200 text-xs sm:text-sm text-left">All Assignments</a>
+          <a href="/error" class="w-full flex items-center px-3 sm:px-4 py-2 sm:py-3 bg-gray-100 text-gray-700 rounded-button hover:bg-gray-200 text-xs sm:text-sm text-left">Grade Report</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Popup -->
+    <div id="notification-popup" class="hidden fixed top-14 sm:top-16 right-4 w-72 sm:w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+      <div class="p-3 sm:p-4 border-b border-gray-100 flex justify-between items-center">
+        <h4 class="text-gray-900 font-semibold text-sm">Notifications</h4>
+        <button onclick="clearNotifications()" class="text-blue-600 text-xs hover:underline">Clear All</button>
+      </div>
+      <div class="max-h-64 overflow-y-auto" id="notification-list">
+        {% for notification in notifications %}
+        <div class="flex items-start space-x-2 sm:space-x-3 p-3 sm:p-4 hover:bg-gray-50 transition-colors cursor-pointer notification-item {% if not notification.read %}bg-gray-100{% endif %}" data-id="{{ notification.id }}">
+          <div class="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full {% if not notification.read %}bg-blue-500 text-white{% else %}bg-gray-300 text-gray-700{% endif %}">
+            {% if notification.type == 'assignment' %}<i class="ri-file-text-line text-sm"></i>{% elif notification.type == 'grade' %}<i class="ri-trophy-line text-sm"></i>{% elif notification.type == 'announcement' %}<i class="ri-notification-line text-sm"></i>{% else %}<i class="ri-mail-line text-sm"></i>{% endif %}
+          </div>
+          <div class="flex-1 text-xs sm:text-sm">
+            <p class="text-gray-900 font-medium">{{ notification.title }}</p>
+            <p class="text-gray-500 line-clamp-2">{{ notification.message }}</p>
+            <span class="text-xs text-gray-400">{{ notification.time_ago }}</span>
+          </div>
+        </div>
+        {% endfor %}
+        {% if notifications|length == 0 %}
+        <div class="p-4 text-center text-gray-500 text-sm">No notifications</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Calendar (unchanged)
+const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+let current = new Date();
+function renderCalendar() {
+  const year = current.getFullYear(); const month = current.getMonth();
+  document.getElementById("calendarMonth").textContent = `${monthNames[month]} ${year}`;
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const grid = document.getElementById("calendarGrid"); grid.innerHTML = "";
+  for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div class="text-gray-300 select-none"></div>`;
+  const today = new Date();
+  for (let day = 1; day <= daysInMonth; day++) {
+    const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+    grid.innerHTML += `<div class="p-2 sm:p-3 rounded-lg text-sm cursor-pointer transition ${isToday ? "bg-blue-500 text-white font-semibold" : "hover:bg-gray-100 text-gray-700"}">${day}</div>`;
+  }
+}
+document.getElementById("prevMonth").onclick = () => { current.setMonth(current.getMonth() - 1); renderCalendar(); };
+document.getElementById("nextMonth").onclick = () => { current.setMonth(current.getMonth() + 1); renderCalendar(); };
+renderCalendar();
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile menu
+  document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+    document.getElementById('mobileNav').classList.toggle('hidden');
+  });
+
+  // Notifications
+  const notifBtn = document.getElementById('notification-button');
+  const notifPopup = document.getElementById('notification-popup');
+  notifBtn?.addEventListener('click', (e) => { e.stopPropagation(); notifPopup.classList.toggle('hidden'); });
+  document.addEventListener('click', (e) => {
+    if (!notifPopup.contains(e.target) && e.target !== notifBtn) notifPopup.classList.add('hidden');
+  });
+
+  // === PROFILE DROPDOWN - NOW CORRECTLY POSITIONED ===
+  const desktopBtn = document.getElementById('profile-dropdown-button');
+  const mobileBtn = document.getElementById('mobileProfileBtn');
+  const desktopMenu = document.getElementById('profile-dropdown-menu');
+  const mobileMenu = document.getElementById('mobile-profile-dropdown');
+
+  const closeAll = () => {
+    desktopMenu?.classList.add('hidden');
+    mobileMenu?.classList.add('hidden');
+  };
+
+  desktopBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAll();
+    desktopMenu.classList.toggle('hidden');
+  });
+
+  mobileBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeAll();
+    mobileMenu.classList.toggle('hidden');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!desktopMenu?.contains(e.target) && !mobileMenu?.contains(e.target) &&
+        e.target !== desktopBtn && e.target !== mobileBtn) {
+      closeAll();
+    }
+  });
+
+  // Initial avatar fallback
+  document.querySelectorAll('#profileImage, #profileImageMobile').forEach(img => {
+    if (!img.src || img.complete && img.naturalWidth === 0) {
+      img.style.display = 'none';
+      img.nextElementSibling.classList.remove('hidden');
+    }
+  });
+});
+
+function clearNotifications() {
+  document.getElementById('notification-list').innerHTML = '<div class="p-4 text-center text-gray-500 text-sm">No notifications</div>';
+  const badge = document.querySelector('#notification-button span');
+  if (badge) badge.remove();
+}
+</script>
+
+</body>
+</html>

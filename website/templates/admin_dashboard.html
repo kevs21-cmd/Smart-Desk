@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LMS Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { primary: '#3b82f6', secondary: '#8b5cf6' },
+      borderRadius: {
+        'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px',
+        'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px',
+        'full': '9999px', 'button': '8px'
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<div class="flex h-screen">
+
+  <!-- Sidebar (Hidden on mobile by default) -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col transform -translate-x-full lg:translate-x-0 lg:static lg:z-auto transition-transform duration-300 ease-in-out">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+          <i class="ri-graduation-cap-fill text-white ri-lg"></i>
+        </div>
+        <span class="text-xl font-medium text-gray-800">LMS</span>
+      </div>
+    </div>
+
+    <nav class="flex-1 p-4 overflow-y-auto custom-scrollbar">
+      <div class="space-y-6">
+        <div>
+          <a href="/admin_dashboard" class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white">
+            <div class="w-5 h-5 flex items-center justify-center"><i class="ri-dashboard-line"></i></div>
+            <span class="font-medium">Dashboard</span>
+          </a>
+        </div>
+
+        <!-- User Management -->
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">User Management</h3>
+          <div class="space-y-1">
+            <a href="/add_account" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-user-add-line"></i></div>
+              <span>Add Student Account</span>
+            </a>
+            <a href="/add_teacher_account" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-user-star-line"></i></div>
+              <span>Add Teachers Account</span>
+            </a>
+            <a href="/student_list" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-group-line"></i></div>
+              <span>Student List</span>
+            </a>
+            <a href="/teacher_list" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-user-line"></i></div>
+              <span>Teacher List</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Course Management -->
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Course Management</h3>
+          <div class="space-y-1">
+            <a href="/create_course" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-mark-line"></i></div>
+              <span>Create Courses</span>
+            </a>
+            <a href="/admin_lms" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-line"></i></div>
+              <span>Manage All Courses</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- System Management -->
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">System Management</h3>
+          <div class="space-y-1">
+            <a href="/admin-programs" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-line"></i></div>
+              <span>Manage All programs</span>
+            </a>
+            <a href="/admin-sections" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-line"></i></div>
+              <span>Manage All sections</span>
+            </a>
+            <a href="/admin-academicyear" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-line"></i></div>
+              <span>Manage Academic Terms</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Mobile Overlay -->
+  <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200 p-4 z-30">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <!-- Hamburger Button (visible only on mobile) -->
+          <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden">
+            <i class="ri-menu-line text-xl"></i>
+          </button>
+
+          <nav class="text-sm">
+            <ol class="flex items-center space-x-2 text-gray-500">
+              <li><a href="#" class="hover:text-gray-700">Home</a></li>
+              <li><i class="ri-arrow-right-s-line"></i></li>
+              <li class="text-gray-900 font-medium">Dashboard</li>
+            </ol>
+          </nav>
+        </div>
+
+        <div class="flex items-center space-x-4">
+          <button id="profileDropdown" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <div class="text-left hidden sm:block">
+              <div class="text-sm font-medium text-gray-900">{{ user.full_name }}</div>
+              <div class="text-xs text-gray-500">Administrator</div>
+            </div>
+            <i class="ri-arrow-down-s-line text-gray-400"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="flex-1 overflow-y-auto custom-scrollbar p-6">
+      <div class="max-w-7xl mx-auto space-y-8">
+        <!-- Welcome Section -->
+        <div class="bg-gradient-to-r from-primary to-secondary rounded-2xl p-8 text-white">
+          <h1 class="text-3xl font-bold mb-2">Welcome back, {{ user.full_name }}!</h1>
+          <p class="text-blue-100 mb-6">Here's what's happening with your LMS platform today.</p>
+          <div class="flex flex-wrap gap-4">
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><i class="ri-group-line text-blue-600 ri-xl"></i></div>
+              <span class="text-green-500 text-sm font-medium">+{{ stats.student_percent }}%</span>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ stats.total_students }}</h3>
+            <p class="text-gray-600 text-sm">Total Students</p>
+          </div>
+
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><i class="ri-user-star-line text-green-600 ri-xl"></i></div>
+              <span class="text-green-500 text-sm font-medium">+{{ stats.teacher_percent }}%</span>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ stats.total_teachers }}</h3>
+            <p class="text-gray-600 text-sm">Active Teachers</p>
+          </div>
+
+
+          <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"><i class="ri-book-line text-purple-600 ri-xl"></i></div>
+              <span class="text-green-500 text-sm font-medium">+{{ stats.active_course_percent }}%</span>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ stats.active_courses }}</h3>
+            <p class="text-gray-600 text-sm">Active Courses</p>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+  <h2 class="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    
+    <!-- Approve Students -->
+    <a href="/student_list" class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-all group">
+      <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i class="ri-user-add-line text-red-600"></i>
+      </div>
+      <div class="text-left">
+        <div class="font-medium text-gray-900">Students List</div>
+        <div class="text-sm text-gray-500">View Students</div>
+       
+      </div>
+    </a>
+
+    <!-- Approve Teachers -->
+    <a href="/teacher_list" class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-all group">
+      <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i class="ri-user-star-line text-orange-600"></i>
+      </div>
+      <div class="text-left">
+        <div class="font-medium text-gray-900">Teachers List</div>
+        <div class="text-sm text-gray-500">View Teachers</div>
+      </div>
+    </a>
+
+    <!-- Review Courses -->
+    <a href="/create_course" class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-all group">
+      <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i class="ri-book-mark-line text-blue-600"></i>
+      </div>
+      <div class="text-left">
+        <div class="font-medium text-gray-900">Create Course</div>
+        <div class="text-sm text-gray-500">Create new Course</div>
+      </div>
+    </a>
+
+    <!-- Add Account -->
+    <a href="/add_account" class="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-all group">
+      <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+        <i class="ri-user-add-fill text-green-600"></i>
+      </div>
+      <div class="text-left">
+        <div class="font-medium text-gray-900">Add Account</div>
+        <div class="text-sm text-gray-500">Create new user</div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-gray-200 p-4 mt-8">
+          <div class="flex flex-col sm:flex-row justify-between text-sm text-gray-500">
+            <div>© 2024 LMS Platform. All rights reserved.</div>
+            <div class="flex space-x-4 mt-2 sm:mt-0">
+              <a href="#" class="hover:text-gray-700">Help</a>
+              <a href="#" class="hover:text-gray-700">Settings</a>
+            </div>
+          </div>
+        </footer>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Mobile Sidebar Toggle Script -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('mobileOverlay');
+  const toggleBtn = document.getElementById('sidebarToggle');
+
+  toggleBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('-translate-x-full');
+    overlay.classList.toggle('hidden');
+  });
+
+  overlay.addEventListener('click', () => {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+  });
+});
+</script>
+
+<!-- Profile Dropdown Script (unchanged) -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const btn = document.getElementById('profileDropdown');
+  let open = false;
+
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (open) {
+      document.querySelectorAll('.profile-menu').forEach(el => el.remove());
+      open = false;
+      return;
+    }
+    open = true;
+    const menu = document.createElement('div');
+    menu.className = 'profile-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50';
+    menu.innerHTML = `
+      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile Settings</a>
+      <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Preferences</a>
+      <div class="border-t border-gray-200 my-1"></div>
+      <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign Out</a>
+    `;
+    btn.parentElement.appendChild(menu);
+
+    document.addEventListener('click', function close(e) {
+      if (!btn.parentElement.contains(e.target)) {
+        menu.remove();
+        open = false;
+        document.removeEventListener('click', close);
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

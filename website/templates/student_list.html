@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student List Management - LMS Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+.custom-checkbox {
+  appearance: none;
+  width: 1rem; height: 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  position: relative;
+}
+.custom-checkbox:checked {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+.custom-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px; left: 1px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+</style>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { primary: '#3b82f6', secondary: '#8b5cf6' },
+      borderRadius: {
+        'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px',
+        'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px',
+        'full': '9999px', 'button': '8px'
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="flex h-screen">
+  <!-- Sidebar - Mobile: Hidden by default, slides in -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col transform -translate-x-full lg:translate-x-0 lg:static lg:z-auto transition-transform duration-300">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+          <i class="ri-graduation-cap-fill text-white ri-lg"></i>
+        </div>
+        <span class="text-xl font-medium text-gray-800">LMS</span>
+      </div>
+    </div>
+    <nav class="flex-1 p-4 overflow-y-auto custom-scrollbar">
+      <div class="space-y-6">
+        <div>
+          <a href="/admin-dashboard" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+            <div class="w-5 h-5 flex items-center justify-center"><i class="ri-dashboard-line"></i></div>
+            <span class="font-medium">Dashboard</span>
+          </a>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">User Management</h3>
+          <div class="space-y-1">
+            <a href="/add_account" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-user-add-line"></i></div>
+              <span>Add Student Account</span>
+            </a>
+            <a href="/add_teacher_account" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-user-star-line"></i></div>
+              <span>Add Teacher Account</span>
+            </a>
+            <a href="/student_list" class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-group-line"></i></div>
+              <span>Student List</span>
+            </a>
+            <a href="/teacher_list" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-user-line"></i></div>
+              <span>Teacher List</span>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Course Management</h3>
+          <div class="space-y-1">
+            <a href="/create_course" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-mark-line"></i></div>
+              <span>Create Course</span>
+            </a>
+            <a href="/admin_lms" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-line"></i></div>
+              <span>Manage All Courses</span>
+            </a>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">System Management</h3>
+          <div class="space-y-1">
+            <a href="/admin-programs" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-line"></i></div>
+              <span>Manage All programs</span>
+            </a>
+            <a href="/admin-sections" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-line"></i></div>
+              <span>Manage All sections</span>
+            </a>
+            <a href="/admin-academicyear" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+              <div class="w-5 h-5 flex items-center justify-center"><i class="ri-book-line"></i></div>
+              <span>Manage Academic Terms</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Overlay for mobile sidebar -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <header class="bg-white shadow-sm border-b border-gray-200 p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden">
+            <i class="ri-menu-line text-xl"></i>
+          </button>
+          <nav class="text-sm hidden sm:block">
+            <ol class="flex items-center space-x-2 text-gray-500">
+              <li><a href="#" class="hover:text-gray-700">Home</a></li>
+              <li><i class="ri-arrow-right-s-line"></i></li>
+              <li><a href="#" class="hover:text-gray-700">User Management</a></li>
+              <li><i class="ri-arrow-right-s-line"></i></li>
+              <li class="text-gray-900 font-medium">Student List</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
+      <div class="max-w-7xl mx-auto space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Student List Management</h1>
+            <p class="text-gray-600 mt-1 text-sm sm:text-base">View and manage all enrolled students in the system</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button id="bulkPromoteBtn" class="hidden px-4 py-2 bg-purple-600 text-white rounded-button hover:bg-purple-700 transition-colors whitespace-nowrap text-sm inline-flex items-center">
+              <i class="ri-arrow-up-double-line mr-2"></i>
+              Promote Selected (<span id="selectedCountDisplay">0</span>)
+            </button>
+            <a href="{{ url_for('auth.student_list_export') }}" class="px-4 py-2 bg-green-600 text-white rounded-button hover:bg-green-700 transition-colors whitespace-nowrap text-sm inline-flex items-center">
+              <i class="ri-download-line mr-2"></i> Export
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats Cards - Responsive Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mb-3">
+              <i class="ri-user-check-line text-green-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">{{ total_active }}</h3>
+            <p class="text-gray-600 text-xs">Total Active Students</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+              <i class="ri-user-add-line text-blue-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">{{ new_enrollments }}</h3>
+            <p class="text-gray-600 text-xs">New This Week</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center mb-3">
+              <i class="ri-user-unfollow-line text-gray-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">{{ inactive_students }}</h3>
+            <p class="text-gray-600 text-xs">Inactive Students</p>
+          </div>
+          <div class="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div class="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+              <i class="ri-time-line text-orange-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900">{{ pending_verifications }}</h3>
+            <p class="text-gray-600 text-xs">Pending Verification</p>
+          </div>
+        </div>
+
+        <!-- Filters & Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-200">
+            <div class="flex flex-col lg:flex-row gap-4">
+              <div class="flex flex-col sm:flex-row gap-3 flex-1">
+                <div class="relative flex-1 max-w-sm">
+                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <i class="ri-search-line text-gray-400"></i>
+                  </div>
+                  <input id="searchInput" type="text" placeholder="Search by name or ID..." class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+                <div class="relative">
+                  <button id="programFilterBtn" class="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors whitespace-nowrap">
+                    <span id="programFilterLabel">All Programs</span>
+                    <i class="ri-arrow-down-s-line text-gray-400"></i>
+                  </button>
+                  <ul id="programDropdown" class="absolute left-0 mt-1 w-48 bg-white shadow-lg rounded-md border border-gray-200 z-50 hidden max-h-60 overflow-y-auto">
+                    <li class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100">All Programs</li>
+                    {% for prog in programs %}
+                    <li class="px-4 py-2 text-sm cursor-pointer hover:bg-gray-100">{{ prog.program_name }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Responsive Table Wrapper -->
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[900px]">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left">
+                    <input type="checkbox" id="selectAllCheckbox" class="custom-checkbox">
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year Level</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application Date</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for student in students %}
+                <tr class="application-row hover:bg-gray-50">
+                  <td class="px-4 py-4">
+                    <input type="checkbox" class="student-row-checkbox custom-checkbox" value="{{ student.user_id }}">
+                  </td>
+                  <td class="px-4 py-4">
+                    <div class="flex items-center">
+                      <img src="https://readdy.ai/api/search-image?query={{ student.full_name | urlencode }}&width=48&height=48&seq=student{{ loop.index }}&orientation=squarish" alt="Student" class="w-10 h-10 rounded-full object-cover flex-shrink-0">
+                      <div class="ml-3 min-w-0">
+                        <div class="text-sm font-medium text-gray-900 truncate">{{ student.full_name }}</div>
+                        <div class="text-xs text-gray-500 truncate">{{ student.email }}</div>
+                        <div class="text-xs text-gray-400">ID: {{ student.student_id }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-4 text-sm">
+                    <div>{{ student.program_name }}</div>
+                    <div class="text-xs text-gray-500">{{ student.program_code }}</div>
+                  </td>
+                  <td class="px-4 py-4 text-sm text-gray-500">{{ student.year_name | default('Not Assigned', true) }}</td>
+                  <td class="px-4 py-4 text-sm text-gray-500">{{ student.date_created.strftime('%b %d, %Y') }}</td>
+                  <td class="px-4 py-4">
+                    {% if student.status == 'active' %}
+                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Active</span>
+                    {% else %}
+                    <span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded-full">Inactive</span>
+                    {% endif %}
+                  </td>
+                  <td class="px-4 py-4 text-sm font-medium">
+                    <div class="flex flex-wrap items-center gap-1">
+                      {% if student.status == 'active' %}
+                      <button class="action-btn px-2 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200" data-user-id="{{ student.user_id }}" data-action="deactivate">Deactivate</button>
+                      {% else %}
+                      <button class="action-btn px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200" data-user-id="{{ student.user_id }}" data-action="activate">Activate</button>
+                      {% endif %}
+                      <button class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200" onclick='openEditModal({user_id: "{{ student.user_id }}", full_name: "{{ student.full_name }}", email: "{{ student.email }}", student_id: "{{ student.student_id }}", program_id: "{{ student.program_id }}", section_id: "{{ student.section_id }}", status: "{{ student.status }}"})'>Edit</button>
+                      <button class="promote-btn p-2 bg-purple-100 text-purple-700 rounded hover:bg-purple-200" data-user-id="{{ student.user_id }}" data-current-year="{{ student.year_level }}" data-name="{{ student.full_name }}" title="Promote">
+                        <i class="ri-arrow-up-double-line text-sm"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="px-4 py-3 border-t border-gray-200 bg-gray-50 text-sm text-gray-500 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>Showing 1 to 8 of 1,247 results</div>
+            <div class="flex space-x-2 justify-center">
+              <button class="px-3 py-1 text-gray-500 hover:text-gray-700 disabled:opacity-50" disabled>Previous</button>
+              <button class="px-3 py-1 bg-primary text-white rounded-button">1</button>
+              <button class="px-3 py-1 text-gray-500 hover:text-gray-700">2</button>
+              <button class="px-3 py-1 text-gray-500 hover:text-gray-700">3</button>
+              <button class="px-3 py-1 text-gray-500 hover:text-gray-700">Next</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 p-4 text-center sm:text-left">
+      <div class="text-xs sm:text-sm text-gray-500">
+        © 2024 LMS Platform. All rights reserved. &nbsp; | &nbsp; Last login: Today at 9:42 AM
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+  <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+    <h3 id="modalTitle" class="text-lg font-medium text-gray-900 mb-4">Confirm Action</h3>
+    <p id="modalMessage" class="text-gray-700 mb-6 text-sm">Are you sure?</p>
+    <div class="flex justify-end space-x-3">
+      <button id="cancelBtn" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm">Cancel</button>
+      <button id="confirmBtn" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Yes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Student Modal -->
+<div id="editStudentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl w-full max-w-md p-6 shadow-lg">
+    <h2 class="text-xl font-semibold mb-4">Edit Student</h2>
+    <form id="editStudentForm">
+      <input type="hidden" id="editUserId" name="user_id">
+      <div class="space-y-4">
+        <div>
+          <label class="text-sm font-medium text-gray-700">Full Name</label>
+          <input type="text" id="editFullName" name="full_name" class="w-full border-gray-300 rounded px-3 py-2 mt-1">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Email</label>
+          <input type="email" id="editEmail" name="email" class="w-full border-gray-300 rounded px-3 py-2 mt-1">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Student ID</label>
+          <input type="text" id="editStudentId" name="student_id" class="w-full border-gray-300 rounded px-3 py-2 mt-1">
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Program</label>
+          <select id="editProgram" name="program_id" class="w-full border-gray-300 rounded px-3 py-2 mt-1">
+            <option value="">Select Program</option>
+            {% for p in programs %}<option value="{{ p.program_id }}">{{ p.program_name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Section</label>
+          <select id="editSection" name="section_id" class="w-full border-gray-300 rounded px-3 py-2 mt-1"></select>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-700">Status</label>
+          <select id="editStatus" name="status" class="w-full border-gray-300 rounded px-3 py-2 mt-1">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="flex justify-end space-x-3 mt-6">
+        <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 text-sm">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Mobile Sidebar Toggle
+document.getElementById('sidebarToggle').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.toggle('-translate-x-full');
+  document.getElementById('sidebarOverlay').classList.toggle('hidden');
+});
+document.getElementById('sidebarOverlay').addEventListener('click', () => {
+  document.getElementById('sidebar').classList.add('-translate-x-full');
+  document.getElementById('sidebarOverlay').classList.add('hidden');
+});
+
+// Edit Modal Functions (unchanged)
+function openEditModal(student) {
+  const modal = document.getElementById('editStudentModal');
+  document.getElementById('editUserId').value = student.user_id;
+  document.getElementById('editFullName').value = student.full_name;
+  document.getElementById('editEmail').value = student.email;
+  document.getElementById('editStudentId').value = student.student_id;
+  document.getElementById('editProgram').value = student.program_id;
+  document.getElementById('editStatus').value = student.status;
+  updateSections(student.program_id, student.section_id);
+  modal.classList.remove('hidden');
+}
+function closeEditModal() { document.getElementById('editStudentModal').classList.add('hidden'); }
+function updateSections(programId, selectedSectionId = null) {
+  const sectionSelect = document.getElementById('editSection');
+  if (!programId) { sectionSelect.innerHTML = '<option value="">No section assigned</option>'; return; }
+  sectionSelect.innerHTML = '<option>Loading...</option>';
+  fetch(`/get_sections/${programId}`).then(r => r.json()).then(data => {
+    sectionSelect.innerHTML = '<option value="">Select Section</option>';
+    data.sections.forEach(sec => {
+      const opt = new Option(sec.section_name, sec.section_id);
+      if (selectedSectionId && sec.section_id == selectedSectionId) opt.selected = true;
+      sectionSelect.add(opt);
+    });
+  });
+}
+document.getElementById('editProgram').addEventListener('change', e => updateSections(e.target.value));
+document.getElementById('editStudentForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const userId = document.getElementById('editUserId').value;
+  const fd = new FormData(e.target);
+  if (!fd.get('program_id')) fd.set('program_id', '');
+  if (!fd.get('section_id')) fd.set('section_id', '');
+  fetch(`/update_student/${userId}`, { method: 'POST', body: fd })
+    .then(res => res.ok ? location.reload() : res.text().then(t => alert(t)))
+    .catch(err => alert(err));
+});
+
+// All other JS (search, filter, bulk actions, etc.) — unchanged
+document.addEventListener('DOMContentLoaded', function () {
+  const searchInput = document.getElementById('searchInput');
+  const programDropdown = document.getElementById('programDropdown');
+  const programFilterLabel = document.getElementById('programFilterLabel');
+  const tableRows = document.querySelectorAll('tbody tr');
+  let selectedProgram = 'All Programs';
+
+  searchInput.addEventListener('input', () => filterRows(searchInput.value.toLowerCase(), selectedProgram));
+  document.querySelectorAll('#programDropdown li').forEach(item => {
+    item.addEventListener('click', () => {
+      selectedProgram = item.textContent.trim();
+      programFilterLabel.textContent = selectedProgram;
+      programDropdown.classList.add('hidden');
+      filterRows(searchInput.value.toLowerCase(), selectedProgram);
+    });
+  });
+  document.getElementById('programFilterBtn').addEventListener('click', () => programDropdown.classList.toggle('hidden'));
+
+  function filterRows(query, program) {
+    tableRows.forEach(row => {
+      const name = row.querySelector('td:nth-child(2) .text-gray-900')?.textContent.toLowerCase() || '';
+      const studentId = row.querySelector('td:nth-child(2) .text-xs.text-gray-400')?.textContent.toLowerCase() || '';
+      const programName = row.querySelector('td:nth-child(3) .text-sm')?.textContent || '';
+      const matchesSearch = name.includes(query) || studentId.includes(query);
+      const matchesProgram = program === 'All Programs' || programName === program;
+      row.style.display = matchesSearch && matchesProgram ? '' : 'none';
+    });
+  }
+
+  // Bulk & Action Logic (unchanged)
+  const modal = document.getElementById('confirmationModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalMessage = document.getElementById('modalMessage');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+  const rowCheckboxes = document.querySelectorAll('.student-row-checkbox');
+  const bulkPromoteBtn = document.getElementById('bulkPromoteBtn');
+  const selectedCountDisplay = document.getElementById('selectedCountDisplay');
+
+  let actionType = null, targetId = null, targetIds = [];
+
+  function updateBulkButtonState() {
+    const checked = document.querySelectorAll('.student-row-checkbox:checked');
+    const count = checked.length;
+    selectedCountDisplay.textContent = count;
+    bulkPromoteBtn.classList.toggle('hidden', count === 0);
+  }
+
+  selectAllCheckbox.addEventListener('change', function() {
+    rowCheckboxes.forEach(cb => {
+      if (cb.closest('tr').style.display !== 'none') cb.checked = this.checked;
+    });
+    updateBulkButtonState();
+  });
+  rowCheckboxes.forEach(cb => cb.addEventListener('change', updateBulkButtonState));
+
+  document.querySelectorAll('.action-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      targetId = btn.dataset.userId;
+      actionType = btn.dataset.action;
+      modalTitle.textContent = actionType === 'activate' ? 'Activate Student' : 'Deactivate Student';
+      modalMessage.textContent = `Are you sure you want to ${actionType} this student?`;
+      modal.classList.remove('hidden');
+    });
+  });
+
+  document.querySelectorAll('.promote-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      targetId = btn.dataset.userId;
+      const currentYear = parseInt(btn.dataset.currentYear) || 1;
+      const name = btn.dataset.name;
+      actionType = 'promote_single';
+      modalTitle.textContent = 'Promote Student';
+      modalMessage.textContent = `Promote ${name} from Year ${currentYear} to Year ${+currentYear + 1}?`;
+      modal.classList.remove('hidden');
+    });
+  });
+
+  bulkPromoteBtn.addEventListener('click', () => {
+    targetIds = Array.from(document.querySelectorAll('.student-row-checkbox:checked')).map(cb => cb.value);
+    if (!targetIds.length) return;
+    actionType = 'promote_bulk';
+    modalTitle.textContent = 'Bulk Promote Students';
+    modalMessage.textContent = `Promote ${targetIds.length} selected students to next year?`;
+    modal.classList.remove('hidden');
+  });
+
+  cancelBtn.onclick = () => { modal.classList.add('hidden'); actionType = targetId = targetIds = null; };
+  confirmBtn.onclick = () => {
+    let url = '', body = null, headers = {};
+    if (actionType === 'activate' || actionType === 'deactivate') url = `/${actionType}_student/${targetId}`;
+    else if (actionType === 'promote_single') url = `/promote_student/${targetId}`;
+    else if (actionType === 'promote_bulk') { url = `/bulk_promote_students`; headers = {'Content-Type': 'application/json'}; body = JSON.stringify({user_ids: targetIds}); }
+
+    confirmBtn.textContent = 'Processing...'; confirmBtn.disabled = true;
+    fetch(url, {method: 'POST', headers, body})
+      .then(r => r.json())
+      .then(data => data.success ? location.reload() : alert(data.message || 'Failed'))
+      .catch(() => alert('Network error'))
+      .finally(() => {
+        modal.classList.add('hidden');
+        confirmBtn.textContent = 'Yes'; confirmBtn.disabled = false;
+      });
+  };
+});
+</script>
+</body>
+</html>

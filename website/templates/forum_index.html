@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ course.course_code }} | Course Management</title>
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#3b82f6",
+            secondary: "#8b5cf6",
+          },
+          borderRadius: {
+            none: "0px",
+            sm: "4px",
+            DEFAULT: "8px",
+            md: "12px",
+            lg: "16px",
+            xl: "20px",
+            "2xl": "24px",
+            "3xl": "32px",
+            full: "9999px",
+            button: "8px",
+          },
+          // Success Modal Animations
+          animation: {
+            'scale-in': 'scaleIn 0.3s ease-out forwards',
+            'check-bounce': 'checkBounce 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+          },
+          keyframes: {
+            scaleIn: {
+              '0%': { transform: 'scale(0.9)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            },
+            checkBounce: {
+              '0%': { transform: 'scale(0) rotate(-45deg)', opacity: '0' },
+              '70%': { transform: 'scale(1.2) rotate(0deg)' },
+              '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' },
+            }
+          }
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+     <link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+  <style>
+    :where([class^="ri-"])::before { content: "\f3c2"; }
+    .modal-open { overflow: hidden; }
+    .scroll-container { -webkit-overflow-scrolling: touch; }
+    .scroll-container::-webkit-scrollbar { display: none; }
+    .scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+    <!-- Logo & Course Title -->
+<div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+
+  <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+
+  <div class="text-base sm:text-xl font-semibold text-gray-900 truncate">
+    {{ course.course_title }}
+  </div>
+
+</div>
+
+    <!-- Desktop Actions -->
+    <div class="hidden md:flex items-center space-x-4">
+      <button class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-gray-600 hover:text-primary transition-colors">
+        <i class="ri-notification-line text-lg sm:text-xl"></i>
+      </button>
+
+      <!-- Profile -->
+      <div class="relative flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div class="text-xs sm:text-sm hidden lg:block">
+          <div id="name" class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500">{{ "Faculty" if user.role_id == 2 else "Student" }}</div>
+        </div>
+        <button class="w-6 h-6 flex items-center justify-center text-gray-400 relative">
+          <i class="ri-arrow-down-s-line"></i>
+          <!-- Dropdown Menu -->
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" class="md:hidden p-2">
+      <i class="ri-menu-line text-gray-600 text-2xl"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div class="text-sm">
+          <div id="nameMobile" class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">{{ "Faculty" if user.role_id == 2 else "Student" }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/teachers-dashboard" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-dashboard-line mr-2"></i>Dashboard</a>
+      <a href="/edit_profile" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-user-line mr-2"></i>Edit Profile</a>
+      <a href="/settings" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-settings-3-line mr-2"></i>Settings</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700 flex items-center"><i class="ri-logout-box-line mr-2"></i>Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-gray-50 border-t border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/teachers-dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <a href="/teacher_lms" class="hover:text-primary">Manage Courses</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class="text-gray-900 font-medium truncate">{{ course.course_code }} — {{ course.course_title }}</span>
+  </nav>
+</div>
+
+<!-- Course Overview -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{{ course.course_code }} — Forum</h1>
+    </div>
+    
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="bg-white border-b border-gray-200 overflow-x-auto">
+  <div class="px-4 sm:px-6">
+    <nav class="flex space-x-4 sm:space-x-8 whitespace-nowrap">
+      <a href="{{ url_for('auth.upload_materials', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Materials
+      </a>
+      <a href="{{ url_for('auth.create_announcement', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Announcements
+      </a>
+      <a href="{{ url_for('auth.student_records', course_id=course_id) }}"
+        class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Grades
+      </a>
+      <a href=""
+         class="py-3 sm:py-4 px-1 border-b-2 border-primary text-primary font-medium text-xs sm:text-sm tab-button active">
+        Create Forum
+      </a>
+      <a href="{{ url_for('auth.create_meeting', course_id=course_id) }}"
+          class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Create Meeting
+      </a>
+    </nav>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <button onclick="openModal('createTopicModal')" class="px-3 sm:px-4 py-2 bg-blue-100 text-blue-700 rounded-button hover:bg-blue-200 transition-colors text-xs sm:text-sm whitespace-nowrap">
+      Create Topic
+    </button>
+  </div>
+</div>
+
+<!-- LIST -->
+<div class="px-4 sm:px-6 py-4 space-y-3">
+  {% if topics %}
+      {% for topic in topics %}
+      <div class="relative">
+          <!-- Topic Card (Clickable) -->
+          <a href="{{ url_for('auth.view_topic', course_id=course_id, topic_id=topic.topic_id) }}" class="block group">
+              <div class="bg-white border border-gray-200 rounded-xl p-5 hover:shadow-md transition-shadow relative {% if topic.is_pinned %}border-l-4 border-l-yellow-400 bg-yellow-50/30{% endif %}">
+                  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div class="flex-1 pr-4">
+                          <div class="flex items-center gap-2 mb-1 flex-wrap">
+                              {% if topic.is_pinned %}
+                                  <span class="text-xs font-bold text-yellow-600 bg-yellow-100 px-2 py-0.5 rounded flex items-center gap-1">
+                                      <i class="ri-pushpin-fill"></i> Pinned
+                                  </span>
+                              {% endif %}
+                              <h2 class="text-lg font-bold text-gray-900 group-hover:text-primary transition-colors line-clamp-1">
+                                  {{ topic.title }}
+                              </h2>
+                          </div>
+                          <p class="text-gray-500 text-sm line-clamp-2 mb-3">{{ topic.content }}</p>
+                          
+                          <div class="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
+                              <div class="flex items-center gap-2">
+                                  <img src="https://ui-avatars.com/api/?name={{ topic.full_name }}&background=random" class="w-6 h-6 rounded-full border border-gray-200">
+                                  <span class="font-medium text-gray-700">{{ topic.full_name }}</span>
+                                  {% if topic.role_id == 2 %}
+                                      <span class="bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded text-[10px] font-bold">TEACHER</span>
+                                  {% endif %}
+                              </div>
+                              <span>&bull;</span>
+                              <span>{{ topic.created_at.strftime('%b %d, %Y') }}</span>
+                          </div>
+                      </div>
+
+                      <div class="flex items-center justify-center min-w-[60px] text-gray-400">
+                          <div class="flex items-center gap-1">
+                              <i class="ri-chat-3-line text-lg"></i>
+                              <span class="font-semibold text-sm">{{ topic.reply_count }}</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </a>
+
+          <!-- Edit/Delete Buttons (Outside <a> to prevent navigation) -->
+          {% if session.get('user_id') == topic.user_id or session.get('role_id') == 2 %}
+          <div class="absolute top-3 right-3 flex gap-2">
+              <button onclick="openModal('editTopicModal-{{ topic.topic_id }}')" 
+                      class="text-blue-500 hover:text-blue-700 text-sm px-2 py-1 border border-blue-200 rounded">
+                  Edit
+              </button>
+              <button onclick="openModal('deleteTopicModal{{ topic.topic_id }}')" 
+                      class="text-red-500 hover:text-red-700 text-sm px-2 py-1 border border-red-200 rounded">
+                  Delete
+              </button>
+          </div>
+          {% endif %}
+
+      </div>
+      {% endfor %}
+  {% else %}
+      <div class="text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+          <div class="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="ri-question-answer-line text-3xl"></i>
+          </div>
+          <h3 class="text-lg font-medium text-gray-900">No discussions yet</h3>
+          <button onclick="openModal('createTopicModal')" class="mt-4 text-primary hover:underline font-medium">Create Topic</button>
+      </div>
+  {% endif %}
+</div>
+
+<!-- ================= SUCCESS MODAL (Global) ================= -->
+<div id="successModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-[100] p-4">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-10 text-center animate-scale-in relative">
+    <div class="w-24 h-24 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+      <svg class="w-14 h-14 text-green-600 animate-check-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+    <h3 class="text-3xl font-bold text-gray-800 mb-3">Success!</h3>
+    <p id="successMessage" class="text-gray-600 text-lg mb-8">Operation completed successfully.</p>
+    <button onclick="location.reload()" class="px-10 py-4 bg-green-600 text-white text-lg rounded-xl hover:bg-green-700 transition font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+      Continue
+    </button>
+  </div>
+</div>
+
+<!-- ================= Create Topic Modal ================= -->
+<div id="createTopicModal" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onclick="closeModal('createTopicModal')"></div>
+  <div class="fixed inset-0 flex items-center justify-center px-4">
+      <div class="bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg w-full animate-scaleFade">
+          <form id="createTopicForm" onsubmit="handleAjaxSubmit(event, this, 'Topic Created Successfully!')" action="{{ url_for('auth.create_topic', course_id=course_id) }}" method="POST">
+              <div class="bg-white px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                  <h3 class="text-lg font-bold text-gray-900">Start Discussion</h3>
+                  <button type="button" onclick="closeModal('createTopicModal')" class="text-gray-400 hover:text-gray-600"><i class="ri-close-line text-2xl"></i></button>
+              </div>
+              <div class="p-6 space-y-4">
+                  <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Topic Title</label>
+                      <input type="text" name="title" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none">
+                  </div>
+                  <div>
+                      <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                      <textarea name="content" rows="5" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none resize-none"></textarea>
+                  </div>
+                  
+                  {% if session.get('role_id') == 2 %}
+                  <div class="flex items-center gap-2 mt-2">
+                      <input type="checkbox" name="is_pinned" id="is_pinned" class="w-4 h-4 text-primary border-gray-300 rounded">
+                      <label for="is_pinned" class="text-sm text-gray-700">Pin this topic</label>
+                  </div>
+                  {% endif %}
+              </div>
+              <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+                  <button type="button" onclick="closeModal('createTopicModal')" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm">Cancel</button>
+                  <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 text-sm">Post</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+<!-- ================= Edit & Delete Modals ================= -->
+{% for topic in topics %}
+<!-- EDIT TOPIC MODAL -->
+<div id="editTopicModal-{{ topic.topic_id }}" class="fixed inset-0 z-50 hidden items-center justify-center px-4">
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+  <div class="bg-white rounded-xl shadow-xl sm:max-w-lg w-full animate-scaleFade overflow-hidden relative z-10">
+      <form onsubmit="handleAjaxSubmit(event, this, 'Topic Updated Successfully!')" action="{{ url_for('auth.edit_topic', course_id=course_id, topic_id=topic.topic_id) }}" method="POST">
+          <div class="bg-white px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+              <h3 class="text-lg font-bold text-gray-900">Edit Topic</h3>
+              <button type="button" onclick="closeModal('editTopicModal-{{ topic.topic_id }}')" class="text-gray-400 hover:text-gray-600">
+                  <i class="ri-close-line text-2xl"></i>
+              </button>
+          </div>
+          <div class="p-6 space-y-4">
+              <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Topic Title</label>
+                  <input type="text" name="edit_title" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none" value="{{ topic.title }}">
+              </div>
+              <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-1">Content</label>
+                  <textarea name="edit_content" rows="5" required class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary outline-none resize-none">{{ topic.content }}</textarea>
+              </div>
+              {% if session.get('role_id') == 2 %}
+              <div class="flex items-center gap-2 mt-2">
+                  <input type="checkbox" name="edit_is_pinned" id="edit_is_pinned-{{ topic.topic_id }}" class="w-4 h-4 text-primary border-gray-300 rounded" {% if topic.is_pinned %}checked{% endif %}>
+                  <label for="edit_is_pinned-{{ topic.topic_id }}" class="text-sm text-gray-700">Pin this topic</label>
+              </div>
+              {% endif %}
+          </div>
+          <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+              <button type="button" onclick="closeModal('editTopicModal-{{ topic.topic_id }}')" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm">Cancel</button>
+              <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 text-sm">Save Changes</button>
+          </div>
+      </form>
+  </div>
+</div>
+
+<!-- Delete Topic Modal -->
+<div id="deleteTopicModal{{ topic.topic_id }}" class="fixed inset-0 z-50 hidden" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onclick="closeModal('deleteTopicModal{{ topic.topic_id }}')"></div>
+  <div class="fixed inset-0 flex items-center justify-center px-4">
+      <div class="bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:max-w-sm w-full animate-scaleFade">
+          <form onsubmit="handleAjaxSubmit(event, this, 'Topic Deleted Successfully!')" action="{{ url_for('auth.delete_topic', topic_id=topic.topic_id) }}" method="POST">
+              <div class="bg-white px-6 py-5 border-b border-gray-200 flex justify-between items-center">
+                  <h3 class="text-lg font-bold text-gray-900">Delete Topic</h3>
+                  <button type="button" onclick="closeModal('deleteTopicModal{{ topic.topic_id }}')" class="text-gray-400 hover:text-gray-600"><i class="ri-close-line text-2xl"></i></button>
+              </div>
+              <div class="p-6 space-y-4 text-gray-700">
+                  <p>Are you sure you want to delete the topic "<strong>{{ topic.title }}</strong>"? This action cannot be undone.</p>
+              </div>
+              <div class="bg-gray-50 px-6 py-4 flex justify-end gap-3">
+                  <button type="button" onclick="closeModal('deleteTopicModal{{ topic.topic_id }}')" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 text-sm">Cancel</button>
+                  <button type="submit" class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm">Delete</button>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+// --- GLOBAL SUCCESS MODAL LOGIC ---
+function showSuccessModal(message = "Operation successful!") {
+  const modal = document.getElementById('successModal');
+  const msgEl = document.getElementById('successMessage');
+  msgEl.textContent = message;
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.body.classList.add('modal-open');
+}
+
+// --- GENERIC AJAX SUBMIT HANDLER ---
+async function handleAjaxSubmit(e, form, successMsg) {
+  e.preventDefault();
+  const submitBtn = form.querySelector('button[type="submit"]');
+  const originalText = submitBtn.textContent;
+  submitBtn.disabled = true;
+  submitBtn.textContent = "Processing...";
+
+  try {
+    const formData = new FormData(form);
+    const res = await fetch(form.action, {
+        method: form.method,
+        body: formData
+    });
+
+    // We assume backend redirects or returns success.
+    // If using flash messages via redirection, we can just reload or show modal then reload.
+    // To show modal first without redirecting immediately, backend should return JSON 
+    // OR we just assume success if status is ok (since Flask redirects on success usually).
+    
+    if (res.ok) {
+        // Close all modals first
+        document.querySelectorAll('[role="dialog"], [id^="editTopicModal"], [id^="deleteTopicModal"]').forEach(el => {
+            el.classList.add('hidden');
+            el.classList.remove('flex');
+        });
+        showSuccessModal(successMsg);
+    } else {
+        alert("Action failed. Please try again.");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("An error occurred.");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalText;
+  }
+}
+
+// --- MODAL UTILS ---
+function openModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.body.classList.add('modal-open');
+}
+function closeModal(id) {
+  const modal = document.getElementById(id);
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+  document.body.classList.remove('modal-open');
+}
+
+// --- MENU TOGGLES ---
+document.getElementById("mobileMenuBtn").addEventListener("click", () => {
+  document.getElementById("mobileNav").classList.toggle("hidden");
+});
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - LMS Portal</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#1E40AF'
+                    },
+                    borderRadius: {
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+        }
+        .error-message {
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+    <header class="w-full bg-white shadow-sm border-b border-gray-200 py-4">
+        <div class="max-w-6xl mx-auto px-6 flex items-center justify-center">
+            <h1 class="text-2xl font-medium text-primary">PGPC</h1>
+            <span class="ml-3 text-lg font-semibold text-gray-800">Learning Management System</span>
+        </div>
+    </header>
+
+    <main class="flex-1 flex items-center justify-center px-6 py-12">
+        <div class="w-full max-w-md">
+            <div class="login-container rounded-2xl p-8">
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-2">Admin Login</h2>
+                    <p class="text-gray-600">Access your admin dashboard</p>
+                </div>
+
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const flashMessages = JSON.parse('{{ messages | tojson | safe }}');
+                    flashMessages.forEach(([category, message]) => {
+                        if (['emailError', 'passwordError', 'captchaError'].includes(category)) {
+                            const el = document.getElementById(category);
+                            if (el) {
+                                el.textContent = message;
+                                el.classList.remove('hidden');
+                                const input = document.getElementById(category.replace('Error', ''));
+                                if (input) {
+                                    input.classList.add('border-red-500', 'focus:ring-red-500');
+                                }
+                            }
+                        } else if (category === 'success') {
+                            alert(message);
+                        }
+                    });
+                });
+                </script>
+                {% endif %}
+                {% endwith %}
+
+                <form id="adminLoginForm" action="{{ url_for('auth.adminlogin') }}" method="POST" class="space-y-6">
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-mail-line text-gray-400"></i>
+                            </div>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email"
+                                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm outline-none"
+                                placeholder="Enter your email"
+                            >
+                        </div>
+                        <div id="emailError" class="error-message hidden mt-2 text-sm text-red-600"></div>
+                    </div>
+
+                    <!-- Password -->
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="ri-lock-line text-gray-400"></i>
+                            </div>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password"
+                                class="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm outline-none"
+                                placeholder="Enter your password"
+                            >
+                            <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <i id="passwordIcon" class="ri-eye-line text-gray-400 hover:text-gray-600"></i>
+                            </button>
+                        </div>
+                        <div id="passwordError" class="error-message hidden mt-2 text-sm text-red-600"></div>
+                    </div>
+
+                    <!-- Captcha -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-3">Security Verification</label>
+                        <div class="captcha-container rounded-lg p-4 bg-gray-50 border-2 border-dashed border-gray-300">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div id="captchaImage" class="bg-white border border-gray-300 rounded px-4 py-2 font-mono text-lg font-bold tracking-wider select-none">7X9K2</div>
+                                    <button type="button" id="refreshCaptcha" class="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-white">
+                                        <i class="ri-refresh-line"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="captcha" 
+                                name="captcha"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary text-sm outline-none"
+                                placeholder="Enter the code above"
+                                maxlength="5"
+                            >
+                            <input type="hidden" id="captchaGenerated" name="captchaGenerated" value="7X9K2">
+                        </div>
+                        <div id="captchaError" class="error-message hidden mt-2 text-sm text-red-600"></div>
+                    </div>
+
+                    <!-- Submit -->
+                    <button 
+                        type="submit" 
+                        class="rounded-button w-full bg-primary text-white py-3 px-6 font-medium hover:bg-secondary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                    >
+                        Sign In
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-6">
+        <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div class="text-sm text-gray-600">© 2024 Learning Management System. All rights reserved.</div>
+            <div class="flex space-x-6 text-sm">
+                <a href="#" class="text-gray-600 hover:text-primary">Privacy Policy</a>
+                <a href="#" class="text-gray-600 hover:text-primary">Terms of Service</a>
+                <a href="#" class="text-gray-600 hover:text-primary">Technical Support</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // ✅ Password toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const togglePassword = document.getElementById('togglePassword');
+            const password = document.getElementById('password');
+            const icon = document.getElementById('passwordIcon');
+            togglePassword.addEventListener('click', () => {
+                const type = password.type === 'password' ? 'text' : 'password';
+                password.type = type;
+                icon.className = type === 'password'
+                    ? 'ri-eye-line text-gray-400 hover:text-gray-600'
+                    : 'ri-eye-off-line text-gray-400 hover:text-gray-600';
+            });
+        });
+
+        // ✅ Captcha refresh + backend sync
+// ✅ Captcha generate and refresh
+window.addEventListener('load', () => {
+    const refresh = document.getElementById('refreshCaptcha');
+    const image = document.getElementById('captchaImage');
+    const hidden = document.getElementById('captchaGenerated');
+    const input = document.getElementById('captcha');
+
+    if (refresh && image && hidden && input) {
+        // Function to generate captcha
+        const generateCaptcha = () => {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let code = '';
+            for (let i = 0; i < 5; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            image.textContent = code;
+            hidden.value = code;
+            input.value = '';
+        };
+
+        // Generate captcha on page load
+        generateCaptcha();
+
+        // Generate captcha on refresh button click
+        refresh.addEventListener('click', generateCaptcha);
+    }
+});
+
+    </script>
+</body>
+</html>

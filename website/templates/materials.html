@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ course.course_code }} | Course Materials</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        secondary: '#8b5cf6'
+      },
+      borderRadius: {
+        'none': '0px',
+        'sm': '4px',
+        DEFAULT: '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'full': '9999px',
+        'button': '8px'
+      },
+      animation: {
+        'scale-in': 'scaleIn 0.2s ease-out forwards',
+      },
+      keyframes: {
+        scaleIn: {
+          '0%': { transform: 'scale(0.9)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        }
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+<style>
+  :where([class^="ri-"])::before { content: "\f3c2"; }
+  #mobileNav { transition: transform .3s ease; }
+  .tab-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab-container::-webkit-scrollbar { display: none; }
+  .tab-container { -ms-overflow-style: none; scrollbar-width: none; }
+  .modal-open { overflow: hidden; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<!-- =============================== -->
+<!--      TOAST NOTIFICATION SYSTEM  -->
+<!-- =============================== -->
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-5 right-5 z-[1000] w-auto max-w-xs space-y-2"></div>
+
+<style>
+/* Toast Base Style */
+.toast-notification {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    opacity: 0;
+    transition: opacity .5s ease-in-out, transform .3s ease-in-out;
+    transform: translateY(-20px);
+    font-size: 0.875rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+/* Show animation */
+.toast-notification.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Toast Types */
+.toast-notification.success {
+    background-color: #28a745;
+}
+
+.toast-notification.error {
+    background-color: #dc3545;
+}
+
+.toast-notification.info {
+    background-color: #17a2b8;
+}
+</style>
+
+<script>
+/**
+ * Show a toast message
+ * @param {string} message - message to display
+ * @param {string} type - 'success', 'error', or 'info'
+ * @param {number} duration - time visible in ms
+ */
+function showToast(message, type = 'info', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${type}`;
+    toast.textContent = message;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 500);
+        }, duration);
+    }, 50);
+}
+</script>
+
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo & Course Title -->
+      <!-- Logo & Course Title -->
+<div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+
+  <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+
+  <div class="text-base sm:text-xl font-semibold text-gray-900 truncate">
+    {{ course.course_title }}
+  </div>
+
+</div>
+
+
+      <!-- Desktop Actions -->
+      <div class="hidden md:flex items-center space-x-3">
+
+        <!-- Profile -->
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+          <div class="text-xs sm:text-sm hidden lg:block">
+            <div id="name" class="font-medium text-gray-900">{{ user.full_name }}</div>
+            <div class="text-gray-500">Student</div>
+          </div>
+          <button id="profile-dropdown-button" class="w-6 h-6 flex items-center justify-center text-gray-400">
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+          <!-- Dropdown Menu -->
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-gray-600 text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+        <div class="text-sm">
+          <div id="nameMobile" class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">Student</div>
+        </div>
+      </div>
+      <button id="mobileProfileBtn" class="w-6 h-6 flex items-center justify-center text-gray-400">
+        <i class="ri-arrow-down-s-line"></i>
+      </button>
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/dashboard" class="block py-2 text-gray-700 hover:text-primary">Dashboard</a>
+      <a href="/lms" class="block py-2 text-gray-700 hover:text-primary">My Courses</a>
+      <a href="/edit_profile" class="block py-2 text-gray-700 hover:text-primary">Edit Profile</a>
+      <a href="/settings" class="block py-2 text-gray-700 hover:text-primary">Settings</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700">Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-gray-50 border-t border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <a href="/lms" class="hover:text-primary">My Courses</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class="text-gray-900 font-medium truncate">{{ course.course_code }} — {{ course.course_title }} </span>
+  </nav>
+</div>
+
+<!-- Course Title Panel -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-4 sm:py-6">
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
+       {{course.section_name}} | {{ course.course_code }} — {{ course.course_title }}
+    </h1>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6">
+    <div class="tab-container flex space-x-6 sm:space-x-8 overflow-x-auto py-2">
+      <a href="{{ url_for('auth.course_overview', course_id=course['course_id']) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm whitespace-nowrap">
+        Overview
+      </a>
+      <a href="" class="py-3 px-1 border-b-2 border-primary text-primary font-medium text-xs sm:text-sm whitespace-nowrap active">
+        Course Materials
+      </a>
+      <a href="{{ url_for('auth.performance_overview', course_id=course['course_id']) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm whitespace-nowrap">
+        Grades
+      </a>
+      <a href="{{ url_for('auth.course_forum_student', course_id=course.course_id) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button whitespace-nowrap">
+        Forums
+      </a>
+      <a href="{{ url_for('auth.view_meetings', course_id=course.course_id) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button whitespace-nowrap">
+        Meetings
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions Toolbar -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex flex-wrap gap-2">
+      <button class="px-3 sm:px-4 py-2 bg-blue-100 text-blue-700 rounded-button hover:bg-blue-200 text-xs sm:text-sm whitespace-nowrap flex items-center">
+        <i class="ri-calendar-line mr-1 sm:mr-2"></i>Schedule
+      </button>
+      <button class="px-3 sm:px-4 py-2 bg-green-100 text-green-700 rounded-button hover:bg-green-200 text-xs sm:text-sm whitespace-nowrap flex items-center">
+        <i class="ri-mail-line mr-1 sm:mr-2"></i>Contact
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="fixed top-4 right-4 z-50 space-y-2">
+      {% for category, message in messages %}
+        <div class="px-4 py-3 rounded-lg shadow-md text-sm font-medium
+            {% if category == 'success' %}bg-green-100 text-green-800{% endif %}
+            {% if category == 'danger' %}bg-red-100 text-red-800{% endif %}
+            {% if category == 'warning' %}bg-yellow-100 text-yellow-800{% endif %}
+            {% if category == 'info' %}bg-blue-100 text-blue-800{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+<script>
+  setTimeout(() => {
+    document.querySelectorAll('.fixed.top-4.right-4 > div').forEach(msg => msg.remove());
+  }, 30000);
+</script>
+
+<!-- Main Content -->
+<div class="px-4 sm:px-6 py-4 sm:py-6">
+  <div class="flex flex-col gap-4 sm:gap-6">
+
+    <!-- Search and Filter Controls (Aligned Left) -->
+    <div class="flex flex-col sm:flex-row justify-start gap-3 mb-2">
+      
+      <!-- Search Bar -->
+      <div class="relative w-full sm:w-72">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="ri-search-line text-gray-500"></i>
+        </div>
+        <input type="text" 
+               id="materialSearch" 
+               placeholder="Search..." 
+               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out">
+      </div>
+
+      <!-- Term Filter Dropdown -->
+      <div class="relative w-full sm:w-48">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="ri-filter-3-line text-gray-500"></i>
+        </div>
+        <select id="termFilter" 
+                class="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg leading-5 bg-gray-50 text-gray-700 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm appearance-none cursor-pointer">
+          <option value="all">All Terms</option>
+          <option value="Prelims">Prelims</option>
+          <option value="Midterms">Midterms</option>
+          <option value="Finals">Finals</option>
+        </select>
+        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+          <i class="ri-arrow-down-s-line text-gray-500"></i>
+        </div>
+      </div>
+
+    </div>
+
+{% if materials or obtlp %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="materialsGrid">
+        
+{# --- OBTLP CARD --- #}
+        {% if obtlp %}
+        <div class="bg-white rounded-lg border border-yellow-200 shadow-sm overflow-hidden material-item min-h-[420px] self-start flex flex-col transition-all duration-300 ring-2 ring-yellow-50 relative"
+             data-term="All Terms"
+             data-search="obtlp syllabus course outline">
+
+             <!-- OBTLP Badge -->
+             <div class="absolute top-0 right-0 z-10">
+                 <div class="bg-yellow-400 text-yellow-900 text-[10px] font-bold px-3 py-1 rounded-bl-lg shadow-sm">
+                     OFFICIAL SYLLABUS
+                 </div>
+             </div>
+
+            <!-- Image Header -->
+            <div class="relative h-56 sm:h-64 bg-gradient-to-br from-yellow-50 to-orange-100 overflow-hidden rounded-t-lg shrink-0">
+                <div class="w-full h-full flex items-center justify-center text-yellow-500/50">
+                    <i class="ri-book-open-line text-8xl"></i>
+                </div>
+                <div class="absolute bottom-3 left-3">
+                    <span class="bg-yellow-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm">OBTLP</span>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="p-4 flex-1 flex flex-col">
+                <h3 class="font-bold text-gray-900 mb-1 text-lg leading-tight">Course Syllabus (OBTLP)</h3>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-3">
+                    Official Outcomes-Based Teaching and Learning Plan for {{ course.course_code }}. Please review the grading system and schedule.
+                </p>
+
+                <div class="flex items-center justify-between text-xs text-gray-500 mb-4 mt-auto">
+                    <span>Uploaded: {{ obtlp.upload_date.strftime('%b %d, %Y') }}</span>
+                    <span class="font-medium text-yellow-700">PDF Document</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-end pt-3 border-t border-yellow-100 gap-2">
+                    <button onclick="openViewMaterialModal('{{ obtlp.static_path }}', 'pdf')" 
+                            class="flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-sm hover:shadow">
+                        <i class="ri-eye-line"></i> View Syllabus
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {# --- END OBTLP CARD --- #}
+
+        {% for mat in materials %}
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden material-item min-h-[420px] self-start flex flex-col transition-all duration-300"
+             data-term="{{ mat.term }}"
+             data-search="{{ mat.title|lower }} {{ mat.description|lower }}">
+
+            <!-- Material Image -->
+            <div class="relative h-56 sm:h-64 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden rounded-t-lg shrink-0">
+                
+                    <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover object-top">
+                
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                        <i class="ri-file-text-line text-6xl"></i>
+                    </div>
+                
+                <div class="absolute top-3 right-3 flex gap-2">
+                    <span class="bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-medium uppercase">{{ mat.material_type }}</span>
+                </div>
+                <div class="absolute bottom-3 left-3">
+                    <span class="bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm">{{ mat.term }}</span>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="p-4 flex-1 flex flex-col">
+                <h3 class="font-semibold text-gray-900 mb-1 text-lg leading-tight">{{ mat.title }}</h3>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ mat.description }}</p>
+
+                <div class="flex items-center justify-between text-xs text-gray-500 mb-4 mt-auto">
+                    <span>{{ mat.upload_date.strftime('%b %d, %Y') }}</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <button class="material-dropdown-toggle flex items-center space-x-1 text-blue-600 hover:text-blue-700 cursor-pointer text-sm font-medium"
+                            data-material="material-{{ mat.material_id }}">
+                        <span>Details & Actions</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+
+                    <div class="flex items-center space-x-1">
+                      <button onclick="toggleCardFullScreen(this)" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-purple-600 rounded-full hover:bg-gray-100" title="Full Screen">
+                        <i class="ri-fullscreen-line"></i>
+                      </button>
+
+                      <button onclick="openViewMaterialModal('{{ mat.static_path }}', '{{ mat.preview_type }}')" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-blue-600 rounded-full hover:bg-gray-100" title="View">
+                        <i class="ri-eye-line"></i>
+                      </button>
+                      
+                      {% if user.role_id != 3 %}
+                      <button onclick="openEditMaterialModal('{{ mat.material_id }}', '{{ mat.title|e }}', '{{ mat.description|e }}', '{{ mat.term }}')" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-green-600 rounded-full hover:bg-gray-100" title="Edit">
+                        <i class="ri-pencil-line"></i>
+                      </button>
+                      <button onclick="openDeleteMaterialModal('{{ mat.material_id }}')" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-600 rounded-full hover:bg-gray-100" title="Delete">
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                      {% endif %}
+                    </div>
+                </div>
+
+                <!-- Dropdown Content -->
+                <div class="material-dropdown-content hidden border-t border-gray-100 mt-3 pt-3" id="dropdown-material-{{ mat.material_id }}">
+
+                    {% set mat_quizzes = [] %}
+                    {% for q in quizzes %}{% if q.material_id == mat.material_id %}{% set _ = mat_quizzes.append(q) %}{% endif %}{% endfor %}
+                    
+                    {% set mat_assignments = [] %}
+                    {% for a in assignments %}{% if a.material_id == mat.material_id %}{% set _ = mat_assignments.append(a) %}{% endif %}{% endfor %}
+
+                    {% set mat_activities = [] %}
+                    {% for act in activities %}{% if act.material_id == mat.material_id %}{% set _ = mat_activities.append(act) %}{% endif %}{% endfor %}
+
+
+                    {# --- 1. QUIZZES SECTION --- #}
+                    {% if mat_quizzes %}
+                    <div class="mb-3">
+                        <h6 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Quizzes</h6>
+                        <div class="space-y-1">
+                            {% for quiz in mat_quizzes %}
+                            <div class="flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-100 quiz-list-item"
+                                 data-start="{{ quiz.publish_at or quiz.date_published }}"
+                                 data-duration="{{ quiz.duration_minutes }}"
+                                 data-extended="{{ quiz.extended_due_date }}">
+                                
+                                <div class="truncate pr-2">
+                                    <div class="text-sm font-medium text-gray-700 truncate">{{ quiz.title }}</div>
+                                    <div class="text-[10px] text-gray-500 flex flex-wrap items-center gap-2">
+                                        <span>{{ quiz.total_points }} pts</span>
+                                        {% if user.role_id == 3 %}
+                                            
+                                            <!-- ATTEMPTS DISPLAY: Only show if NOT submitted AND NOT expired AND attempts > 0 -->
+                                            {% if quiz.student_score is none and not quiz.expired and quiz.attempts_left > 0 %}
+                                                <span class="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100 font-medium">
+                                                    {{ quiz.attempts_left }} Attempts Left
+                                                </span>
+                                            {% endif %}
+
+                                            {% if quiz.student_score is not none %}
+                                                <span class="text-green-600 font-bold">• Score: {{ quiz.student_score }}</span>
+                                            {% else %}
+                                                <span class="quiz-list-timer text-orange-600 font-mono font-bold hidden">
+                                                    <i class="ri-time-line align-bottom"></i> <span class="timer-text">--:--</span>
+                                                </span>
+                                            {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="flex shrink-0 items-center gap-2 action-container">
+                                    {% if user.role_id == 3 %}
+                                        {% if quiz.student_score is not none %}
+                                            <button onclick="openReviewQuizModal('{{ quiz.quiz_id }}')" class="text-purple-600 hover:text-purple-800 text-xs font-medium px-2 py-1 border border-purple-200 rounded bg-white transition" title="Review Answers">
+                                                Review
+                                            </button>
+                                        {% endif %}
+                                        
+                                        {% if quiz.can_take %}
+                                            <button onclick="openTakeQuizModal('{{ quiz.quiz_id }}')" class="take-btn text-blue-600 hover:text-blue-800 text-xs font-medium px-2 py-1 border border-blue-200 rounded bg-white transition">Take</button>
+                                        {% else %}
+                                            {% if quiz.expired and quiz.student_score is none %}
+                                                <span class="text-red-500 text-xs font-bold uppercase mr-1">Closed</span>
+                                            {% elif quiz.attempts_left <= 0 %}
+                                                <i class="ri-checkbox-circle-fill text-green-500 text-lg"></i>
+                                            {% elif quiz.student_score is none %}
+                                                <span class="text-gray-400 text-xs italic">Locked</span>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {# --- 2. ASSIGNMENTS SECTION --- #}
+                    {% if mat_assignments %}
+                    <div class="mb-3">
+                        <h6 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Assignments</h6>
+                        <div class="space-y-1">
+                            {% for assign in mat_assignments %}
+                            <div class="flex items-center justify-between bg-green-50 p-2 rounded border border-green-100">
+                                <div class="truncate pr-2">
+                                    <div class="text-sm font-medium text-green-900 truncate">{{ assign.title }}</div>
+                                    <div class="text-[10px] text-green-700 flex flex-wrap items-center gap-2">
+                                      <span>Due: {{ assign.effective_due_date.strftime('%b %d, %H:%M') if assign.effective_due_date else 'No Due Date' }}</span>
+                                      
+                                      <!-- ATTEMPT DISPLAY: Only if NOT submitted and NOT expired -->
+                                      {% if user.role_id == 3 and not assign.submitted and not assign.expired %}
+                                          <span class="bg-white/50 px-1.5 py-0.5 rounded text-green-800 border border-green-200">Single Attempt</span>
+                                      {% endif %}
+
+                                      {% if assign.grade is not none %}
+                                          <span class="font-bold text-green-800 bg-green-100 px-2 py-0.5 rounded">Grade: {{ assign.grade }} / {{ assign.points }}</span>
+                                          {% if assign.feedback %}
+                                              <button 
+                                                data-title="Assignment: {{ assign.title|e }}"
+                                                data-grade="{{ assign.grade }}"
+                                                data-feedback="{{ assign.feedback|replace('\n', ' ')|replace('\r', '')|e }}"
+                                                onclick="openFeedbackModal(this.dataset.title, this.dataset.grade, this.dataset.feedback)"
+                                                class="text-blue-600 hover:underline cursor-pointer font-medium" 
+                                                title="View Teacher Feedback">
+                                                <i class="ri-message-2-line"></i> Feedback
+                                            </button>
+                                          {% endif %}
+                                      {% endif %}
+                                  </div>
+                                </div>
+                                <div class="flex shrink-0 items-center">
+                                    {% if user.role_id == 3 %}
+                                        {% if assign.submitted %}
+                                             <span class="text-green-600 text-lg" title="Submitted"><i class="ri-check-double-line"></i></span>
+                                        {% elif assign.expired %}
+                                             <span class="text-red-500 text-xs font-bold uppercase">Expired</span>
+                                        {% else %}
+                                             <button onclick="openSubmitFileModal('assignment', '{{ assign.assignment_id }}', '{{ assign.title|e }}')" 
+                                                     class="text-green-700 hover:text-green-900 text-xs font-medium px-2 py-1 border border-green-200 rounded bg-white transition">
+                                                 Submit
+                                             </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {# --- 3. ACTIVITIES SECTION --- #}
+                    {% if mat_activities %}
+                    <div>
+                        <h6 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Activities</h6>
+                        <div class="space-y-1">
+                            {% for act in mat_activities %}
+                            <div class="flex items-center justify-between bg-purple-50 p-2 rounded border border-purple-100">
+                                <div class="truncate pr-2">
+                                    <div class="text-sm font-medium text-purple-900 truncate">{{ act.title }}</div>
+                                    <div class="text-[10px] text-purple-700 flex flex-wrap items-center gap-2">
+                                      <span>Due: {{ act.effective_due_date.strftime('%b %d, %H:%M') if act.effective_due_date else 'No Due Date' }}</span>
+
+                                      <!-- ATTEMPT DISPLAY: Only if NOT submitted and NOT expired -->
+                                      {% if user.role_id == 3 and not act.submitted and not act.expired %}
+                                          <span class="bg-white/50 px-1.5 py-0.5 rounded text-purple-800 border border-purple-200">Single Attempt</span>
+                                      {% endif %}
+                                      
+                                      {% if act.grade is not none %}
+                                          <span class="font-bold text-purple-800 bg-purple-100 px-2 py-0.5 rounded">Grade: {{ act.grade }} / {{ act.points }}</span>
+                                          {% if act.feedback %}
+                                              <button 
+                                                data-title="Activity: {{ act.title|e }}"
+                                                data-grade="{{ act.grade }}"
+                                                data-feedback="{{ act.feedback|replace('\n', ' ')|replace('\r', '')|e }}"
+                                                onclick="openFeedbackModal(this.dataset.title, this.dataset.grade, this.dataset.feedback)"
+                                                class="text-blue-600 hover:underline cursor-pointer font-medium" 
+                                                title="View Teacher Feedback">
+                                                <i class="ri-message-2-line"></i> Feedback
+                                            </button>
+                                          {% endif %}
+                                      {% endif %}
+                                  </div>
+                                </div>
+                                <div class="flex shrink-0 items-center">
+                                    {% if user.role_id == 3 %}
+                                        {% if act.submitted %}
+                                             <span class="text-green-600 text-lg" title="Submitted"><i class="ri-check-double-line"></i></span>
+                                        {% elif act.expired %}
+                                             <span class="text-red-500 text-xs font-bold uppercase">Expired</span>
+                                        {% else %}
+                                             <button onclick="openSubmitFileModal('activity', '{{ act.activity_id }}', '{{ act.title|e }}')" 
+                                                     class="text-purple-700 hover:text-purple-900 text-xs font-medium px-2 py-1 border border-purple-200 rounded bg-white transition">
+                                                 Submit
+                                             </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        <div id="noResults" class="hidden col-span-1 sm:col-span-2 text-center py-12 bg-gray-50 border border-dashed border-gray-300 rounded-xl">
+            <p class="text-gray-500">No materials found matching your criteria.</p>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-12 bg-white border border-dashed border-gray-300 rounded-xl">
+        <p class="text-gray-500">No materials uploaded yet.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('materialSearch');
+        const termFilter = document.getElementById('termFilter');
+        const materialItems = document.querySelectorAll('.material-item');
+        const noResultsMsg = document.getElementById('noResults');
+
+        function filterMaterials() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const selectedTerm = termFilter.value;
+            let visibleCount = 0;
+
+            materialItems.forEach(item => {
+                const titleDesc = item.getAttribute('data-search');
+                const itemTerm = item.getAttribute('data-term');
+                const matchesSearch = titleDesc.includes(searchTerm);
+                const matchesTerm = selectedTerm === 'all' || itemTerm === selectedTerm;
+
+                if (matchesSearch && matchesTerm) {
+                    item.classList.remove('hidden');
+                    item.classList.add('flex');
+                    visibleCount++;
+                } else {
+                    item.classList.add('hidden');
+                    item.classList.remove('flex');
+                }
+            });
+
+            if (visibleCount === 0 && materialItems.length > 0) {
+                if(noResultsMsg) noResultsMsg.classList.remove('hidden');
+            } else {
+                if(noResultsMsg) noResultsMsg.classList.add('hidden');
+            }
+        }
+
+        if(searchInput) searchInput.addEventListener('input', filterMaterials);
+        if(termFilter) termFilter.addEventListener('change', filterMaterials);
+    });
+</script>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- UNIVERSAL SUCCESS MODAL -->
+<div id="universalSuccessModal" class="fixed inset-0 z-[60] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onclick="closeSuccessModal()"></div>
+    <div class="flex items-center justify-center min-h-screen px-4 text-center">
+        <div class="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-sm shadow-2xl transform transition-all animate-scale-in relative z-10">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ri-check-line text-4xl text-green-600 font-bold"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2" id="successModalTitle">Success!</h3>
+            <p class="text-gray-500 mb-6" id="successModalMessage">Operation completed successfully.</p>
+            
+            <div class="flex flex-col gap-2">
+                <button id="successReviewBtn" class="hidden w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg transition shadow-md shadow-purple-200">
+                    Review Answers
+                </button>
+                <button onclick="closeSuccessModal()" class="w-full py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium rounded-lg transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- REVIEW QUIZ MODAL -->
+<div id="reviewQuizModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeReviewQuizModal()"></div>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
+            <div class="bg-white px-6 py-5 border-b border-gray-200 sticky top-0 z-10 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Quiz Review</h3>
+                    <p class="text-sm text-gray-500 mt-1">Review your answers and correct solutions.</p>
+                </div>
+                <button onclick="closeReviewQuizModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="ri-close-circle-line text-3xl"></i>
+                </button>
+            </div>
+            <div class="px-6 py-6 max-h-[70vh] overflow-y-auto bg-gray-50" id="reviewQuizContainer"></div>
+        </div>
+    </div>
+</div>
+
+<!-- TAKE QUIZ MODAL -->
+<div id="takeQuizModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-3xl w-full">
+            <div class="bg-white px-6 py-5 border-b border-gray-200 sticky top-0 z-10 flex justify-between items-center">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900" id="quizModalTitle">Quiz</h3>
+                    <p class="text-sm text-gray-500 mt-1" id="quizModalDesc">Description...</p>
+                </div>
+                <div class="bg-blue-50 px-4 py-2 rounded-lg border border-blue-100 text-right">
+                    <span class="text-[10px] text-blue-600 uppercase tracking-wider font-bold block">Time Left</span>
+                    <span id="quizTimer" class="text-xl font-mono font-bold text-blue-700">00:00</span>
+                    
+                </div>
+            </div>
+            <div class="px-6 py-6 max-h-[65vh] overflow-y-auto bg-gray-50">
+                <form id="quizForm" class="space-y-6">
+                    <div id="quizQuestionsContainer"></div>
+                </form>
+            </div>
+            <div class="bg-white px-6 py-4 border-t border-gray-200 flex flex-row-reverse gap-3">
+                <button type="button" onclick="submitQuiz()" class="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none sm:text-sm">Submit Quiz</button>
+                <button type="button" onclick="closeQuizModal()" class="inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SUBMIT FILE MODAL -->
+<div id="submitFileModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="closeSubmitFileModal()"></div>
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+            <div class="bg-white px-6 py-5 border-b border-gray-200">
+                <h3 class="text-lg font-bold text-gray-900" id="submitModalTitle">Submit Work</h3>
+            </div>
+            <form id="submitFileForm" onsubmit="handleFileSubmit(event)" enctype="multipart/form-data">
+                <div class="px-6 py-6 bg-gray-50">
+                    <input type="hidden" name="assignment_id" id="submitAssignId" disabled>
+                    <input type="hidden" name="activity_id" id="submitActivityId" disabled>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload File</label>
+                        <div class="flex items-center justify-center w-full">
+                            <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <i class="ri-upload-cloud-2-line text-3xl text-gray-400 mb-2"></i>
+                                    <p class="text-sm text-gray-500"><span class="font-semibold">Click to upload</span></p>
+                                    <p id="fileNameDisplay" class="text-xs text-gray-400 mt-1">PDF, DOCX, ZIP</p>
+                                </div>
+                                <input type="file" name="file" class="hidden" required onchange="document.getElementById('fileNameDisplay').textContent = this.files[0].name">
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white px-6 py-4 border-t border-gray-200 flex flex-row-reverse gap-3">
+                    <button type="submit" class="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-6 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:text-sm">Submit</button>
+                    <button type="button" onclick="closeSubmitFileModal()" class="inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:text-sm">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- FEEDBACK MODAL -->
+<div id="feedbackModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onclick="closeFeedbackModal()"></div>
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0 pointer-events-none">
+        <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md w-full pointer-events-auto animate-scaleFade">
+            <div class="bg-white px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900" id="fbModalTitle">Teacher Feedback</h3>
+                <button onclick="closeFeedbackModal()" class="text-gray-400 hover:text-gray-600"><i class="ri-close-line text-2xl"></i></button>
+            </div>
+            <div class="px-6 py-6">
+                <div class="flex items-center justify-between mb-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                    <span class="text-sm text-gray-600 font-medium">Your Grade:</span>
+                    <span class="text-lg font-bold text-primary" id="fbModalGrade">--</span>
+                </div>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Instructor Comments</label>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-gray-800 leading-relaxed max-h-60 overflow-y-auto" id="fbModalText"></div>
+            </div>
+            <div class="bg-gray-50 px-6 py-3 flex justify-end">
+                <button type="button" onclick="closeFeedbackModal()" class="w-full inline-flex justify-center rounded-lg border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-100 focus:outline-none sm:text-sm">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- VIEW MATERIAL MODAL (Full Screen / No Header-Footer) -->
+<div id="viewMaterialModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div class="fixed inset-0 bg-black bg-opacity-95 transition-opacity" onclick="closeViewMaterialModal()"></div>
+    <div class="relative w-full h-full flex items-center justify-center p-2 sm:p-4 pointer-events-none">
+        <div class="relative w-full h-full max-w-7xl max-h-[95vh] flex flex-col pointer-events-auto">
+            
+            <!-- Close Button (Floating Top Right) -->
+            <button onclick="closeViewMaterialModal()" class="absolute -top-10 right-0 sm:top-2 sm:right-4 z-[60] text-white/80 hover:text-white transition-colors bg-black/20 hover:bg-black/40 rounded-full p-1 backdrop-blur-sm">
+                <i class="ri-close-line text-3xl sm:text-4xl"></i>
+            </button>
+
+            <!-- Main Content Area (Full Screen) -->
+            <div id="viewModalContent" class="w-full h-full bg-white rounded-lg shadow-2xl overflow-hidden relative">
+                <!-- Javascript will inject the iframe here with class="w-full h-full" -->
+            </div>
+
+            <!-- Download Button (Floating Bottom Right) -->
+            <div class="absolute bottom-6 right-6 z-[60]">
+                <a id="viewModalDownload" href="#" download class="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-full shadow-lg transition-transform transform hover:scale-105 backdrop-blur-md border border-white/10">
+                    <i class="ri-download-cloud-2-line text-lg"></i> <span>Download</span>
+                </a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+// ================= GLOBAL VARIABLES =================
+let currentQuizId = null;
+let quizTimerInterval = null;
+let isSubmitting = false;
+let quizEndTime = null;
+
+// ================= INITIALIZATION =================
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Dropdown Toggles
+    document.querySelectorAll('.material-dropdown-toggle').forEach(t => {
+        t.addEventListener('click', function() {
+            const d = document.getElementById(`dropdown-${this.dataset.material}`);
+            if(d) d.classList.toggle('hidden');
+        });
+    });
+
+    // 2. Mobile Menu
+    document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+        const n = document.getElementById('mobileNav');
+        n.classList.toggle('hidden'); n.classList.toggle('flex');
+    });
+
+    // 3. Profile Dropdown
+    const pb = document.getElementById('profile-dropdown-button');
+    const pm = document.getElementById('profile-dropdown-menu');
+    pb?.addEventListener('click', (e) => { e.stopPropagation(); pm.classList.toggle('hidden'); });
+    document.addEventListener('click', () => pm?.classList.add('hidden'));
+
+    // 4. Start Dashboard List Timers
+    initQuizListTimers();
+});
+
+// ================= QUIZ LIST TIMERS (DASHBOARD) =================
+function initQuizListTimers() {
+    const quizItems = document.querySelectorAll('.quiz-list-item');
+    if (quizItems.length === 0) return;
+
+    const updateTimers = () => {
+        const now = new Date().getTime();
+        quizItems.forEach(item => {
+            let startStr = item.dataset.start;
+            const durationMins = parseInt(item.dataset.duration) || 0;
+            let extendedStr = item.dataset.extended;
+            
+            const timerDisplay = item.querySelector('.quiz-list-timer');
+            const timerText = item.querySelector('.timer-text');
+            const actionContainer = item.querySelector('.action-container');
+            const takeBtn = actionContainer.querySelector('.take-btn');
+
+            if (!timerDisplay || !takeBtn) return;
+
+            let endTime = 0;
+            // Handle Start Time
+            if (startStr && startStr !== 'None') {
+                // Replace space with T for Safari/Mobile compatibility (ISO format)
+                startStr = startStr.replace(' ', 'T'); 
+                const startTime = new Date(startStr).getTime();
+                if (!isNaN(startTime)) {
+                    endTime = startTime + (durationMins * 60000);
+                }
+            }
+
+            // Handle Extended Time
+            if (extendedStr && extendedStr !== 'None') {
+                extendedStr = extendedStr.replace(' ', 'T');
+                const extTime = new Date(extendedStr).getTime();
+                if (!isNaN(extTime) && extTime > endTime) endTime = extTime;
+            }
+
+            const remaining = endTime - now;
+
+            if (remaining > 0) {
+                timerDisplay.classList.remove('hidden');
+                
+                // Format Time
+                const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+                
+                let timeString = "";
+                if (hours > 0) timeString += `${hours}h `;
+                timeString += `${minutes}m ${seconds}s`;
+                timerText.textContent = timeString;
+            } else {
+                // Time is up
+                timerDisplay.classList.add('hidden');
+                if (takeBtn) {
+                    takeBtn.remove();
+                    const closedBadge = document.createElement('span');
+                    closedBadge.className = 'text-red-500 text-xs font-bold uppercase mr-1';
+                    closedBadge.textContent = 'Closed';
+                    actionContainer.appendChild(closedBadge);
+                }
+            }
+        });
+    };
+    
+    updateTimers(); // Run immediately
+    setInterval(updateTimers, 1000); // Loop
+}
+
+// ================= QUIZ MODAL LOGIC =================
+
+// 1. Open Modal & Fetch Data
+function openTakeQuizModal(quizId) {
+    currentQuizId = quizId;
+    const modal = document.getElementById('takeQuizModal');
+    const container = document.getElementById('quizQuestionsContainer');
+    const timerContainer = document.getElementById('quizTimer');
+    
+    // Clear previous timer content completely
+    timerContainer.innerHTML = ''; 
+    const timerSpan = document.createElement('span');
+    timerSpan.id = 'quizTimerText';
+    timerSpan.textContent = "Loading...";
+    timerContainer.appendChild(timerSpan);
+
+    // UI Reset
+    modal.classList.remove('hidden');
+    timerContainer.className = "text-xl font-bold text-blue-700 flex justify-end"; 
+    
+    container.innerHTML = `
+        <div class="text-center py-10">
+            <i class="ri-loader-4-line text-3xl animate-spin text-blue-600"></i>
+            <p class="mt-2 text-gray-500">Loading Quiz...</p>
+        </div>`;
+
+    // Fetch
+    fetch(`/api/get_quiz_data/${quizId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'error') {
+                alert(data.message);
+                closeQuizModal();
+            } else {
+                // --- ROBUST TIME CALCULATION ---
+                let totalSeconds = 0;
+
+                // Check for 'remaining_seconds' (active attempt)
+                if (data.remaining_seconds != null && data.remaining_seconds !== "") {
+                    totalSeconds = parseInt(data.remaining_seconds);
+                } 
+                // Check for 'duration_minutes' (new attempt)
+                else if (data.duration_minutes != null && data.duration_minutes !== "") {
+                    totalSeconds = parseInt(data.duration_minutes) * 60;
+                }
+                // Fallback for 'duration'
+                else if (data.duration != null && data.duration !== "") {
+                    totalSeconds = parseInt(data.duration) * 60;
+                }
+
+                if (!isNaN(totalSeconds) && totalSeconds > 0) {
+                    // Set Global End Timestamp
+                    quizEndTime = Date.now() + (totalSeconds * 1000);
+                    startModalTimer(); 
+                } else {
+                    // No time limit
+                    quizEndTime = null;
+                    document.getElementById('quizTimerText').textContent = "No Limit";
+                    timerContainer.className = "text-xl font-bold text-green-600 flex justify-end";
+                }
+                
+                renderQuizQuestions(data);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Failed to load quiz. Please check your connection.');
+            closeQuizModal();
+        });
+}
+
+// 2. Close Modal & Cleanup
+function closeQuizModal() {
+    document.getElementById('takeQuizModal').classList.add('hidden');
+    if (quizTimerInterval) clearInterval(quizTimerInterval);
+    quizTimerInterval = null;
+    isSubmitting = false;
+    quizEndTime = null;
+}
+
+// 3. Render Questions
+function renderQuizQuestions(data) {
+    document.getElementById('quizModalTitle').textContent = data.title;
+    document.getElementById('quizModalDesc').textContent = data.description || 'Answer the questions below.';
+    const container = document.getElementById('quizQuestionsContainer');
+    container.innerHTML = '';
+
+    if (!data.questions || data.questions.length === 0) {
+        container.innerHTML = '<p class="text-center text-gray-500">No questions found.</p>';
+        return;
+    }
+
+    data.questions.forEach((q, index) => {
+        const qNum = index + 1;
+        let inputHtml = '';
+        const type = (q.question_type || '').toLowerCase().replace(/ /g, '_');
+
+        if (type === 'multiple_choice') {
+            [q.option_a, q.option_b, q.option_c, q.option_d].filter(Boolean).forEach(opt => {
+                inputHtml += `
+                <div class="flex items-center mb-2 p-3 border border-gray-200 rounded-lg hover:bg-blue-50 cursor-pointer transition-colors">
+                    <input type="radio" name="q_${q.question_id}" value="${opt}" id="q_${q.question_id}_${opt}" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 cursor-pointer">
+                    <label for="q_${q.question_id}_${opt}" class="ml-3 block text-sm font-medium text-gray-700 w-full cursor-pointer">${opt}</label>
+                </div>`;
+            });
+        } else if (type === 'true_false') {
+            inputHtml = `
+            <div class="flex gap-4 mt-2">
+                <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 w-full transition-colors">
+                    <input type="radio" name="q_${q.question_id}" value="TRUE" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <span class="ml-2 text-sm font-medium text-gray-700">True</span>
+                </label>
+                <label class="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 w-full transition-colors">
+                    <input type="radio" name="q_${q.question_id}" value="FALSE" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                    <span class="ml-2 text-sm font-medium text-gray-700">False</span>
+                </label>
+            </div>`;
+        } else {
+            inputHtml = `<textarea name="q_${q.question_id}" rows="3" class="w-full border border-gray-300 rounded-md p-3" placeholder="Your answer..."></textarea>`;
+        }
+        
+        container.insertAdjacentHTML('beforeend', `
+            <div class="bg-white p-5 rounded-xl border border-gray-200 shadow-sm question-item mb-6" data-id="${q.question_id}">
+                <div class="flex justify-between items-start mb-3">
+                    <span class="font-bold text-gray-800 text-lg">Question ${qNum}</span>
+                    <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-bold">${q.points} pts</span>
+                </div>
+                <p class="text-gray-700 text-base mb-4 leading-relaxed">${q.question_text}</p>
+                <div>${inputHtml}</div>
+            </div>`);
+    });
+}
+
+// 4. Modal Timer Logic (Fixed Format: 1h 30m 15s)
+function startModalTimer() {
+    if (!quizEndTime) return;
+    
+    const timerContainer = document.getElementById('quizTimer');
+    const timerText = document.getElementById('quizTimerText'); // Targeted span
+
+    function update() {
+        const now = Date.now();
+        const diff = quizEndTime - now;
+        
+        let timeLeft = Math.floor(diff / 1000);
+
+        // --- TIME IS UP ---
+        if (timeLeft <= 0) {
+            timerText.textContent = "0m 0s";
+            timerContainer.className = "text-xl font-bold text-red-600 flex justify-end";
+            
+            if (quizTimerInterval) clearInterval(quizTimerInterval);
+            
+            if (!isSubmitting) {
+                isSubmitting = true;
+                alert("Time is up! Submitting quiz automatically.");
+                submitQuiz(true); // Force submit
+            }
+            return;
+        }
+
+        // --- FORMATTING (e.g., 1h 5m 30s) ---
+        const h = Math.floor(timeLeft / 3600);
+        const m = Math.floor((timeLeft % 3600) / 60);
+        const s = timeLeft % 60;
+
+        let timeString = "";
+        if (h > 0) timeString += `${h}h `;
+        timeString += `${m}m ${s}s`;
+
+        timerText.textContent = timeString;
+
+        // --- STYLING ---
+        if (timeLeft <= 60) {
+            timerContainer.className = "text-xl font-bold text-red-600 animate-pulse flex justify-end";
+        } else {
+            timerContainer.className = "text-xl font-bold text-blue-700 flex justify-end";
+        }
+    }
+
+    // Run immediately then loop
+    update();
+    if (quizTimerInterval) clearInterval(quizTimerInterval);
+    quizTimerInterval = setInterval(update, 1000);
+}
+
+// 5. Submit Quiz
+function submitQuiz(force = false) {
+    if (!force && !confirm("Are you sure you want to submit?")) return;
+    if (isSubmitting && !force) return; // Prevent double clicks
+    
+    isSubmitting = true;
+    if (quizTimerInterval) clearInterval(quizTimerInterval);
+
+    // Collect Answers
+    const answers = [];
+    document.querySelectorAll('.question-item').forEach(card => {
+        const qId = card.dataset.id;
+        const checked = card.querySelector('input[type="radio"]:checked');
+        const text = card.querySelector('textarea, input[type="text"]');
+        answers.push({ 
+            question_id: qId, 
+            answer_choice: checked ? checked.value : "", 
+            answer_text: text ? text.value.trim() : "" 
+        });
+    });
+
+    // Update Button UI
+    const submitBtn = document.querySelector('#takeQuizModal button[onclick="submitQuiz()"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Submitting...';
+    }
+
+    // Send Data
+    fetch('/api/submit_quiz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ quiz_id: currentQuizId, answers: answers })
+    })
+    .then(res => res.json())
+    .then(data => {
+        closeQuizModal();
+        if (data.status === 'success') {
+            openSuccessModal('Quiz Completed!', `Score: ${data.score}`, currentQuizId);
+        } else {
+            alert(data.message || 'Error submitting quiz');
+            // Re-enable button on failure so user can try again
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Quiz';
+            }
+            isSubmitting = false; 
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Error submitting quiz');
+        closeQuizModal();
+        isSubmitting = false;
+    });
+}
+
+// ================= MODAL UTILITIES =================
+
+// Success Modal
+function openSuccessModal(title, message, reviewQuizId = null) {
+    const modal = document.getElementById('universalSuccessModal');
+    document.getElementById('successModalTitle').textContent = title;
+    document.getElementById('successModalMessage').textContent = message;
+    
+    const reviewBtn = document.getElementById('successReviewBtn');
+    if(reviewQuizId) {
+        reviewBtn.classList.remove('hidden');
+        reviewBtn.onclick = function() { 
+            closeSuccessModal(); 
+            // Small delay to allow modal transition
+            setTimeout(() => openReviewQuizModal(reviewQuizId), 300);
+        };
+    } else {
+        reviewBtn.classList.add('hidden');
+    }
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+function closeSuccessModal() {
+    document.getElementById('universalSuccessModal').classList.add('hidden');
+    document.body.style.overflow = '';
+    // Reload to update scores/grades on the page
+    setTimeout(() => window.location.reload(), 300); 
+}
+
+// Review Quiz Modal
+function openReviewQuizModal(quizId) {
+    const modal = document.getElementById('reviewQuizModal');
+    const container = document.getElementById('reviewQuizContainer');
+    
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    
+    container.innerHTML = '<div class="text-center py-10"><i class="ri-loader-4-line text-3xl animate-spin text-blue-600"></i><p class="mt-2 text-gray-500">Loading Review...</p></div>';
+    
+    // Construct URL properly
+    const baseReviewUrl = "{{ url_for('auth.review_quiz', quiz_id=0) }}".replace('/0', '');
+    
+    fetch(`${baseReviewUrl}/${quizId}`)
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'error') throw new Error(data.message);
+        renderReview(data);
+    }).catch(err => {
+        container.innerHTML = `<div class="text-center text-red-500 p-4">Failed to load review.<br><span class="text-xs text-gray-400">${err.message}</span></div>`;
+    });
+}
+function closeReviewQuizModal() {
+    document.getElementById('reviewQuizModal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+function renderReview(data) {
+    const container = document.getElementById('reviewQuizContainer');
+    container.innerHTML = '';
+    
+    const scoreHtml = `
+        <div class="flex items-center justify-between bg-gray-100 p-4 rounded-lg mb-6">
+            <div>
+                <div class="text-sm text-gray-500 uppercase tracking-wide">Your Score</div>
+                <div class="text-2xl font-bold ${data.passed ? 'text-green-600' : 'text-red-600'}">${data.total_score} / ${data.max_score}</div>
+            </div>
+            <div class="text-right">
+                <div class="text-sm text-gray-500">Date Taken</div>
+                <div class="font-medium text-gray-900">${data.date_taken || 'Just now'}</div>
+            </div>
+        </div>`;
+    
+    container.insertAdjacentHTML('beforeend', scoreHtml);
+    
+    data.questions.forEach((q, index) => {
+        const isCorrect = q.is_correct;
+        const borderColor = isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50';
+        let answerDisplay = '';
+        
+        if (q.type === 'multiple_choice' || q.type === 'true_false') {
+            answerDisplay = `
+                <div class="mt-3 text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="font-semibold text-gray-600">Your Answer:</span>
+                        <span class="${isCorrect ? 'text-green-700' : 'text-red-700 font-bold'}">${q.user_answer}</span>
+                    </div>
+                    ${!isCorrect ? `<div class="flex items-center gap-2 mt-1"><span class="font-semibold text-gray-600">Correct Answer:</span><span class="text-green-700 font-bold">${q.correct_answer}</span></div>` : ''}
+                </div>`;
+        } else {
+            answerDisplay = `
+                <div class="mt-3 text-sm bg-white p-3 rounded border border-gray-200">
+                    <p class="text-gray-500 text-xs mb-1">Your Answer:</p>
+                    <p class="text-gray-800">${q.user_answer}</p>
+                </div>
+                <div class="mt-2 text-sm">
+                    <span class="font-semibold text-gray-600">Correct/Model Answer:</span>
+                    <p class="text-green-700 mt-1">${q.correct_answer}</p>
+                </div>`;
+        }
+        
+        container.insertAdjacentHTML('beforeend', `
+            <div class="p-4 rounded-lg border ${borderColor} mb-4 shadow-sm relative">
+                <div class="pr-8">
+                    <span class="text-xs font-bold text-gray-400 uppercase">Question ${index + 1}</span>
+                    <p class="text-gray-900 font-medium mt-1 text-lg">${q.question_text}</p>
+                </div>
+                ${answerDisplay}
+                <div class="mt-2 text-right text-xs text-gray-400">Points: ${q.earned_points} / ${q.points}</div>
+            </div>`);
+    });
+}
+
+// File Submission
+function openSubmitFileModal(type, id, title) {
+    const modal = document.getElementById('submitFileModal');
+    document.getElementById('submitModalTitle').textContent = "Submit " + (type === 'assignment' ? "Assignment: " : "Activity: ") + title;
+    const form = document.getElementById('submitFileForm');
+    const assignInput = document.getElementById('submitAssignId');
+    const activityInput = document.getElementById('submitActivityId');
+    
+    // Reset inputs
+    assignInput.disabled = true; activityInput.disabled = true; 
+    assignInput.value = ""; activityInput.value = "";
+    
+    if (type === 'assignment') {
+        form.dataset.url = "{{ url_for('auth.submit_assignment', course_id=course.course_id) }}";
+        assignInput.disabled = false; assignInput.value = id;
+    } else {
+        form.dataset.url = "{{ url_for('auth.submit_activity', course_id=course.course_id) }}";
+        activityInput.disabled = false; activityInput.value = id;
+    }
+    modal.classList.remove('hidden');
+}
+function closeSubmitFileModal() {
+    document.getElementById('submitFileModal').classList.add('hidden');
+    document.getElementById('fileNameDisplay').textContent = "PDF, DOCX, ZIP";
+    document.getElementById('submitFileForm').reset();
+}
+function handleFileSubmit(event) {
+    event.preventDefault();
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = "Uploading..."; 
+    submitBtn.disabled = true;
+    
+    fetch(form.dataset.url, { method: 'POST', body: new FormData(form) })
+    .then(response => { 
+        closeSubmitFileModal(); 
+        openSuccessModal('Submitted!', 'Your work has been uploaded successfully.'); 
+    })
+    .catch(error => { 
+        alert("An error occurred during upload."); 
+        submitBtn.textContent = originalText; 
+        submitBtn.disabled = false; 
+    });
+}
+
+// Feedback Modal
+function openFeedbackModal(title, grade, feedback) {
+    document.getElementById('fbModalTitle').textContent = title;
+    document.getElementById('fbModalGrade').textContent = grade;
+    document.getElementById('fbModalText').textContent = feedback || "No written feedback.";
+    document.getElementById('feedbackModal').classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+function closeFeedbackModal() {
+    document.getElementById('feedbackModal').classList.add('hidden');
+    document.body.classList.remove('modal-open');
+}
+
+// View Material Modal
+function openViewMaterialModal(path, type) {
+    const modal = document.getElementById('viewMaterialModal');
+    const contentDiv = document.getElementById('viewModalContent');
+    document.getElementById('viewModalDownload').href = path;
+    
+    let html = '';
+    if (type === 'pdf') {
+        html = `<iframe src="${path}" class="w-full h-full border-none"></iframe>`;
+    } else if (type === 'video') {
+        html = `<video controls class="max-w-full max-h-full rounded shadow-lg"><source src="${path}"></video>`;
+    } else if (type === 'image') {
+        html = `<img src="${path}" class="max-w-full max-h-full object-contain">`;
+    } else {
+        html = `<div class="text-center text-gray-500"><p>Preview not available for this file type.</p></div>`;
+    }
+    
+    contentDiv.innerHTML = html;
+    modal.classList.remove('hidden');
+}
+function closeViewMaterialModal() {
+    document.getElementById('viewMaterialModal').classList.add('hidden');
+    document.getElementById('viewModalContent').innerHTML = '';
+}
+
+// Full Screen Card Toggle
+function toggleCardFullScreen(btn) {
+    const card = btn.closest('.material-item');
+    const icon = btn.querySelector('i');
+    const dropdown = card.querySelector('.material-dropdown-content');
+    const img = card.querySelector('.relative.h-56');
+    
+    if (!card.classList.contains('fixed')) {
+        // Enter Full Screen
+        card.classList.add('fixed', 'inset-0', 'z-50', 'w-full', 'h-full', 'overflow-y-auto', 'rounded-none');
+        card.classList.remove('rounded-lg', 'min-h-[420px]', 'self-start', 'shadow-sm', 'border');
+        icon.classList.replace('ri-fullscreen-line', 'ri-fullscreen-exit-line');
+        dropdown.classList.remove('hidden');
+        if(img) { img.classList.remove('h-56', 'sm:h-64'); img.classList.add('h-96'); }
+        document.body.style.overflow = 'hidden';
+    } else {
+        // Exit Full Screen
+        card.classList.remove('fixed', 'inset-0', 'z-50', 'w-full', 'h-full', 'overflow-y-auto', 'rounded-none');
+        card.classList.add('rounded-lg', 'min-h-[420px]', 'self-start', 'shadow-sm', 'border');
+        icon.classList.replace('ri-fullscreen-exit-line', 'ri-fullscreen-line');
+        dropdown.classList.add('hidden');
+        if(img) { img.classList.add('h-56', 'sm:h-64'); img.classList.remove('h-96'); }
+        document.body.style.overflow = '';
+    }
+}
+</script>
+</body>
+</html>

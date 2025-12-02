@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manage Students | {{ course.course_title }}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+
+<div class="max-w-7xl mx-auto space-y-8">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Manage Students - {{ course.course_title }}</h1>
+            <p class="text-gray-600 mt-2">View and manage all students in this course</p>
+        </div>
+        <div>
+            <a href="{{ url_for('auth.create_course') }}" 
+               class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                &larr; Back to Courses
+            </a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="fixed top-4 right-4 z-50 space-y-2">
+          {% for category, message in messages %}
+            <div class="px-4 py-3 rounded-lg shadow-md text-sm font-medium
+                {% if category == 'success' %}bg-green-100 text-green-800{% endif %}
+                {% if category == 'danger' %}bg-red-100 text-red-800{% endif %}
+                {% if category == 'warning' %}bg-yellow-100 text-yellow-800{% endif %}
+                {% if category == 'info' %}bg-blue-100 text-blue-800{% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    <script>
+      setTimeout(() => {
+        document.querySelectorAll('.fixed.top-4.right-4 > div').forEach(msg => msg.remove());
+      }, 3000);
+    </script>
+
+    <!-- Filters -->
+    <div class="flex flex-wrap items-center gap-4 mb-6">
+        <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="ri-search-line text-gray-400"></i>
+            </div>
+            <input id="searchInput" type="text" placeholder="Search students..." 
+                   value="{{ search_query }}"
+                   class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent w-64">
+        </div>
+
+        <select id="programFilter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            <option value="all">All Programs</option>
+            {% for prog in programs %}
+                <option value="{{ prog.program_id }}" {% if selected_program_id==prog.program_id|string %}selected{% endif %}>
+                    {{ prog.program_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select id="sectionFilter" class="px-3 py-2 border border-gray-300 rounded-lg text-sm">
+            <option value="all">All Sections</option>
+            {% for sec in sections %}
+                <option value="{{ sec.section_id }}" {% if selected_section_id==sec.section_id|string %}selected{% endif %}>
+                    {{ sec.section_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button onclick="applyFilters()"
+                class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+            Apply
+        </button>
+    </div>
+
+    <!-- Students Table -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow">
+        <table class="w-full table-auto">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for student in all_students %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 text-sm text-gray-900">{{ student.full_name }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ student.program_name }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500">{{ student.section_name }}</td>
+                    <td class="px-6 py-4 text-center text-sm">
+                        {% if student.user_id in enrolled_students_ids %}
+                            <span class="text-green-600 font-semibold">Enrolled</span>
+                        {% else %}
+                            <span class="text-gray-500">Not Enrolled</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <form method="POST" action="{{ url_for('auth.manage_course_students', course_id=course.course_id) }}">
+                            <input type="hidden" name="user_id" value="{{ student.user_id }}">
+                            <input type="hidden" name="action" value="{{ 'remove' if student.user_id in enrolled_students_ids else 'add' }}">
+                            <button type="submit" class="px-3 py-1 rounded text-white
+                                {% if student.user_id in enrolled_students_ids %}bg-red-500 hover:bg-red-600{% else %}bg-green-500 hover:bg-green-600{% endif %}">
+                                {% if student.user_id in enrolled_students_ids %}Remove{% else %}Add{% endif %}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex justify-between items-center mt-4">
+        <div>Page {{ page }} of {{ total_pages }}</div>
+        <div class="space-x-2">
+            {% for p in range(1, total_pages+1) %}
+                <a href="{{ url_for('auth.manage_students_page', course_id=course.course_id, page=p, program_id=selected_program_id, section_id=selected_section_id, search=search_query) }}"
+                   class="px-3 py-1 rounded {% if p==page %}bg-blue-600 text-white{% else %}bg-gray-100 text-gray-700{% endif %} hover:bg-blue-500 hover:text-white">
+                    {{ p }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+function applyFilters() {
+    const search = document.getElementById('searchInput').value;
+    const program = document.getElementById('programFilter').value;
+    const section = document.getElementById('sectionFilter').value;
+
+    let url = `{{ url_for('auth.manage_students_page', course_id=course.course_id) }}?`;
+    if(search) url += `search=${search}&`;
+    if(program) url += `program_id=${program}&`;
+    if(section) url += `section_id=${section}&`;
+
+    window.location.href = url;
+}
+</script>
+
+</body>
+</html>

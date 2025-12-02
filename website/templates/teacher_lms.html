@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PGPC LMS | Courses</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        secondary: '#8b5cf6'
+      },
+      borderRadius: {
+        'button': '8px'
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+<style>
+  .modal-open { overflow: hidden; }
+  #mobileNav, #filterCard, #createCourseModal, #successModal { transition: all .2s ease; }
+  .scroll-container { -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .scroll-container::-webkit-scrollbar { display: none; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+
+  @keyframes scaleFade {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .animate-scaleFade { animation: scaleFade 0.25s ease-out forwards; }
+
+  @keyframes bounceCheck {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
+  }
+  .animate-bounceCheck { animation: bounceCheck 0.6s ease; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+        <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+        <div class="text-base sm:text-lg font-semibold text-gray-800 truncate">COURSES</div>
+      </div>
+
+      <div class="hidden md:flex items-center space-x-3">
+    
+        <div class="relative flex items-center space-x-2">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" 
+                 onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+          <div class="text-xs sm:text-sm hidden lg:block">
+            <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+            <div class="text-gray-500">Faculty</div>
+          </div>
+          <button id="profile-dropdown-button" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-700">
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-gray-600 text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover"
+               onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div class="text-sm">
+          <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">Faculty</div>
+        </div>
+      </div>
+      <button id="mobileProfileBtn" class="w-6 h-6 flex items-center justify-center text-gray-400">
+        <i class="ri-arrow-down-s-line"></i>
+      </button>
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/teachers-dashboard" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-dashboard-line mr-2"></i>Dashboard</a>
+      <a href="/edit_profile" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-user-line mr-2"></i>Edit Profile</a>
+      <a href="/settings" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-settings-3-line mr-2"></i>Settings</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700 flex items-center"><i class="ri-logout-box-line mr-2"></i>Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-white border-b border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/teachers-dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class="text-gray-900 font-medium">Manage Courses</span>
+  </nav>
+</div>
+
+<!-- Hero -->
+<div class="bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 py-8 sm:py-12">
+  <div class="max-w-4xl mx-auto text-center">
+    <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2 sm:mb-4">Welcome to Your Academic Journey</h1>
+    <p class="text-sm sm:text-base lg:text-lg text-gray-600">Select a course to access materials, assignments, and track progress</p>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="px-4 sm:px-6 py-6 sm:py-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+      <h2 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">My Courses</h2>
+      <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <div class="relative flex-1 sm:flex-initial">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <i class="ri-search-line text-gray-400 text-sm"></i>
+          </div>
+          <input type="text" id="searchInput" class="w-full pl-9 sm:pl-10 pr-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm" placeholder="Search courses...">
+        </div>
+
+        <div class="relative">
+          <button id="filterButton" class="px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-button hover:bg-gray-200 transition-colors text-xs sm:text-sm whitespace-nowrap flex items-center">
+            Filter <i class="ri-arrow-down-s-line ml-1"></i>
+          </button>
+          <div id="filterCard" class="hidden absolute right-0 mt-2 w-64 sm:w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 sm:p-4 z-20">
+            <form method="POST" class="space-y-3 sm:space-y-4 text-xs sm:text-sm" id="filterForm">
+              <div>
+                <label class="block font-medium text-gray-700">Academic Year</label>
+                <select name="academic_year_id" class="mt-1 w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                  <option value="all">All Years</option>
+                  {% for year in academic_years %}
+                  <option value="{{ year.academic_year_id }}" {% if selected_academic_year_id == year.academic_year_id|string %}selected{% endif %}>
+                    {{ year.start_year }}-{{ year.end_year }} ({{ year.semester }} Semester)
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="flex justify-end">
+                <button type="submit" class="px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 text-xs sm:text-sm">Apply</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Course Grid -->
+    <div id="courseGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+      {% if courses %}
+        {% for course in courses %}
+        <div class="course-card bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+          <div class="h-40 sm:h-48 bg-gradient-to-br from-blue-100 to-blue-300 relative overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794" alt="Books" class="w-full h-full object-cover opacity-50">
+            <div class="absolute top-3 left-3">
+              <span class="px-3 py-1 bg-white/90 text-blue-700 text-xs font-medium rounded-full">{{ course.status|default('Active') }}</span>
+            </div>
+            <div class="absolute bottom-3 left-3 right-3 text-white">
+              <h3 class="text-base sm:text-lg font-semibold mb-1 truncate">{{ course.course_code }} - {{ course.course_title }}</h3>
+              <p class="text-xs opacity-90 line-clamp-2">{{ course.course_description|default('No description') }}</p>
+            </div>
+          </div>
+          <div class="p-4 sm:p-6">
+            <div class="text-xs sm:text-sm text-gray-600 mb-4">
+              <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <span>{{ course.academic_year }}</span>
+                <span>•</span>
+                <span>{{ course.instructor_name|default('TBA') }}</span>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              {% if course.status == 'approved' %}
+                <a href="/upload_materials/{{ course.course_id }}" class="flex-1 px-4 py-2 bg-primary text-white rounded-button hover:bg-blue-600 text-center text-xs sm:text-sm">Enter Course</a>
+              {% else %}
+                <button disabled class="flex-1 px-4 py-2 bg-gray-400 text-white rounded-button text-xs sm:text-sm cursor-not-allowed opacity-70">Pending Approval</button>
+              {% endif %}
+              <button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-button hover:bg-gray-200"><i class="ri-more-line"></i></button>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="col-span-full text-center py-12 text-gray-500">No courses found.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Success Modal -->
+<div id="successModal" class="fixed inset-0 items-center justify-center z-50 bg-black/50 backdrop-blur-sm p-4 hidden">
+  <div class="bg-white rounded-3xl shadow-xl max-w-sm w-full p-8 text-center animate-scaleFade">
+    <div class="w-20 h-20 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
+      <svg class="w-12 h-12 text-green-600 animate-bounceCheck" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+    <h3 class="text-2xl font-bold text-gray-800 mb-2">Success!</h3>
+    <p class="text-gray-600 mb-6">Your course has been created successfully.</p>
+    <button id="closeSuccessModal" class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">OK</button>
+  </div>
+</div>
+
+<!-- Flash Messages (Optional - if you want toast notifications too) -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      {% if category == 'success' and 'course_created' in msg %}
+        <script>document.getElementById('successModal').classList.remove('hidden');</script>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile Menu
+  document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+    document.getElementById('mobileNav').classList.toggle('hidden');
+  });
+
+  // Search
+  const searchInput = document.getElementById('searchInput');
+  const courseCards = document.querySelectorAll('.course-card');
+  searchInput?.addEventListener('keyup', () => {
+    const term = searchInput.value.toLowerCase();
+    courseCards.forEach(card => {
+      card.style.display = card.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  });
+
+  // Filter Dropdown
+  document.getElementById('filterButton')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('filterCard').classList.toggle('hidden');
+  });
+  document.addEventListener('click', () => {
+    document.getElementById('filterCard')?.classList.add('hidden');
+  });
+
+  
+  
+
+  document.getElementById('closeModalButton')?.addEventListener('click', closeModal);
+  document.getElementById('cancelModalButton')?.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+  // Success Modal Close → Reload
+  document.getElementById('closeSuccessModal')?.addEventListener('click', () => {
+    successModal.classList.add('hidden');
+    document.body.classList.remove('modal-open');
+    location.reload();
+  });
+
+  // Profile Dropdowns (Desktop & Mobile)
+  document.getElementById('profile-dropdown-button')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('profile-dropdown-menu').classList.toggle('hidden');
+  });
+  document.getElementById('mobileProfileBtn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.querySelector('#mobileNav .border-t')?.nextElementSibling.classList.toggle('hidden');
+  });
+});
+</script>
+</body>
+</html>

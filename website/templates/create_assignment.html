@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ course.course_code }} | Course Management</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#3b82f6", secondary: "#8b5cf6" },
+            borderRadius: { none: "0px", sm: "4px", DEFAULT: "8px", md: "12px", lg: "16px", xl: "20px", "2xl": "24px", "3xl": "32px", full: "9999px", button: "8px" },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" />
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      .modal-open { overflow: hidden; }
+      .scroll-container { -webkit-overflow-scrolling: touch; }
+      .scroll-container::-webkit-scrollbar { display: none; }
+      .scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* Success Modal Animations */
+      @keyframes scaleFade {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .animate-scaleFade { animation: scaleFade 0.35s ease-out; }
+
+      @keyframes bounceCheck {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-14px); }
+        60% { transform: translateY(-7px); }
+      }
+      .animate-bounceCheck { animation: bounceCheck 0.7s ease; }
+    </style>
+  </head>
+<body class="bg-gray-50">
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+        <div class="text-xl sm:text-2xl font-medium text-primary">LMS</div>
+        <h1 class="text-base sm:text-lg lg:text-2xl font-semibold text-gray-900 truncate">{{ course.course_title }}</h1>
+      </div>
+
+      <!-- Desktop Actions -->
+      <div class="hidden md:flex items-center space-x-2 sm:space-x-4">
+
+        <!-- Profile - WITH PROPER POSITIONING -->
+        <div class="relative flex items-center space-x-2">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+          <div class="text-xs sm:text-sm hidden lg:block">
+            <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+            <div class="text-gray-500">Faculty</div>
+          </div>
+          <button id="profile-dropdown-button" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-700">
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+
+          <!-- Dropdown Menu - Now correctly positioned under the arrow -->
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-gray-600 text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div class="text-sm">
+          <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">Faculty</div>
+        </div>
+      </div>
+      <button id="mobileProfileBtn" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-700">
+        <i class="ri-arrow-down-s-line"></i>
+      </button>
+
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/teachers-dashboard" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-dashboard-line mr-2"></i>Dashboard</a>
+      <a href="/edit_profile" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-user-line mr-2"></i>Edit Profile</a>
+      <a href="/settings" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-settings-3-line mr-2"></i>Settings</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700 flex items-center"><i class="ri-logout-box-line mr-2"></i>Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-gray-50 border-t border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/teachers-dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <a href="/teacher_lms" class="hover:text-primary">Manage Courses</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class="text-gray-900 font-medium truncate">{{ course.course_code }} — {{ course.course_title }}</span>
+  </nav>
+</div>
+
+<!-- Course Overview -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-4 sm:py-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{{ course.course_code }} — Create Assignments</h1>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <button class="px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-button hover:bg-gray-200 transition-colors text-xs sm:text-sm whitespace-nowrap">
+          Course Settings
+        </button>
+        <button class="px-3 sm:px-4 py-2 bg-primary text-white rounded-button hover:bg-blue-600 transition-colors text-xs sm:text-sm whitespace-nowrap">
+          Student Management
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="bg-white border-b border-gray-200 overflow-x-auto">
+  <div class="px-4 sm:px-6">
+    <nav class="flex space-x-4 sm:space-x-8 whitespace-nowrap">
+      <a href="{{ url_for('auth.upload_materials', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Materials
+      </a>
+      <a href="{{ url_for('auth.create_assignment', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-primary text-primary font-medium text-xs sm:text-sm tab-button active">
+        Assignments
+      </a>
+      <a href="{{ url_for('auth.create_quiz', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Quizzes
+      </a>
+      <a href="{{ url_for('auth.learning_activities', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Activities
+      </a>
+      <a href="{{ url_for('auth.create_announcement', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Announcements
+      </a>
+      <a href="{{ url_for('auth.student_records', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Grades
+      </a>
+    </nav>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <button
+      class="px-3 sm:px-4 py-2 bg-blue-100 text-blue-700 rounded-button hover:bg-blue-200 transition-colors text-xs sm:text-sm whitespace-nowrap"
+      onclick="openModal('createAssignmentModal')"
+    >
+      Create Assignment
+    </button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="px-4 sm:px-6 py-4 sm:py-6">
+  <div class="flex flex-col lg:flex-row gap-4 sm:gap-6">
+    <!-- Assignments List -->
+    <div class="flex-1 space-y-3 sm:space-y-4">
+      {% if assignments %}
+        {% for assignment in assignments %}
+          <div class="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3">
+            <div class="flex-1 min-w-0">
+              <h3 class="font-medium text-gray-900 mb-1 text-sm sm:text-base truncate">{{ assignment.title }}</h3>
+              <p class="text-xs sm:text-sm text-gray-600 mb-2 line-clamp-2">{{ assignment.description }}</p>
+              <div class="flex flex-wrap items-center gap-x-2 text-xs text-gray-500">
+                <span>Due: {{ assignment.due_date }}</span>
+                <span>•</span>
+                <span>{{ assignment.points }} pts</span>
+                <span>•</span>
+                <span>{{ assignment.submission_count }}/{{ assignment.total_students }} submitted</span>
+              </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-1 sm:gap-2">
+              {% if assignment.published %}
+                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Published</span>
+              {% else %}
+                <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded">Draft</span>
+              {% endif %}
+
+              <button onclick="openAssignmentView('{{ assignment.assignment_id }}', '{{ assignment.title }}')"
+                      class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-blue-600 transition" title="View Submissions">
+                <i class="ri-eye-line text-base sm:text-lg"></i>
+              </button>
+
+              <button onclick="editAssignment('{{ assignment.assignment_id }}', '{{ assignment.title }}', '{{ assignment.description }}', '{{ assignment.due_date }}')"
+                      class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary transition" title="Edit">
+                <i class="ri-edit-line text-base sm:text-lg"></i>
+              </button>
+
+              <button onclick="deleteAssignment('{{ assignment.assignment_id }}')"
+                      class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600 transition" title="Delete">
+                <i class="ri-delete-bin-line text-base sm:text-lg"></i>
+              </button>
+
+              <button data-assignment-id="{{ assignment.assignment_id }}"
+                      data-publish="{{ 'true' if not assignment.published else 'false' }}"
+                      onclick="publishAssignmentButton(this)"
+                      {% if assignment.published %}disabled{% endif %}
+                      class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed" title="Publish">
+                <i class="ri-upload-line text-base sm:text-lg"></i>
+              </button>
+            </div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-6 text-center text-gray-500 text-sm">
+          No assignments posted yet.
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div class="w-full lg:w-80 flex-shrink-0 space-y-4 sm:space-y-6">
+      <!-- Analytics -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Course Analytics</h3>
+        <div class="space-y-3 sm:space-y-4 text-xs sm:text-sm">
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-gray-600">Student Engagement</span>
+              <span class="font-medium text-green-600">87%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-green-500 h-2 rounded-full" style="width: 87%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-gray-600">Assignment Completion</span>
+              <span class="font-medium text-blue-600">92%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-blue-500 h-2 rounded-full" style="width: 92%"></div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-gray-600">Quiz Performance</span>
+              <span class="font-medium text-purple-600">85%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2">
+              <div class="bg-purple-500 h-2 rounded-full" style="width: 85%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Recent Activity</h3>
+        <div class="space-y-3 text-xs sm:text-sm">
+          <div class="flex items-start space-x-2">
+            <div class="w-2 h-2 bg-green-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-gray-900 truncate">Emma Thompson submitted Project 3</p>
+              <p class="text-gray-500">2 minutes ago</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-2">
+            <div class="w-2 h-2 bg-blue-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-gray-900 truncate">New discussion post in Modern Frameworks</p>
+              <p class="text-gray-500">15 minutes ago</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-2">
+            <div class="w-2 h-2 bg-orange-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-gray-900 truncate">Quiz 4 deadline reminder sent</p>
+              <p class="text-gray-500">1 hour ago</p>
+            </div>
+          </div>
+          <div class="flex items-start space-x-2">
+            <div class="w-2 h-2 bg-purple-500 rounded-full mt-1.5 flex-shrink-0"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-gray-900 truncate">Michael Chen completed Quiz 3</p>
+              <p class="text-gray-500">2 hours ago</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Quick Actions</h3>
+        <div class="space-y-2 text-xs sm:text-sm">
+          <button class="w-full px-3 sm:px-4 py-2 text-left text-gray-700 hover:bg-gray-50 rounded transition-colors flex items-center">
+            Upload new material
+          </button>
+          <button class="w-full px-3 sm:px-4 py-2 text-left text-gray-700 hover:bg-gray-50 rounded transition-colors flex items-center">
+            Send class email
+          </button>
+          <button class="w-full px-3 sm:px-4 py-2 text-left text-gray-700 hover:bg-gray-50 rounded transition-colors flex items-center">
+            Schedule office hours
+          </button>
+          <button class="w-full px-3 sm:px-4 py-2 text-left text-gray-700 hover:bg-gray-50 rounded transition-colors flex items-center">
+            Export attendance
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE ASSIGNMENT MODAL -->
+<div id="createAssignmentModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 modal-open">
+  <div class="bg-white rounded-xl w-full max-w-lg mx-auto p-5 sm:p-6 relative shadow-lg max-h-screen overflow-y-auto">
+    <button onclick="closeModal('createAssignmentModal')" class="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-xl sm:text-2xl">
+      <i class="ri-close-line"></i>
+    </button>
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 text-center">Post New Assignment</h2>
+    <form id="assignmentForm" class="space-y-4">
+      <div>
+        <label for="assignmentTitle" class="block text-sm font-medium text-gray-700 mb-1">Title:</label>
+        <input type="text" id="assignmentTitle" required
+               class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm" placeholder="Enter assignment title" />
+      </div>
+      <div>
+        <label for="assignmentDescription" class="block text-sm font-medium text-gray-700 mb-1">Description:</label>
+        <textarea id="assignmentDescription" rows="3"
+                  class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm resize-none" placeholder="Enter assignment description"></textarea>
+      </div>
+      <div>
+        <label for="assignmentDueDate" class="block text-sm font-medium text-gray-700 mb-1">Due Date:</label>
+        <input type="date" id="assignmentDueDate" required
+               class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm"/>
+      </div>
+      <div>
+        <label for="assignmentPoints" class="block text-sm font-medium text-gray-700 mb-1">Points:</label>
+        <input type="number" id="assignmentPoints" min="0" value="100"
+               class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary text-sm" placeholder="Enter maximum points" />
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button type="submit" class="flex-1 flex items-center justify-center px-4 py-2 bg-primary text-white rounded hover:bg-blue-600 transition-colors text-sm">
+          Post Assignment
+        </button>
+        <button type="button" onclick="closeModal('createAssignmentModal')"
+                class="flex-1 flex items-center justify-center border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50 transition text-sm">
+          Cancel
+        </button>
+      </div>
+    </form>
+    <p id="assignmentFormMessage" class="mt-2 text-sm text-center"></p>
+  </div>
+</div>
+
+<!-- VIEW SUBMISSIONS MODAL -->
+<div id="viewModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 modal-open">
+  <div class="bg-white rounded-xl w-full max-w-3xl mx-auto relative shadow-lg max-h-screen overflow-y-auto">
+    <button onclick="closeViewModal()" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">
+      <i class="ri-close-line"></i>
+    </button>
+    <div class="px-5 sm:px-8 py-5 sm:py-6 border-b text-center">
+      <h3 id="viewTitle" class="text-lg sm:text-xl font-semibold text-gray-900">Assignment Submissions</h3>
+    </div>
+    <div id="submissionListContainer" class="px-5 sm:px-8 py-5 sm:py-6 space-y-3 text-xs sm:text-sm">
+      {% for assignment in assignments %}
+        <ul id="submissions-{{ assignment.assignment_id }}" class="submission-list hidden space-y-3">
+          {% set subs = submissions[assignment.assignment_id] %}
+          {% if subs %}
+            {% for s in subs %}
+              <li class="flex flex-col sm:flex-row sm:justify-between sm:items-center border-b border-gray-200 pb-3 gap-2">
+                <div class="flex-1">
+                  <strong class="text-gray-800">{{ s.student_name }}</strong><br>
+                  {% if s.submission_date %}
+                    <small class="text-gray-400">{{ s.submission_date }}</small>
+                  {% endif %}
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  {% if s.file_path %}
+                    {% set clean_path = s.file_path
+                        | replace('\\', '/')
+                        | replace('static/uploads/', '')
+                        | replace('/static/uploads/', '')
+                        | replace('uploads/', '')
+                        | replace('/uploads/', '')
+                    %}
+                    <a href="{{ url_for('static', filename='uploads/' ~ clean_path) }}"
+                      target="_blank"
+                      class="bg-blue-600 text-white px-3 py-1 rounded text-xs sm:text-sm hover:bg-blue-700 whitespace-nowrap">
+                      View File
+                    </a>
+                  {% else %}
+                    <span class="text-gray-400 text-xs sm:text-sm">No file</span>
+                  {% endif %}
+                  <input type="number" min="0" max="100" placeholder="Grade"
+                         value="{{ s.grade if s.grade is not none else '' }}"
+                         data-submission="{{ s.submission_id }}"
+                         class="border border-gray-300 rounded px-2 sm:px-3 py-1 w-full sm:w-20 text-xs sm:text-sm"
+                         {% if s.grade is not none %}disabled{% endif %}>
+                  <input type="text" placeholder="Feedback"
+                         value="{{ s.feedback if s.feedback else '' }}"
+                         data-submission="{{ s.submission_id }}"
+                         class="border border-gray-300 rounded px-2 sm:px-3 py-1 w-full sm:w-40 text-xs sm:text-sm"
+                         {% if s.grade is not none %}disabled{% endif %}>
+                  {% if s.grade is not none %}
+                    <button class="bg-green-500 text-white text-xs sm:text-sm px-3 py-1 rounded opacity-60 cursor-not-allowed w-full sm:w-auto" disabled>Saved</button>
+                  {% else %}
+                    <button onclick="saveGradeFeedback(this)" class="bg-green-500 text-white text-xs sm:text-sm px-3 py-1 rounded hover:bg-green-600 w-full sm:w-auto">Save</button>
+                  {% endif %}
+                </div>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="text-center text-gray-400 text-xs sm:text-sm py-2">No submissions yet.</li>
+          {% endif %}
+        </ul>
+      {% endfor %}
+    </div>
+    <div class="px-5 sm:px-8 py-4 border-t">
+      <button class="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-2 px-4 rounded text-sm" onclick="closeViewModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT ASSIGNMENT MODAL -->
+<div id="editAssignmentModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 modal-open">
+  <div class="bg-white rounded-xl w-full max-w-lg mx-auto p-5 sm:p-6 relative shadow-lg max-h-screen overflow-y-auto">
+    <button onclick="closeModal('editAssignmentModal')" class="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-xl sm:text-2xl">
+      <i class="ri-close-line"></i>
+    </button>
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-4 text-center">Edit Assignment</h2>
+    <form id="editAssignmentForm" class="space-y-4">
+      <input type="hidden" id="editAssignmentId">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Title:</label>
+        <input type="text" id="editAssignmentTitle" required class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded text-sm">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Description:</label>
+        <textarea id="editAssignmentDescription" rows="3" class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded text-sm resize-none"></textarea>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Due Date:</label>
+        <input type="date" id="editAssignmentDueDate" required class="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded text-sm">
+      </div>
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button type="submit" class="flex-1 bg-primary text-white py-2 rounded hover:bg-blue-600 transition text-sm">Save Changes</button>
+        <button type="button" onclick="closeModal('editAssignmentModal')" class="flex-1 border border-gray-300 text-gray-700 py-2 rounded hover:bg-gray-50 transition text-sm">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- DELETE MODAL -->
+<div id="deleteAssignmentModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 modal-open">
+  <div class="bg-white rounded-xl w-full max-w-sm mx-auto p-5 sm:p-6 relative shadow-lg text-center">
+    <button onclick="closeModal('deleteAssignmentModal')" class="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-xl">
+      <i class="ri-close-line"></i>
+    </button>
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Delete Assignment</h2>
+    <p class="text-sm text-gray-600 mb-4">Are you sure you want to delete this assignment?</p>
+    <input type="hidden" id="deleteAssignmentId">
+    <div class="flex flex-col sm:flex-row gap-2">
+      <button class="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 text-sm" onclick="confirmDeleteAssignment()">Yes, Delete</button>
+      <button class="flex-1 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 text-sm" onclick="closeModal('deleteAssignmentModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- PUBLISH MODAL -->
+<div id="publishAssignmentModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 modal-open">
+  <div class="bg-white rounded-xl w-full max-w-sm mx-auto p-5 sm:p-6 relative shadow-lg text-center">
+    <button onclick="closeModal('publishAssignmentModal')" class="absolute top-3 right-3 text-gray-500 hover:text-red-600 text-xl">
+      <i class="ri-close-line"></i>
+    </button>
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3">Publish Assignment</h2>
+    <p id="publishAssignmentMessage" class="text-sm text-gray-600 mb-4">Once published, this assignment will be visible to students.</p>
+    <input type="hidden" id="publishAssignmentId">
+    <input type="hidden" id="publishAssignmentStatus">
+    <div class="flex flex-col sm:flex-row gap-2">
+      <button class="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm" onclick="confirmPublishAssignment()">Confirm</button>
+      <button class="flex-1 bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 text-sm" onclick="closeModal('publishAssignmentModal')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ==================== SUCCESS MODAL ==================== -->
+<div id="successModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-10 text-center animate-scaleFade">
+    <div class="w-24 h-24 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+      <svg class="w-14 h-14 text-green-600 animate-bounceCheck" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+      </svg>
+    </div>
+    <h3 class="text-3xl font-bold text-gray-800 mb-3">Success!</h3>
+    <p class="text-gray-600 text-lg mb-8">Your assignment has been processed successfully.</p>
+    <button onclick="location.reload()" class="px-10 py-4 bg-green-600 text-white text-lg rounded-xl hover:bg-green-700 transition font-medium">
+      Continue
+    </button>
+  </div>
+</div>
+
+<!-- ==================== AUTO-SHOW SUCCESS MODAL ON FLASH ==================== -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% if category == "success" %}
+        <script>
+          document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('successModal').classList.remove('hidden');
+            document.getElementById('successModal').classList.add('flex');
+            document.body.classList.add('modal-open');
+          });
+        </script>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const successModal = document.getElementById('successModal');
+
+  // Show success modal + reload after short delay
+  const showSuccess = () => {
+    successModal.classList.remove('hidden');
+    successModal.classList.add('flex');
+    document.body.classList.add('modal-open');
+    setTimeout(() => location.reload(), 2200);
+  };
+
+  // Modal helpers
+  window.openModal = (id) => {
+    const modal = document.getElementById(id);
+    if(modal) {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.classList.add('modal-open');
+    }
+  };
+  window.closeModal = (id) => {
+    const modal = document.getElementById(id);
+    if(modal) {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.body.classList.remove('modal-open');
+    }
+  };
+
+  // Mobile menu toggle
+  document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+    document.getElementById('mobileNav')?.classList.toggle('hidden');
+  });
+
+  // ================= CREATE ASSIGNMENT =================
+  document.getElementById('assignmentForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const title = document.getElementById('assignmentTitle').value.trim();
+    const description = document.getElementById('assignmentDescription').value.trim();
+    const due_date = document.getElementById('assignmentDueDate').value;
+    const points = document.getElementById('assignmentPoints').value || 100;
+    const msg = document.getElementById('assignmentFormMessage');
+
+    if(!title || !due_date){
+      msg.textContent = 'Title and due date are required.';
+      msg.className = 'mt-2 text-sm text-center text-red-600';
+      return;
+    }
+
+    try {
+      const res = await fetch("{{ url_for('auth.create_assignment', course_id=course.course_id) }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'create', title, description, due_date, points })
+      });
+      const data = await res.json();
+      if(data.status === 'success'){
+        closeModal('createAssignmentModal');
+        showSuccess();
+      } else {
+        msg.textContent = data.message || 'Failed to create assignment.';
+        msg.className = 'mt-2 text-sm text-center text-red-600';
+      }
+    } catch(err){
+      msg.textContent = 'Network error. Please try again.';
+      msg.className = 'mt-2 text-sm text-center text-red-600';
+    }
+  });
+
+  // ================= VIEW SUBMISSIONS =================
+  window.openAssignmentView = (id, title) => {
+    document.querySelectorAll('.submission-list').forEach(el => el.classList.add('hidden'));
+    const list = document.getElementById('submissions-' + id);
+    if(list) list.classList.remove('hidden');
+    document.getElementById('viewTitle').textContent = 'Submissions: ' + title;
+    openModal('viewModal');
+  };
+  window.closeViewModal = () => closeModal('viewModal');
+
+  // ================= GRADE & FEEDBACK =================
+  window.saveGradeFeedback = async (btn) => {
+    const row = btn.closest('div');
+    const gradeInp = row.querySelector('input[type="number"]');
+    const feedbackInp = row.querySelector('input[type="text"]');
+    const submissionId = gradeInp.dataset.submission;
+    const grade = gradeInp.value.trim();
+    const feedback = feedbackInp.value.trim();
+
+    if(!grade || grade < 0){
+      alert('Please enter a valid grade.');
+      return;
+    }
+
+    try {
+      const res = await fetch("{{ url_for('auth.create_assignment', course_id=course.course_id) }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'grade', submission_id: submissionId, grade, feedback })
+      });
+      const data = await res.json();
+      if(data.status === 'success'){
+        gradeInp.disabled = true;
+        feedbackInp.disabled = true;
+        btn.disabled = true;
+        btn.textContent = 'Saved';
+        btn.classList.add('opacity-60');
+        showSuccess();
+      }
+    } catch(err){ /* silent */ }
+  };
+
+  // ================= EDIT ASSIGNMENT =================
+  window.editAssignment = (id, title, desc, due) => {
+    document.getElementById('editAssignmentId').value = id;
+    document.getElementById('editAssignmentTitle').value = title;
+    document.getElementById('editAssignmentDescription').value = desc;
+    document.getElementById('editAssignmentDueDate').value = due;
+    openModal('editAssignmentModal');
+  };
+
+  document.getElementById('editAssignmentForm')?.addEventListener('submit', async function(e){
+    e.preventDefault();
+    const id = document.getElementById('editAssignmentId').value;
+    const title = document.getElementById('editAssignmentTitle').value.trim();
+    const desc = document.getElementById('editAssignmentDescription').value.trim();
+    const due = document.getElementById('editAssignmentDueDate').value;
+    if(!title || !due) return;
+
+    try {
+      const res = await fetch("{{ url_for('auth.create_assignment', course_id=course.course_id) }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'edit', assignment_id: id, title, description: desc, due_date: due })
+      });
+      const data = await res.json();
+      if(data.status === 'success'){
+        closeModal('editAssignmentModal');
+        showSuccess();
+      }
+    } catch(err){ /* silent */ }
+  });
+
+  // ================= DELETE ASSIGNMENT =================
+  window.deleteAssignment = (id) => {
+    document.getElementById('deleteAssignmentId').value = id;
+    openModal('deleteAssignmentModal');
+  };
+  window.confirmDeleteAssignment = async () => {
+    const id = document.getElementById('deleteAssignmentId').value;
+    if(!id) return;
+    try {
+      const res = await fetch("{{ url_for('auth.create_assignment', course_id=course.course_id) }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', assignment_id: id })
+      });
+      const data = await res.json();
+      if(data.status === 'success'){
+        closeModal('deleteAssignmentModal');
+        showSuccess();
+      } else {
+        alert(data.message || 'Failed to delete assignment.');
+      }
+    } catch(err){
+      alert('Network error. Please try again.');
+    }
+  };
+
+  // ================= PUBLISH / UNPUBLISH =================
+  window.publishAssignmentButton = (btn) => {
+    const id = btn.dataset.assignmentId;
+    const willPublish = btn.dataset.publish === 'true';
+    document.getElementById('publishAssignmentId').value = id;
+    document.getElementById('publishAssignmentStatus').value = willPublish;
+    document.getElementById('publishAssignmentMessage').textContent = 
+      willPublish 
+        ? "Once published, students will see this assignment." 
+        : "Once unpublished, students will no longer see it.";
+    openModal('publishAssignmentModal');
+  };
+  window.confirmPublishAssignment = async () => {
+    const id = document.getElementById('publishAssignmentId').value;
+    const publish = document.getElementById('publishAssignmentStatus').value === 'true';
+    try {
+      const res = await fetch("{{ url_for('auth.create_assignment', course_id=course.course_id) }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'publish', assignment_id: id, publish })
+      });
+      const data = await res.json();
+      if(data.status === 'success'){
+        closeModal('publishAssignmentModal');
+        showSuccess();
+      }
+    } catch(err){ /* silent */ }
+  };
+
+  // ================= PROFILE DROPDOWN =================
+  const profileBtn = document.getElementById('profile-dropdown-button');
+  const profileMenu = document.getElementById('profile-dropdown-menu');
+  profileBtn?.addEventListener('click', e => {
+    e.stopPropagation();
+    profileMenu?.classList.toggle('hidden');
+  });
+  document.addEventListener('click', () => profileMenu?.classList.add('hidden'));
+});
+</script>
+
+
+</body>
+</html>

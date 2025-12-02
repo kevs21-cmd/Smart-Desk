@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Approval Management - LMS Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .custom-checkbox {
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            position: relative;
+        }
+        .custom-checkbox:checked {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: -2px;
+            left: 1px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#8b5cf6'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="flex h-screen">
+<aside id="sidebar" class="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300">
+<div class="p-6 border-b border-gray-200">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<i class="ri-graduation-cap-fill text-white ri-lg"></i>
+</div>
+<span class="text-xl font-medium text-gray-800">LMS</span>
+</div>
+</div>
+<nav class="flex-1 p-4 overflow-y-auto custom-scrollbar">
+<div class="space-y-6">
+<div>
+<a href="/admin_dashboard" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-dashboard-line"></i>
+</div>
+<span class="font-medium">Dashboard</span>
+</a>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">User Management</h3>
+<div class="space-y-1">
+<a href="/pending_students" data-readdy="true" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-user-add-line"></i>
+</div>
+<span>Approve Students</span>
+</a>
+<a href="/pending_teachers"class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-user-star-line"></i>
+</div>
+<span>Approve Teachers</span>
+</a>
+<a href="/student_list" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-group-line"></i>
+</div>
+<span>Student List</span>
+</a>
+<a href="/teacher_list" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-user-line"></i>
+</div>
+<span>Teacher List</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Course Management</h3>
+<div class="space-y-1">
+<a href="/pending_courses" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-mark-line"></i>
+</div>
+<span>Approve Courses</span>
+</a>
+<a href="/admin_lms" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-line"></i>
+</div>
+<span>Manage All Courses</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">System Mangement</h3>
+<div class="space-y-1">
+<a href="/admin-programs" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-line"></i>
+</div>
+<span>Manage All programs</span>
+<a href="/admin-sections" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-line"></i>
+</div>
+<span>Manage All sections</span>
+<a href="/admin-academicyear" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-line"></i>
+</div>
+<span>Manage Academic Terms</span>
+</a>
+</div>
+</div>
+<div class="space-y-1">
+</div>
+</div>
+</nav>
+</aside>
+
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Header (unchanged) -->
+        <header class="bg-white shadow-sm border-b border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-menu-line"></i>
+                            </div>
+                        </button>
+                        <nav class="text-sm">
+                            <ol class="flex items-center space-x-2 text-gray-500">
+                                <li><a href="https://readdy.ai/home/a646b416-2b12-4339-ab61-09b597244a23/d2469336-f70d-4970-b6aa-b8e792eaf6c7" data-readdy="true" class="hover:text-gray-700">Home</a></li>
+                                <li><i class="ri-arrow-right-s-line"></i></li>
+                                <li><a href="#" class="hover:text-gray-700">User Management</a></li>
+                                <li><i class="ri-arrow-right-s-line"></i></li>
+                                <li class="text-gray-900 font-medium">Approve Teachers</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto custom-scrollbar p-6">
+            <div class="max-w-7xl mx-auto space-y-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">Teacher Approval Management</h1>
+                        <p class="text-gray-600 mt-2">Review and approve pending teacher applications</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button class="px-4 py-2 bg-green-600 text-white rounded-button hover:bg-green-700 transition-colors whitespace-nowrap">
+                            <i class="ri-download-line mr-2"></i>Export Applications
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dashboard Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i class="ri-time-line text-red-600 ri-xl"></i>
+                                </div>
+                            </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ pending_count }}</h3>
+                        <p class="text-gray-600 text-sm">Pending Applications</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="ri-calendar-line text-blue-600 ri-xl"></i>
+                                </div>
+                            </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ submitted_today }}</h3>
+                        <p class="text-gray-600 text-sm">Submitted Today</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="ri-check-line text-green-600 ri-xl"></i>
+                                </div>
+                            </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ approved_this_week }}</h3>
+                        <p class="text-gray-600 text-sm">Approved This Week</p>
+                    </div>
+                    <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="ri-close-line text-orange-600 ri-xl"></i>
+                                </div>
+                            </div>
+                        <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ rejected_count }}</h3>
+                        <p class="text-gray-600 text-sm">Rejected Applications</p>
+                    </div>
+                </div>
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+
+    <!-- Bulk Actions -->
+    <div class="flex items-center justify-between mb-4">
+        <div class="flex space-x-2">
+            <button id="bulkApproveBtn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50" disabled>
+                Approve Selected
+            </button>
+            <button id="bulkRejectBtn" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50" disabled>
+                Reject Selected
+            </button>
+        </div>
+        <div>
+            <input type="checkbox" id="selectAllCheckbox" class="mr-2">
+            <label for="selectAllCheckbox" class="text-sm text-gray-700">Select All</label>
+        </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="flex flex-wrap items-center gap-4 mb-6">
+        <div class="relative">
+            <input id="searchInput" type="text" placeholder="Search by name or ID..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent w-64">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="ri-search-line text-gray-400"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teachers Table -->
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3"></th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teacher</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200" id="teachersTable">
+                {% for teacher in teachers %}
+                <tr class="application-row hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="teacherCheckbox" value="{{ teacher.user_id }}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <img src="https://readdy.ai/api/search-image?query={{ teacher.full_name | urlencode }}&width=48&height=48&seq=teacher{{ loop.index }}&orientation=squarish" 
+                                alt="Teacher" class="w-12 h-12 rounded-full object-cover">
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ teacher.full_name }}</div>
+                                <div class="text-sm text-gray-500">{{ teacher.email }}</div>
+                                <div class="text-xs text-gray-400">ID: {{ teacher.user_id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ teacher.date_created.strftime('%b %d, %Y') }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-medium rounded-full {% if teacher.approved %}bg-green-100 text-green-800{% elif teacher.rejected %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                            {% if teacher.approved %}Approved{% elif teacher.rejected %}Rejected{% else %}Pending Review{% endif %}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex items-center space-x-2">
+                            {% if not teacher.approved %}
+                            <button class="singleActionBtn px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                                data-action="approve"
+                                data-teacher-id="{{ teacher.user_id }}"
+                                data-teacher-name="{{ teacher.full_name }}">
+                                Approve
+                            </button>
+                            {% endif %}
+                            {% if not teacher.rejected %}
+                            <button class="singleActionBtn px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                                data-action="reject"
+                                data-teacher-id="{{ teacher.user_id }}"
+                                data-teacher-name="{{ teacher.full_name }}">
+                                Reject
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg w-96 p-6 relative">
+        <h3 id="modalTitle" class="text-lg font-semibold mb-2">Confirm</h3>
+        <p id="modalMessage" class="mb-4">Are you sure?</p>
+        <form id="modalForm" method="POST">
+            <div class="flex justify-end space-x-2">
+                <button type="button" id="cancelBtn" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Confirm</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- JS -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const teacherCheckboxes = document.querySelectorAll('.teacherCheckbox');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const bulkApproveBtn = document.getElementById('bulkApproveBtn');
+    const bulkRejectBtn = document.getElementById('bulkRejectBtn');
+    const modal = document.getElementById('confirmationModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalForm = document.getElementById('modalForm');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    function updateBulkButtons() {
+        const anyChecked = Array.from(teacherCheckboxes).some(c => c.checked);
+        bulkApproveBtn.disabled = !anyChecked;
+        bulkRejectBtn.disabled = !anyChecked;
+    }
+
+    teacherCheckboxes.forEach(c => c.addEventListener('change', updateBulkButtons));
+
+    selectAllCheckbox.addEventListener('change', () => {
+        const checked = selectAllCheckbox.checked;
+        teacherCheckboxes.forEach(c => c.checked = checked);
+        updateBulkButtons();
+    });
+
+    function openModal(action, teacherIds, teacherName = '') {
+        modalTitle.textContent = action === 'approve' ? 'Approve Teacher?' : 'Reject Teacher?';
+        modalMessage.textContent = teacherIds.length === 1 
+            ? `Are you sure you want to ${action} ${teacherName}?` 
+            : `Are you sure you want to ${action} ${teacherIds.length} selected teachers?`;
+        modalForm.action = action === 'approve' ? '/bulk_approve_teachers' : '/bulk_reject_teachers';
+        modalForm.dataset.ids = JSON.stringify(teacherIds);
+        modal.classList.remove('hidden');
+    }
+
+    cancelBtn.addEventListener('click', () => modal.classList.add('hidden'));
+    modal.addEventListener('click', e => { if(e.target === modal) modal.classList.add('hidden'); });
+
+    // Single actions
+    document.querySelectorAll('.singleActionBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.dataset.action;
+            const teacherId = parseInt(btn.dataset.teacherId);
+            const teacherName = btn.dataset.teacherName;
+            openModal(action, [teacherId], teacherName);
+        });
+    });
+
+    // Bulk actions
+    bulkApproveBtn.addEventListener('click', () => {
+        const ids = Array.from(teacherCheckboxes).filter(c => c.checked).map(c => parseInt(c.value));
+        openModal('approve', ids);
+    });
+
+    bulkRejectBtn.addEventListener('click', () => {
+        const ids = Array.from(teacherCheckboxes).filter(c => c.checked).map(c => parseInt(c.value));
+        openModal('reject', ids);
+    });
+
+    // Submit modal form
+modalForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const ids = JSON.parse(modalForm.dataset.ids);
+    const url = modalForm.action;
+
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({teacher_ids: ids})
+    })
+    .then(() => {
+        location.reload(); // Reload immediately without alert
+    })
+    .catch(err => {
+        console.error('Error:', err);
+        location.reload(); // Still reload if there's an error
+    });
+});
+
+
+});
+</script>
+
+
+                </div>
+            </main>
+
+            <footer class="bg-white border-t border-gray-200 p-4">
+                <div class="flex items-center justify-between text-sm text-gray-500">
+                    <div>
+                        <span>© 2024 LMS Platform. All rights reserved.</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span>Last login: Today at 9:42 AM</span>
+                        <a href="#" class="hover:text-gray-700">Help</a>
+                        <a href="#" class="hover:text-gray-700">Settings</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const tableRows = document.querySelectorAll('tbody tr');
+
+    function filterTable() {
+        const searchText = searchInput.value.toLowerCase();
+
+        tableRows.forEach(row => {
+            // Get teacher name and ID from the first column
+            const name = row.querySelector('td div.ml-4 div.text-sm.font-medium')?.textContent.toLowerCase() || '';
+            const userId = row.querySelector('td div.ml-4 div.text-xs.text-gray-400')?.textContent.toLowerCase() || '';
+
+            const matchesSearch = name.includes(searchText) || userId.includes(searchText);
+
+            row.style.display = matchesSearch ? '' : 'none';
+        });
+    }
+
+    // Filter table on input
+    searchInput.addEventListener('input', filterTable);
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('confirmationModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalForm = document.getElementById('modalForm');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    document.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.dataset.action; // "approve" or "reject"
+            const teacherId = btn.dataset.teacherId;
+            const teacherName = btn.dataset.teacherName;
+
+            // Set modal title and message dynamically
+            modalTitle.textContent = action === 'approve' ? 'Approve Teacher?' : 'Reject Teacher?';
+            modalMessage.textContent = action === 'approve'
+                ? `Are you sure you want to approve ${teacherName}?`
+                : `Are you sure you want to reject ${teacherName}?`;
+
+            // Set form action dynamically
+            modalForm.action = action === 'approve'
+                ? `/approve_teacher/${teacherId}`
+                : `/reject_teacher/${teacherId}`;
+
+            // Show modal
+            modal.classList.remove('hidden');
+        });
+    });
+
+    // Cancel button closes modal
+    cancelBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    // Close modal if clicked outside content
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+});
+</script>
+
+</body>
+</html>

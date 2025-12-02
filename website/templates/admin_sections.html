@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Section List Management - LMS Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+<style>
+:where([class^="ri-"])::before { content: "\f3c2"; }
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+</style>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { primary: '#3b82f6', secondary: '#8b5cf6' },
+      borderRadius: {
+        'none': '0px', 'sm': '4px', DEFAULT: '8px', 'md': '12px',
+        'lg': '16px', 'xl': '20px', '2xl': '24px', '3xl': '32px',
+        'full': '9999px', 'button': '8px'
+      }
+    }
+  }
+}
+</script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="flex h-screen">
+  <!-- Sidebar - Mobile: Slides in -->
+  <aside id="sidebar" class="fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col transform -translate-x-full lg:translate-x-0 lg:static lg:z-auto transition-transform duration-300">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+          <i class="ri-graduation-cap-fill text-white ri-lg"></i>
+        </div>
+        <span class="text-xl font-medium text-gray-800">LMS</span>
+      </div>
+    </div>
+    <nav class="flex-1 p-4 overflow-y-auto custom-scrollbar">
+      <div class="space-y-6">
+        <div>
+          <a href="/admin-dashboard" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+            <i class="ri-dashboard-line"></i><span class="font-medium">Dashboard</span>
+          </a>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">User Management</h3>
+          <div class="space-y-1">
+            <a href="/add_account" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"><i class="ri-user-add-line"></i><span>Add Student Account</span></a>
+            <a href="/add_teacher_account" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"><i class="ri-user-star-line"></i><span>Add Teacher Account</span></a>
+            <a href="/student_list" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"><i class="ri-group-line"></i><span>Student List</span></a>
+            <a href="/teacher_list" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"><i class="ri-user-line"></i><span>Teacher List</span></a>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Course Management</h3>
+          <div class="space-y-1">
+            <a href="/create_course" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"><i class="ri-book-mark-line"></i><span>Create Courses</span></a>
+            <a href="/admin_lms" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"><i class="ri-book-line"></i><span>Manage All Courses</span></a>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">System Management</h3>
+          <div class="space-y-1">
+            <a href="/admin-programs" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"><i class="ri-book-line"></i><span>Manage All Programs</span></a>
+            <a href="/admin-sections" class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white"><i class="ri-book-line"></i><span>Manage All Sections</span></a>
+            <a href="/admin-academicyear" class="flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"><i class="ri-book-line"></i><span>Manage Academic Terms</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- Mobile Overlay -->
+  <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+
+  <!-- Main Content -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <header class="bg-white shadow-sm border-b border-gray-200 p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-4">
+          <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-100 lg:hidden">
+            <i class="ri-menu-line text-xl"></i>
+          </button>
+          <nav class="text-sm hidden sm:block">
+            <ol class="flex items-center space-x-2 text-gray-500">
+              <li><a href="#" class="hover:text-gray-700">Home</a></li>
+              <li><i class="ri-arrow-right-s-line"></i></li>
+              <li><a href="#" class="hover:text-gray-700">System Management</a></li>
+              <li><i class="ri-arrow-right-s-line"></i></li>
+              <li class="text-gray-900 font-medium">Sections</li>
+            </ol>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
+      <div class="max-w-7xl mx-auto space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Section List Management</h1>
+            <p class="text-gray-600 mt-1 text-sm sm:text-base">View and manage all sections in the system</p>
+          </div>
+          <button onclick="openCreateSectionModal()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-button hover:bg-green-700 text-sm">
+            <i class="ri-add-line mr-2"></i> Create Section
+          </button>
+        </div>
+
+        <!-- Sections Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="p-4 border-b border-gray-200">
+            <div class="flex flex-col sm:flex-row gap-4">
+              <div class="relative flex-1 max-w-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <i class="ri-search-line text-gray-400"></i>
+                </div>
+                <input id="searchInput" type="text" placeholder="Search sections..." class="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+              </div>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[900px]">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Section Name</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year Level</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Semester</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adviser</th>
+                  <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                {% for sec in sections %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-4 text-sm font-medium text-gray-900">{{ sec[1] }}</td>
+                  <td class="px-4 py-4 text-sm text-gray-500">{{ sec[4] }}</td>
+                  <td class="px-4 py-4 text-sm text-gray-500">{{ sec[6] }}</td>
+                  <td class="px-4 py-4 text-sm text-gray-500">{{ sec[3] }}</td>
+                  <td class="px-4 py-4 text-sm text-gray-500">{{ sec[5] if sec[5] else '—' }}</td>
+                  <td class="px-4 py-4 text-sm font-medium">
+                    <div class="flex flex-wrap gap-2">
+                      <button class="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+                        onclick="openEditSectionModal(this)"
+                        data-section-id="{{ sec[0] }}"
+                        data-section-name="{{ sec[1] }}"
+                        data-year-level-id="{{ sec[2] }}"
+                        data-semester="{{ sec[3] }}">Edit</button>
+                      <button class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                        data-section-id="{{ sec[0] }}"
+                        onclick="openDeleteConfirmation(this)">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 p-4 text-center text-sm text-gray-500">
+      © 2024 LMS Platform. All rights reserved.
+    </footer>
+  </div>
+</div>
+
+<!-- Create Section Modal -->
+<div id="createSectionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative max-h-screen overflow-y-auto">
+    <button id="closeCreateSectionModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl">×</button>
+    <h2 class="text-xl font-semibold mb-5">Create New Section</h2>
+    <form id="createSectionForm" method="POST" action="{{ url_for('auth.create_section') }}" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Program</label>
+        <select name="program_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          <option value="" disabled selected>Select a program</option>
+          {% for p in programs %}
+          <option value="{{ p[0] }}">{{ p[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Section Name</label>
+        <input type="text" name="section_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Year Level</label>
+        <select name="year_level_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          <option value="" disabled selected>Select Year Level</option>
+          {% for yl in year_levels %}
+          <option value="{{ yl[0] }}">{{ yl[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+        <select name="semester" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          <option value="1st">1st Semester</option>
+          <option value="2nd">2nd Semester</option>
+          <option value="Summer">Summer</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Adviser</label>
+        <select name="adviser_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          <option value="">None</option>
+          {% for a in advisers %}
+          <option value="{{ a[0] }}">{{ a[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" id="cancelCreateSection" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Create</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Section Modal -->
+<div id="editSectionModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative max-h-screen overflow-y-auto">
+    <button id="closeEditSectionModal" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl">×</button>
+    <h2 class="text-xl font-semibold mb-5">Edit Section</h2>
+    <form id="editSectionForm" method="POST" class="space-y-4">
+      <input type="hidden" name="section_id" id="edit_section_id">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Section Name</label>
+        <input type="text" name="section_name" id="edit_section_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Year Level</label>
+        <select name="year_level" id="edit_year_level" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          <option value="" disabled>Select Year Level</option>
+          {% for yl in year_levels %}
+          <option value="{{ yl[0] }}">{{ yl[1] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+        <select name="semester" id="edit_semester" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+          <option value="1st">1st Semester</option>
+          <option value="2nd">2nd Semester</option>
+          <option value="Summer">Summer</option>
+        </select>
+      </div>
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" id="cancelEditSection" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Update</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Confirm Delete</h3>
+    <p class="text-gray-700 mb-6">Are you sure you want to delete this section? This action cannot be undone.</p>
+    <form id="deleteSectionForm" method="POST">
+      <input type="hidden" name="section_id" id="delete_section_id">
+      <div class="flex justify-end gap-3">
+        <button type="button" id="cancelDeleteBtn" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Mobile Sidebar Toggle
+document.getElementById('sidebarToggle').onclick = () => {
+  document.getElementById('sidebar').classList.toggle('-translate-x-full');
+  document.getElementById('sidebarOverlay').classList.toggle('hidden');
+};
+document.getElementById('sidebarOverlay').onclick = () => {
+  document.getElementById('sidebar').classList.add('-translate-x-full');
+  document.getElementById('sidebarOverlay').classList.add('hidden');
+};
+
+// Create Section Modal
+function openCreateSectionModal() {
+  document.getElementById('createSectionForm').reset();
+  document.getElementById('createSectionModal').classList.remove('hidden');
+}
+document.getElementById('closeCreateSectionModal').onclick = 
+document.getElementById('cancelCreateSection').onclick = () => {
+  document.getElementById('createSectionModal').classList.add('hidden');
+};
+
+// Edit Section Modal
+function openEditSectionModal(btn) {
+  document.getElementById('edit_section_id').value = btn.dataset.sectionId;
+  document.getElementById('edit_section_name').value = btn.dataset.sectionName;
+  document.getElementById('edit_year_level').value = btn.dataset.yearLevelId;
+  document.getElementById('edit_semester').value = btn.dataset.semester;
+  document.getElementById('editSectionForm').action = `/edit-section/${btn.dataset.sectionId}`;
+  document.getElementById('editSectionModal').classList.remove('hidden');
+}
+document.getElementById('closeEditSectionModal').onclick = 
+document.getElementById('cancelEditSection').onclick = () => {
+  document.getElementById('editSectionModal').classList.add('hidden');
+};
+
+// Delete Confirmation
+function openDeleteConfirmation(btn) {
+  document.getElementById('delete_section_id').value = btn.dataset.sectionId;
+  document.getElementById('deleteSectionForm').action = `/delete-section/${btn.dataset.sectionId}`;
+  document.getElementById('deleteConfirmationModal').classList.remove('hidden');
+}
+document.getElementById('cancelDeleteBtn').onclick = () => {
+  document.getElementById('deleteConfirmationModal').classList.add('hidden');
+};
+
+// Search Filter
+document.getElementById('searchInput').addEventListener('input', function() {
+  const query = this.value.toLowerCase();
+  document.querySelectorAll('tbody tr').forEach(row => {
+    const name = row.cells[0].textContent.toLowerCase();
+    const program = row.cells[1].textContent.toLowerCase();
+    row.style.display = (name.includes(query) || program.includes(query)) ? '' : 'none';
+  });
+});
+</script>
+</body>
+</html>

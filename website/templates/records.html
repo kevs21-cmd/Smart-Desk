@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ course.course_code }} | Course Management</title>
+  <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#3b82f6",
+            secondary: "#8b5cf6",
+          },
+          borderRadius: {
+            none: "0px",
+            sm: "4px",
+            DEFAULT: "8px",
+            md: "12px",
+            lg: "16px",
+            xl: "20px",
+            "2xl": "24px",
+            "3xl": "32px",
+            full: "9999px",
+            button: "8px",
+          },
+          animation: {
+            scaleFade: 'scaleFade 0.3s ease-out',
+          },
+          keyframes: {
+            scaleFade: {
+              '0%': { transform: 'scale(0.95)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            }
+          }
+        },
+      },
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+     <link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+  <style>
+    :where([class^="ri-"])::before { content: "\f3c2"; }
+    .modal-open { overflow: hidden; }
+    /* Hide scrollbar for clean modal look */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+   <!-- Logo & Course Title -->
+<div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+
+  <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+
+  <div class="text-base sm:text-xl font-semibold text-gray-900 truncate">
+    {{ course.course_title }}
+  </div>
+
+</div>
+
+    <!-- Desktop Actions -->
+    <div class="hidden md:flex items-center space-x-4">
+      <button class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-gray-600 hover:text-primary transition-colors">
+        <i class="ri-notification-line text-lg sm:text-xl"></i>
+      </button>
+
+      <!-- Profile -->
+      <div class="relative flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div class="text-xs sm:text-sm hidden lg:block">
+          <div id="name" class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500">{{ "Faculty" if user.role_id == 2 else "Student" }}</div>
+        </div>
+        <button class="w-6 h-6 flex items-center justify-center text-gray-400 relative">
+          <i class="ri-arrow-down-s-line"></i>
+          <!-- Dropdown Menu -->
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button id="mobileMenuBtn" class="md:hidden p-2">
+      <i class="ri-menu-line text-gray-600 text-2xl"></i>
+    </button>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div class="text-sm">
+          <div id="nameMobile" class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">{{ "Faculty" if user.role_id == 2 else "Student" }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/teachers-dashboard" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-dashboard-line mr-2"></i>Dashboard</a>
+      <a href="/edit_profile" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-user-line mr-2"></i>Edit Profile</a>
+      <a href="/settings" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-settings-3-line mr-2"></i>Settings</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700 flex items-center"><i class="ri-logout-box-line mr-2"></i>Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-gray-50 border-t border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/teachers-dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <a href="/teacher_lms" class="hover:text-primary">Manage Courses</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class="text-gray-900 font-medium truncate">{{ course.course_code }} — {{ course.course_title }}</span>
+  </nav>
+</div>
+
+<!-- Course Overview -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-4 sm:py-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{{ course.course_code }} — Student Records</h1>
+    </div>
+    
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="bg-white border-b border-gray-200 overflow-x-auto">
+  <div class="px-4 sm:px-6">
+    <nav class="flex space-x-4 sm:space-x-8 whitespace-nowrap">
+      <a href="{{ url_for('auth.upload_materials', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Materials
+      </a>
+      <a href="{{ url_for('auth.create_announcement', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Announcements
+      </a>
+      <a href="{{ url_for('auth.student_records', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-primary text-primary font-medium text-xs sm:text-sm tab-button active">
+        Grades
+      </a>
+      <a href="{{ url_for('auth.course_forum', course_id=course.course_id) }}"
+          class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Create Forum
+      </a>
+      <a href="{{ url_for('auth.create_meeting', course_id=course.course_id) }}"
+          class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Create Meeting
+      </a>
+    </nav>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+  <a href="/records/export?course_id={{ course_id }}">
+    <button class="flex items-center gap-2 px-3 sm:px-4 py-2 bg-yellow-100 text-yellow-700 rounded-button hover:bg-yellow-200 transition-colors text-xs sm:text-sm whitespace-nowrap">
+
+      <!-- Excel File Icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 2H8a2 2 0 00-2 2v3H5a1 1 0 000 2h1v6H5a1 1 0 000 2h1v3a2 2 0 002 2h11a2 2 0 002-2V4a2 2 0 00-2-2zm0 18H8v-3h11v3zm0-5H8v-6h11v6zm0-8H8V4h11v3z"/>
+        <path d="M10.5 14l1.5-2-1.5-2h1.3l.9 1.3.9-1.3h1.3l-1.5 2 1.5 2h-1.3l-.9-1.3-.9 1.3h-1.3z"/>
+      </svg>
+
+      Export to Excel
+    </button>
+  </a>
+</div>
+
+</div>
+
+<!-- Main Content -->
+<div class="px-4 sm:px-6 py-4 sm:py-6">
+  <!-- Student Table -->
+  <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+    <table class="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-3 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Student ID</th>
+          <th class="px-3 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Name</th>
+          <th class="px-3 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Section</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-gray-200">
+        {% if students %}
+          {% for student in students %}
+          <tr class="hover:bg-gray-50 cursor-pointer transition" onclick="showStudentRecord('{{ student.user_id }}')">
+            <td class="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-medium">{{ student.student_id }}</td>
+            <td class="px-3 sm:px-6 py-3 sm:py-4">
+              <div class="flex items-center">
+                <div class="ml-0 sm:ml-3">
+                  <div class="font-medium text-gray-900 truncate">{{ student.full_name }}</div>
+                  <div class="text-gray-500 truncate text-xs">{{ student.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-3 sm:px-6 py-3 sm:py-4 text-gray-900 font-medium">{{ student.section_name }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="3" class="px-3 sm:px-6 py-4 text-center text-gray-500">
+              No students found
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ================= STUDENT RECORD MODAL (TABBED) ================= -->
+<div id="studentRecordModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-70 flex items-center justify-center p-4 modal-open transition-opacity duration-300">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-auto p-0 relative flex flex-col max-h-[90vh] overflow-hidden animate-scaleFade">
+    
+    <!-- 1. Modal Header -->
+    <div class="p-6 border-b border-gray-100 flex justify-between items-start bg-gray-50/50">
+      <div>
+        <h3 id="recordName" class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">Student Name</h3>
+        <h4 id="recordSection" class="text-sm text-primary font-medium mt-1">Section Name</h4>
+      </div>
+      <button onclick="closeStudentRecordModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <i class="ri-close-line text-2xl"></i>
+      </button>
+    </div>
+
+    <!-- 2. Navigation Tabs (Stepper) -->
+    <div class="flex border-b border-gray-200 bg-white">
+      <button onclick="switchRecordTab('quizzes')" id="tab-btn-quizzes" class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-primary text-primary transition-colors focus:outline-none">
+        1. Quizzes
+      </button>
+      <button onclick="switchRecordTab('assignments')" id="tab-btn-assignments" class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors focus:outline-none">
+        2. Assignments
+      </button>
+      <button onclick="switchRecordTab('activities')" id="tab-btn-activities" class="flex-1 py-3 text-sm font-medium text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors focus:outline-none">
+        3. Activities
+      </button>
+    </div>
+
+    <!-- 3. Scrollable Content Area -->
+    <div class="flex-1 overflow-y-auto p-6 bg-white relative">
+      
+      <!-- Section: Quizzes -->
+      <div id="section-quizzes" class="record-section transition-opacity duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+            <i class="ri-question-answer-line text-blue-500"></i> Quizzes
+          </h4>
+          <span class="text-xs font-semibold bg-blue-50 text-blue-600 px-2 py-1 rounded-md">Weighted: 40%</span>
+        </div>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">Quiz Title</th>
+                <th class="px-4 py-3 text-right font-semibold text-gray-600">Score</th>
+              </tr>
+            </thead>
+            <tbody id="quizList" class="divide-y divide-gray-100 bg-white">
+              <!-- Content injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section: Assignments -->
+      <div id="section-assignments" class="record-section hidden transition-opacity duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+            <i class="ri-file-text-line text-green-500"></i> Assignments
+          </h4>
+          <span class="text-xs font-semibold bg-green-50 text-green-600 px-2 py-1 rounded-md">Weighted: 30%</span>
+        </div>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">Assignment Title</th>
+                <th class="px-4 py-3 text-right font-semibold text-gray-600">Score</th>
+              </tr>
+            </thead>
+            <tbody id="assignmentList" class="divide-y divide-gray-100 bg-white">
+              <!-- Content injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section: Activities -->
+      <div id="section-activities" class="record-section hidden transition-opacity duration-300">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="font-bold text-gray-800 text-lg flex items-center gap-2">
+            <i class="ri-gamepad-line text-purple-500"></i> Activities
+          </h4>
+          <span class="text-xs font-semibold bg-purple-50 text-purple-600 px-2 py-1 rounded-md">Weighted: 30%</span>
+        </div>
+        <div class="overflow-hidden rounded-xl border border-gray-200 shadow-sm">
+          <table class="min-w-full text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600">Activity Title</th>
+                <th class="px-4 py-3 text-right font-semibold text-gray-600">Score</th>
+              </tr>
+            </thead>
+            <tbody id="activityList" class="divide-y divide-gray-100 bg-white">
+              <!-- Content injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 4. Footer & Controls -->
+    <div class="p-4 border-t border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4">
+      
+      <!-- Overall Grade -->
+      <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm w-full sm:w-auto justify-center sm:justify-start">
+        <span class="text-sm text-gray-500 font-medium">Overall Grade:</span>
+        <span id="overallGrade" class="text-lg font-bold text-gray-900">0.00%</span>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button id="btn-prev" onclick="navigateTab(-1)" class="flex-1 sm:flex-none px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium">
+          Previous
+        </button>
+        
+        <button id="btn-next" onclick="navigateTab(1)" class="flex-1 sm:flex-none px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium shadow-md">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ===================== TABBED MODAL LOGIC =====================
+  const sections = ['quizzes', 'assignments', 'activities'];
+  let currentSectionIndex = 0;
+
+  function switchRecordTab(sectionName) {
+    currentSectionIndex = sections.indexOf(sectionName);
+
+    // Hide all sections
+    document.querySelectorAll('.record-section').forEach(el => el.classList.add('hidden'));
+    
+    // Show target section with fade
+    const target = document.getElementById(`section-${sectionName}`);
+    target.classList.remove('hidden');
+    target.style.opacity = '0';
+    setTimeout(() => target.style.opacity = '1', 50);
+
+    // Update Header Tabs
+    sections.forEach(sec => {
+      const btn = document.getElementById(`tab-btn-${sec}`);
+      if (sec === sectionName) {
+        btn.classList.remove('border-transparent', 'text-gray-500');
+        btn.classList.add('border-primary', 'text-primary');
+      } else {
+        btn.classList.add('border-transparent', 'text-gray-500');
+        btn.classList.remove('border-primary', 'text-primary');
+      }
+    });
+
+    updateNavButtons();
+  }
+
+  function navigateTab(direction) {
+    const newIndex = currentSectionIndex + direction;
+    if (newIndex >= 0 && newIndex < sections.length) {
+      switchRecordTab(sections[newIndex]);
+    }
+  }
+
+  function updateNavButtons() {
+    const prevBtn = document.getElementById('btn-prev');
+    const nextBtn = document.getElementById('btn-next');
+
+    // Previous Button
+    if (currentSectionIndex === 0) {
+      prevBtn.disabled = true;
+      prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+      prevBtn.disabled = false;
+      prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
+
+    // Next/Close Button
+    if (currentSectionIndex === sections.length - 1) {
+      nextBtn.innerText = "Close";
+      nextBtn.onclick = closeStudentRecordModal;
+      nextBtn.classList.replace('bg-primary', 'bg-gray-800');
+      nextBtn.classList.replace('hover:bg-blue-600', 'hover:bg-gray-900');
+    } else {
+      nextBtn.innerText = "Next";
+      nextBtn.onclick = () => navigateTab(1);
+      nextBtn.classList.replace('bg-gray-800', 'bg-primary');
+      nextBtn.classList.replace('hover:bg-gray-900', 'hover:bg-blue-600');
+    }
+  }
+
+  // ===================== DATA FETCHING LOGIC =====================
+  
+  // Modal Control
+  function openModal(id) {
+    document.getElementById(id).classList.remove('hidden');
+    document.body.classList.add('modal-open');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.body.classList.remove('modal-open');
+  }
+  function closeStudentRecordModal() { closeModal('studentRecordModal'); }
+
+  // FETCH STUDENT DATA
+  async function showStudentRecord(studentId) {
+    try {
+      const response = await fetch(`/records/${studentId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch records");
+      }
+
+      const record = await response.json();
+
+      // Populate Header
+      document.getElementById("recordName").textContent = record.name;
+      document.getElementById("recordSection").textContent = record.section;
+      document.getElementById("overallGrade").textContent = record.overallGrade;
+
+      // Helper to generate rows
+      const generateRows = (items) => {
+        if (!items || items.length === 0) {
+          return `<tr><td colspan="2" class="px-4 py-3 text-center text-gray-500 italic">No records found</td></tr>`;
+        }
+        return items.map(item => `
+          <tr class="hover:bg-gray-50 transition-colors">
+            <td class="px-4 py-3 text-left text-gray-700">${item.name}</td>
+            <td class="px-4 py-3 text-right font-semibold text-gray-900">${item.score !== null ? item.score : '-'}</td>
+          </tr>
+        `).join("");
+      };
+
+      // Populate Tables
+      document.getElementById("quizList").innerHTML = generateRows(record.quizzes);
+      document.getElementById("assignmentList").innerHTML = generateRows(record.assignments);
+      document.getElementById("activityList").innerHTML = generateRows(record.activities); // Mapped from learning_activity_submissions
+
+      // Reset to first tab & Open
+      switchRecordTab('quizzes');
+      openModal('studentRecordModal');
+
+    } catch (err) {
+      console.error(err);
+      alert("Error loading student record.");
+    }
+  }
+
+  // Close on backdrop click
+  window.addEventListener('click', (e) => {
+    if (e.target.id === 'studentRecordModal') closeStudentRecordModal();
+  });
+
+  // Mobile Menu
+  document.getElementById("mobileMenuBtn").addEventListener("click", () => {
+    document.getElementById("mobileNav").classList.toggle("hidden");
+  });
+
+  // Profile Dropdown
+  document.addEventListener("DOMContentLoaded", () => {
+    const dropdownBtn = document.querySelector(".ri-arrow-down-s-line");
+    const dropdownMenu = document.getElementById("profile-dropdown-menu");
+    if (dropdownBtn) {
+      dropdownBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle("hidden");
+      });
+    }
+    document.addEventListener("click", () => {
+      if(dropdownMenu) dropdownMenu.classList.add("hidden");
+    });
+  });
+</script>
+</body>
+</html>

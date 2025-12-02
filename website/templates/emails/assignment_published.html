@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Assignment Published</title>
+    <style>
+        body { margin: 0; padding: 0; background: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .container { max-width: 620px; margin: 30px auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #3b82f6, #2563eb); padding: 35px 20px; text-align: center; color: white; }
+        .header h1 { margin: 0; font-size: 28px; font-weight: 600; }
+        .body { padding: 35px; color: #1f2937; line-height: 1.6; }
+        .title { font-size: 24px; font-weight: bold; color: #1e40af; margin: 0 0 20px; }
+        .info { background: #f8fafc; padding: 16px; border-radius: 8px; margin: 12px 0; border-left: 5px solid #3b82f6; }
+        .btn { display: inline-block; background: #2563eb; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 25px 0; }
+        .footer { background: #1f2937; color: #9ca3af; padding: 25px; text-align: center; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Assignment Alert</h1>
+        </div>
+        <div class="body">
+            <p>Hi <strong>{{ student_name }}</strong>,</p>
+            <p>Your teacher has just published a new assignment:</p>
+
+            <h2 class="title">{{ assignment_title }}</h2>
+
+            <div class="info">
+                <strong>Course:</strong> {{ course_code }} - {{ course_name }}
+            </div>
+            <div class="info">
+                <strong>Teacher:</strong> {{ teacher_name }}
+            </div>
+            <div class="info">
+                <strong>Due Date:</strong> {{ due_date }}
+            </div>
+            <div class="info">
+                <strong>Worth:</strong> {{ points }} points
+            </div>
+
+            {% if description.strip() %}
+            <p><strong>Description:</strong></p>
+            <div style="background:#f1f5f9;padding:18px;border-radius:8px;margin:15px 0;">
+                {{ description | safe }}
+            </div>
+            {% endif %}
+
+            <div style="text-align:center;">
+                <a href="{{ url_for('student.view_course', course_id=course_id, _external=True) }}#assignment-{{ assignment_id }}"
+                   class="btn">
+                    View Assignment Now
+                </a>
+            </div>
+
+            <p>Don't forget to submit on time!</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated message from your Learning Management System.</p>
+            <p>© {{ "now"|strftime("%Y") }} Your LMS. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

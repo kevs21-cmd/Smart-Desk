@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ course.course_code }} | Course Management</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3b82f6",
+              secondary: "#8b5cf6",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      .modal-open { overflow: hidden; }
+      .scroll-container { -webkit-overflow-scrolling: touch; }
+      .scroll-container::-webkit-scrollbar { display: none; }
+      .scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+      /* Success Modal Animations */
+      @keyframes scaleFade {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+      }
+      .animate-scaleFade { animation: scaleFade 0.35s ease-out; }
+
+      @keyframes bounceCheck {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-14px); }
+        60% { transform: translateY(-7px); }
+      }
+      .animate-bounceCheck { animation: bounceCheck 0.7s ease; }
+
+      /* --- NEW TOAST STYLES --- */
+      #toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: none; /* Allows clicking through the container area */
+      }
+      
+      .toast {
+        pointer-events: auto;
+        min-width: 250px;
+        max-width: 350px;
+        background: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transform: translateX(120%);
+        transition: transform 0.3s ease-out;
+        border-left: 5px solid #3b82f6;
+        font-size: 0.9rem;
+        color: #1f2937;
+      }
+      
+      .toast.show { transform: translateX(0); }
+      
+      .toast-success { border-left-color: #10b981; }
+      .toast-error { border-left-color: #ef4444; }
+      .toast-warning { border-left-color: #f59e0b; }
+      
+      .toast-icon { font-size: 1.25rem; }
+      .toast-success .toast-icon { color: #10b981; }
+      .toast-error .toast-icon { color: #ef4444; }
+    </style>
+  </head>
+<body class="bg-gray-50">
+
+<!-- ==================== TOAST CONTAINER ==================== -->
+<div id="toast-container"></div>
+
+<!-- ==================== HEADER (Unchanged) ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo & Course Title -->
+<div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+
+  <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+
+  <div class="text-base sm:text-xl font-semibold text-gray-900 truncate">
+    {{ course.course_title }}
+  </div>
+
+</div>
+
+
+        <!-- Profile -->
+        <div class="relative flex items-center space-x-2">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+          <div class="text-xs sm:text-sm hidden lg:block">
+            <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+            <div class="text-gray-500">Faculty</div>
+          </div>
+          <button id="profile-dropdown-button" class="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-700">
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+
+          <!-- Dropdown Menu -->
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-gray-600 text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100 relative">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div class="text-sm">
+          <div class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">Faculty</div>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/teacher_lms" class="block py-2 text-gray-700 hover:text-primary flex items-center"><i class="ri-book-line mr-2"></i>Courses</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700 flex items-center"><i class="ri-logout-box-line mr-2"></i>Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-gray-50 border-t border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/teachers-dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <a href="/teacher_lms" class="hover:text-primary">Manage Courses</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class="text-gray-900 font-medium truncate">{{ course.course_code }} — {{ course.course_title }}</span>
+  </nav>
+</div>
+
+<!-- Course Overview -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-4 sm:py-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h1 class="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900">{{ course.course_code }} | {{course.section_name}} — Upload Materials</h1>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="bg-white border-b border-gray-200 overflow-x-auto">
+  <div class="px-4 sm:px-6">
+    <nav class="flex space-x-4 sm:space-x-8 whitespace-nowrap">
+      <a href="{{ url_for('auth.upload_materials', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-primary text-primary font-medium text-xs sm:text-sm tab-button active">
+        Materials
+      </a>
+      <a href="{{ url_for('auth.create_announcement', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Announcements
+      </a>
+      <a href="{{ url_for('auth.student_records', course_id=course_id) }}"
+         class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Grades
+      </a>
+      <a href="{{ url_for('auth.course_forum', course_id=course.course_id) }}"
+          class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Create Forum
+      </a>
+      <a href="{{ url_for('auth.create_meeting', course_id=course_id) }}"
+          class="py-3 sm:py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button">
+        Create Meeting
+      </a>
+    </nav>
+  </div>
+</div>
+
+<!-- Toolbar -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap gap-3">
+    <!-- Upload Material Button -->
+    <button
+      class="px-3 sm:px-4 py-2 bg-green-100 text-green-700 rounded-button hover:bg-green-200 transition-colors text-xs sm:text-sm whitespace-nowrap flex items-center"
+      onclick="openUploadModal()"
+    >
+      <i class="ri-upload-cloud-line mr-2"></i> Upload Material
+    </button>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="px-4 sm:px-6 py-4 sm:py-6">
+  <div class="flex flex-col gap-4 sm:gap-6">
+
+    <!-- Search and Filter Controls -->
+    <div class="flex flex-col sm:flex-row justify-start gap-3 mb-2">
+      
+      <!-- Search Bar -->
+      <div class="relative w-full sm:w-72">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="ri-search-line text-gray-500"></i>
+        </div>
+        <input type="text" 
+               id="materialSearch" 
+               placeholder="Search title..." 
+               class="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition duration-150 ease-in-out">
+      </div>
+
+      <!-- Term Filter Dropdown -->
+      <div class="relative w-full sm:w-48">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <i class="ri-filter-3-line text-gray-500"></i>
+        </div>
+        <select id="termFilter" 
+                class="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg leading-5 bg-gray-50 text-gray-700 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm appearance-none cursor-pointer">
+          <option value="all">All Terms</option>
+          <option value="Prelims">Prelims</option>
+          <option value="Midterms">Midterms</option>
+          <option value="Finals">Finals</option>
+        </select>
+        <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+          <i class="ri-arrow-down-s-line text-gray-500"></i>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Materials Grid -->
+    {% if materials %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="materialsGrid">
+        {% for mat in materials %}
+        <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden material-item min-h-[420px] self-start flex flex-col material-card transition-all duration-300"
+             data-term="{{ mat.term }}"
+             data-title="{{ mat.title|lower }}">
+
+            <!-- Material Image -->
+            <div class="relative h-56 sm:h-64 bg-gradient-to-br from-blue-100 to-blue-200 overflow-hidden rounded-t-lg shrink-0 transition-all duration-300">
+                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=800&q=80"
+                     class="w-full h-full object-cover object-top">
+                <div class="absolute inset-0 bg-black bg-opacity-30"></div>
+                <div class="absolute top-3 right-3 flex gap-2">
+                    <span class="bg-red-500 text-white px-2 py-1 rounded-full text-xs font-medium">{{ mat.material_type }}</span>
+                </div>
+                <div class="absolute bottom-3 left-3">
+                    <span class="bg-gray-600 text-white px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm">{{ mat.term }}</span>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="p-4 flex-1 flex flex-col">
+                <h3 class="font-semibold text-gray-900 mb-1 text-lg leading-tight">{{ mat.title }}</h3>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">{{ mat.description }}</p>
+                <div class="flex items-center justify-between text-xs text-gray-500 mb-4 mt-auto">
+                    <span>{{ mat.upload_date.strftime('%b %d, %Y') }}</span>
+                    <span>PDF</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100">
+                    <button class="material-dropdown-toggle flex items-center space-x-1 text-primary hover:text-blue-700 cursor-pointer text-sm font-medium"
+                            data-material="material-{{ loop.index }}">
+                        <span>Details & Actions</span>
+                        <i class="ri-arrow-down-s-line"></i>
+                    </button>
+                    <div class="flex items-center space-x-1">
+                      
+                      <!-- View -->
+                      <button onclick="openViewMaterialModal('{{ mat.static_path }}')" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-primary rounded-full hover:bg-gray-100" title="View PDF"><i class="ri-eye-line"></i></button>
+                      
+                      <!-- NEW: Card Fullscreen Toggle -->
+                      <button onclick="toggleCardFullScreen(this)" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-blue-600 rounded-full hover:bg-gray-100" title="Maximize Card">
+                        <i class="ri-fullscreen-line"></i>
+                      </button>
+
+                      <!-- Edit -->
+                      <button onclick="openEditMaterialModal('{{ mat.material_id }}', '{{ mat.title|e }}', '{{ mat.description|e }}', '{{ mat.term }}')" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-green-600 rounded-full hover:bg-gray-100" title="Edit"><i class="ri-pencil-line"></i></button>
+                      
+                      <!-- Delete -->
+                      <button onclick="openDeleteMaterialModal('{{ mat.material_id }}')" class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-red-600 rounded-full hover:bg-gray-100" title="Delete"><i class="ri-delete-bin-line"></i></button>
+                    </div>
+                </div>
+
+                <!-- Dropdown Content -->
+                <div class="material-dropdown-content hidden border-t border-gray-100 mt-3 pt-3" id="dropdown-material-{{ loop.index }}">
+                    
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        <button onclick="openCreateQuizModal('{{ course_id }}', '{{ mat.material_id }}')" class="flex-1 bg-blue-50 text-blue-600 px-2 py-1.5 rounded text-xs font-medium hover:bg-blue-100 flex items-center justify-center gap-1"><i class="ri-question-line"></i> Quiz</button>
+                        <button onclick="openCreateAssignmentModal('{{ course_id }}', '{{ mat.material_id }}')" class="flex-1 bg-green-50 text-green-600 px-2 py-1.5 rounded text-xs font-medium hover:bg-green-100 flex items-center justify-center gap-1"><i class="ri-file-edit-line"></i> Assign</button>
+                        <button onclick="openCreateActivityModal('{{ course_id }}', '{{ mat.material_id }}')" class="flex-1 bg-purple-50 text-purple-600 px-2 py-1.5 rounded text-xs font-medium hover:bg-purple-100 flex items-center justify-center gap-1"><i class="ri-gamepad-line"></i> Activity</button>
+                    </div>
+
+                    <!-- Quizzes List -->
+                    {% if mat.quizzes %}
+                    <div class="mb-3">
+                        <h6 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Quizzes</h6>
+                        <div class="space-y-1">
+                            {% for quiz in mat.quizzes %}
+                            <div class="flex items-center justify-between bg-gray-50 p-2 rounded border border-gray-100">
+                                <div class="truncate pr-2">
+                                    <div class="text-sm font-medium text-gray-700 truncate">{{ quiz.title }}</div>
+                                    <div class="text-[10px] text-gray-500">
+                                      {{ quiz.total_questions }} Qs • 
+                                      {% if quiz.published %}
+                                        <span class="text-green-600">Published</span>
+                                      {% elif quiz.publish_at %}
+                                        <span class="text-blue-600 font-medium">Scheduled</span>
+                                      {% else %}
+                                        <span class="text-gray-400">Draft</span>
+                                      {% endif %}
+                                    </div>
+                                </div>
+                                <div class="flex shrink-0">
+                                    <button onclick="openExceptionModal('quiz', '{{ quiz.quiz_id }}')" class="text-yellow-600 hover:text-yellow-700 p-1" title="Exceptions"><i class="ri-shield-user-line"></i></button>
+                                    <button onclick="openEssayGradingModal('{{ quiz.quiz_id }}')" class="text-purple-500 hover:text-purple-700 p-1"><i class="ri-graduation-cap-line"></i></button>
+                                    {% if quiz.published %}
+                                        <button onclick="openConfirmationModal('{{ quiz.quiz_id }}', 'unpublish')" class="text-orange-500 hover:text-orange-700 p-1"><i class="ri-eye-off-line"></i></button>
+                                    {% else %}
+                                        <button onclick="openConfirmationModal('{{ quiz.quiz_id }}', 'publish')" class="text-green-600 hover:text-green-700 p-1"><i class="ri-upload-2-line"></i></button>
+                                    {% endif %}
+                                    <button onclick="editQuiz('{{ quiz.quiz_id }}')" class="text-blue-500 hover:text-blue-700 p-1"><i class="ri-pencil-line"></i></button>
+                                    <button onclick="openConfirmationModal('{{ quiz.quiz_id }}', 'delete')" class="text-red-500 hover:text-red-700 p-1"><i class="ri-delete-bin-line"></i></button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Assignments List -->
+                    {% if mat.assignments %}
+                    <div class="mb-3">
+                        <h6 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Assignments</h6>
+                        <div class="space-y-1">
+                            {% for assign in mat.assignments %}
+                            <div class="flex items-center justify-between bg-green-50 p-2 rounded border border-green-100">
+                                <div class="truncate pr-2">
+                                    <div class="text-sm font-medium text-green-900 truncate">{{ assign.title }}</div>
+                                    <div class="text-[10px] text-green-700">
+                                        {{ assign.points }} pts • 
+                                        {% if assign.published %}
+                                            <span class="text-green-600">Published</span>
+                                        {% elif assign.publish_at %}
+                                            <span class="text-blue-600 font-medium">Scheduled</span>
+                                        {% else %}
+                                            <span class="text-gray-400">Draft</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="flex shrink-0">
+                                    <button onclick="openExceptionModal('assignment', '{{ assign.assignment_id }}')" class="text-yellow-600 hover:text-yellow-700 p-1" title="Exceptions"><i class="ri-shield-user-line"></i></button>
+                                    <button onclick="openSubmissionGradingModal('{{ assign.assignment_id }}', '{{ assign.title|e }}', '{{ assign.points }}', 'assignment')" class="text-purple-500 hover:text-purple-700 p-1"><i class="ri-group-line"></i></button>
+                                    {% if assign.published %}
+                                        <button onclick="performAssignmentAction('{{ assign.assignment_id }}', 'unpublish')" class="text-orange-500 hover:text-orange-700 p-1"><i class="ri-eye-off-line"></i></button>
+                                    {% else %}
+                                        <button onclick="performAssignmentAction('{{ assign.assignment_id }}', 'publish')" class="text-green-600 hover:text-green-700 p-1"><i class="ri-upload-2-line"></i></button>
+                                    {% endif %}
+                                    <button onclick="openCreateAssignmentModal('{{ course_id }}', '{{ mat.material_id }}', '{{ assign.assignment_id }}')" class="text-blue-500 hover:text-blue-700 p-1"><i class="ri-pencil-line"></i></button>
+                                    <button onclick="performAssignmentAction('{{ assign.assignment_id }}', 'delete')" class="text-red-500 hover:text-red-700 p-1"><i class="ri-delete-bin-line"></i></button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Activities List -->
+                    {% if mat.activities %}
+                    <div>
+                        <h6 class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Activities</h6>
+                        <div class="space-y-1">
+                            {% for act in mat.activities %}
+                            <div class="flex items-center justify-between bg-purple-50 p-2 rounded border border-purple-100">
+                                <div class="truncate pr-2">
+                                    <div class="text-sm font-medium text-purple-900 truncate">{{ act.title }}</div>
+                                    <div class="text-[10px] text-purple-700">
+                                        {{ act.points }} pts • 
+                                        {% if act.published %}
+                                            <span class="text-green-600">Published</span>
+                                        {% elif act.publish_at %}
+                                            <span class="text-blue-600 font-medium">Scheduled</span>
+                                        {% else %}
+                                            <span class="text-gray-400">Draft</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="flex shrink-0">
+                                    <button onclick="openExceptionModal('activity', '{{ act.activity_id }}')" class="text-yellow-600 hover:text-yellow-700 p-1" title="Exceptions"><i class="ri-shield-user-line"></i></button>
+                                    <button onclick="openSubmissionGradingModal('{{ act.activity_id }}', '{{ act.title|e }}', '{{ act.points }}', 'activity')" class="text-purple-500 hover:text-purple-700 p-1"><i class="ri-group-line"></i></button>
+                                    {% if act.published %}
+                                        <button onclick="performActivityAction('{{ act.activity_id }}', 'unpublish')" class="text-orange-500 hover:text-orange-700 p-1"><i class="ri-eye-off-line"></i></button>
+                                    {% else %}
+                                        <button onclick="performActivityAction('{{ act.activity_id }}', 'publish')" class="text-green-600 hover:text-green-700 p-1"><i class="ri-upload-2-line"></i></button>
+                                    {% endif %}
+                                    <button onclick="openCreateActivityModal('{{ course_id }}', '{{ mat.material_id }}', '{{ act.activity_id }}')" class="text-blue-500 hover:text-blue-700 p-1"><i class="ri-pencil-line"></i></button>
+                                    <button onclick="performActivityAction('{{ act.activity_id }}', 'delete')" class="text-red-500 hover:text-red-700 p-1"><i class="ri-delete-bin-line"></i></button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- No Results State -->
+    <div id="noResults" class="hidden text-center py-12 bg-white border border-dashed border-gray-300 rounded-xl">
+        <i class="ri-search-2-line text-4xl text-gray-300 mb-2"></i>
+        <p class="text-gray-500">No materials match your filters.</p>
+    </div>
+
+    {% else %}
+    <div class="text-center py-12 bg-white border border-dashed border-gray-300 rounded-xl">
+        <p class="text-gray-500">No materials uploaded yet.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+
+<!-- JavaScript -->
+<script>
+// --- TOAST AND MODAL HELPERS ---
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    // Icon based on type
+    let iconClass = 'ri-information-line';
+    if(type === 'success') iconClass = 'ri-checkbox-circle-line';
+    if(type === 'error') iconClass = 'ri-error-warning-line';
+    if(type === 'warning') iconClass = 'ri-alert-line';
+
+    toast.innerHTML = `
+        <i class="${iconClass} toast-icon"></i>
+        <div class="flex-1">${message}</div>
+    `;
+
+    container.appendChild(toast);
+    
+    // Trigger animation
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+function showSuccessModal() {
+    document.getElementById('successModal').classList.remove('hidden');
+    document.getElementById('successModal').classList.add('flex');
+    document.body.classList.add('modal-open');
+}
+
+// --- Search and Filter Logic ---
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('materialSearch');
+    const termSelect = document.getElementById('termFilter');
+    const cards = document.querySelectorAll('.material-card');
+    const noResults = document.getElementById('noResults');
+
+    function filterMaterials() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedTerm = termSelect.value;
+        let visibleCount = 0;
+
+        cards.forEach(card => {
+            const cardTerm = card.getAttribute('data-term');
+            const cardTitle = card.getAttribute('data-title');
+            
+            const matchesSearch = cardTitle.includes(searchTerm);
+            const matchesTerm = selectedTerm === 'all' || cardTerm === selectedTerm;
+
+            if (matchesSearch && matchesTerm) {
+                card.style.display = ''; 
+                visibleCount++;
+            } else {
+                card.style.display = 'none'; 
+            }
+        });
+
+        if (noResults) {
+            if (visibleCount === 0 && cards.length > 0) {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+    }
+
+    if(searchInput) searchInput.addEventListener('input', filterMaterials);
+    if(termSelect) termSelect.addEventListener('change', filterMaterials);
+});
+
+// --- Card Fullscreen Logic ---
+function toggleCardFullScreen(btn) {
+    const card = btn.closest('.material-item');
+    const icon = btn.querySelector('i');
+    const dropdown = card.querySelector('.material-dropdown-content');
+    const img = card.querySelector('.relative.h-56'); // Matches the HTML class
+    
+    if (!card.classList.contains('fixed')) {
+        // Enter Full Screen
+        card.classList.add('fixed', 'inset-0', 'z-50', 'w-full', 'h-full', 'overflow-y-auto', 'rounded-none');
+        card.classList.remove('rounded-lg', 'min-h-[420px]', 'self-start', 'shadow-sm', 'border');
+        icon.classList.replace('ri-fullscreen-line', 'ri-fullscreen-exit-line');
+        
+        // Show dropdown content automatically
+        dropdown.classList.remove('hidden');
+        
+        // Make image larger
+        if(img) { 
+            img.classList.remove('h-56', 'sm:h-64'); 
+            img.classList.add('h-96'); 
+        }
+        
+        document.body.style.overflow = 'hidden'; // Stop background scrolling
+    } else {
+        // Exit Full Screen
+        card.classList.remove('fixed', 'inset-0', 'z-50', 'w-full', 'h-full', 'overflow-y-auto', 'rounded-none');
+        card.classList.add('rounded-lg', 'min-h-[420px]', 'self-start', 'shadow-sm', 'border');
+        icon.classList.replace('ri-fullscreen-exit-line', 'ri-fullscreen-line');
+        
+        // Hide dropdown content (optional, but cleaner)
+        dropdown.classList.add('hidden');
+        
+        // Restore image size
+        if(img) { 
+            img.classList.add('h-56', 'sm:h-64'); 
+            img.classList.remove('h-96'); 
+        }
+        
+        document.body.style.overflow = ''; // Restore background scrolling
+    }
+}
+</script>
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- 1. UPLOAD MODAL (Unchanged) -->
+<div id="uploadModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-70 flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl w-full max-w-lg mx-auto p-6 relative shadow-lg">
+    <button onclick="closeUploadModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="ri-close-line text-2xl"></i></button>
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Upload Material</h2>
+    <form id="uploadMaterialForm" enctype="multipart/form-data" action="{{ url_for('auth.upload_materials', course_id=course.course_id) }}" method="POST">
+      <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input type="text" name="material_title" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Enter material title"/>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Term</label>
+            <select name="term" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none bg-white">
+                <option value="Prelims">Prelims</option>
+                <option value="Midterms">Midterms</option>
+                <option value="Finals">Finals</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea name="material_description" rows="3" required class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary outline-none" placeholder="Enter a brief description"></textarea>
+          </div>
+          <div id="uploadArea" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:bg-gray-50 transition cursor-pointer relative">
+            <input type="file" name="files" id="fileInput" accept=".pdf" multiple required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+            <i class="ri-upload-cloud-2-line text-3xl text-gray-400"></i>
+            <p class="text-sm text-gray-600 mt-2">Click to upload PDF</p>
+          </div>
+          <div id="filePreview" class="text-left text-gray-600 mt-3 text-xs sm:text-sm"></div>
+      </div>
+      <button type="submit" class="w-full mt-6 bg-primary text-white py-2 rounded-lg font-medium hover:bg-blue-600 transition">Upload</button>
+    </form>
+  </div>
+</div>
+
+<!-- 2. EDIT MATERIAL MODAL (Unchanged) -->
+<div id="editMaterialModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+  <div class="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+    <h2 class="text-xl font-bold mb-4">Edit Material</h2>
+    <input type="hidden" id="editMaterialId">
+    <div class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input type="text" id="editMaterialTitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Term</label>
+            <select id="editMaterialTerm" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+                <option value="Prelims">Prelims</option>
+                <option value="Midterms">Midterms</option>
+                <option value="Finals">Finals</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea id="editMaterialDescription" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"></textarea>
+        </div>
+    </div>
+    <div class="flex justify-end gap-2 mt-6">
+      <button onclick="closeModal('editMaterialModal')" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200">Cancel</button>
+      <button onclick="submitEditMaterial()" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. CREATE ASSIGNMENT MODAL (UPDATED: Publish Date) -->
+<div id="createAssignmentModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative animate-scaleFade">
+    <div class="flex justify-between items-center mb-5 border-b pb-3">
+        <h2 class="text-2xl font-bold text-gray-800" id="assignModalTitle">Create Assignment</h2>
+        <button onclick="closeModal('createAssignmentModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    </div>
+    <input type="hidden" id="assignCourseId">
+    <input type="hidden" id="assignMaterialId">
+    <input type="hidden" id="assignEditId">
+    <div class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input type="text" id="assignTitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none" placeholder="e.g., Midterm Essay">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                <input type="datetime-local" id="assignDueDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Points</label>
+                <input type="number" id="assignPoints" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none" value="100">
+            </div>
+        </div>
+        <!-- NEW FIELD: Publish Schedule -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Schedule Publish (Optional)</label>
+            <input type="datetime-local" id="assignPublishAt" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none">
+            <p class="text-xs text-gray-500 mt-1">Leave empty to publish manually or immediately.</p>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea id="assignDescription" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-green-500 outline-none" placeholder="Enter instructions..."></textarea>
+        </div>
+    </div>
+    <div class="flex justify-end gap-3 pt-6">
+        <button onclick="closeModal('createAssignmentModal')" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Cancel</button>
+        <button onclick="submitAssignment()" class="px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 shadow-lg" id="assignSaveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- 4. CREATE ACTIVITY MODAL (UPDATED: Publish Date) -->
+<div id="createActivityModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 relative animate-scaleFade">
+    <div class="flex justify-between items-center mb-5 border-b pb-3">
+        <h2 class="text-2xl font-bold text-gray-800" id="activityModalTitle">Create Activity</h2>
+        <button onclick="closeModal('createActivityModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    </div>
+    <input type="hidden" id="activityCourseId">
+    <input type="hidden" id="activityMaterialId">
+    <input type="hidden" id="activityEditId">
+    <div class="space-y-4">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <input type="text" id="activityTitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none" placeholder="e.g., Group Project">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
+                <input type="datetime-local" id="activityDueDate" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Points</label>
+                <input type="number" id="activityPoints" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none" value="100">
+            </div>
+        </div>
+        <!-- NEW FIELD: Publish Schedule -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Schedule Publish (Optional)</label>
+            <input type="datetime-local" id="activityPublishAt" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none">
+            <p class="text-xs text-gray-500 mt-1">Leave empty to publish manually or immediately.</p>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <textarea id="activityDescription" rows="3" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-purple-500 outline-none" placeholder="Enter details..."></textarea>
+        </div>
+    </div>
+    <div class="flex justify-end gap-3 pt-6">
+        <button onclick="closeModal('createActivityModal')" class="px-5 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Cancel</button>
+        <button onclick="submitActivity()" class="px-5 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 shadow-lg" id="activitySaveBtn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- 5. ASSIGNMENT GRADING MODAL (Unchanged) -->
+<div id="assignmentGradingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 relative max-h-[90vh] flex flex-col animate-scaleFade">
+    <div class="flex justify-between items-center mb-4 border-b pb-3">
+        <div><h2 class="text-xl font-bold text-gray-800" id="gradingModalTitle">Submissions</h2></div>
+        <button onclick="closeModal('assignmentGradingModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    </div>
+    <input type="hidden" id="currentGradingType" value="assignment">
+    <div id="assignmentSubmissionsList" class="flex-1 overflow-y-auto pr-2 space-y-4"></div>
+    <div class="pt-4 border-t mt-2 flex justify-end">
+        <button onclick="closeModal('assignmentGradingModal')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 6. ESSAY GRADING MODAL (Unchanged) -->
+<div id="essayGradingModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl p-6 relative max-h-[90vh] overflow-y-auto flex flex-col">
+    <div class="flex justify-between items-center mb-5 border-b pb-3">
+        <div><h2 class="text-xl font-bold text-gray-800">Grade Essays</h2></div>
+        <button onclick="closeModal('essayGradingModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    </div>
+    <div id="essayAnswersContainer" class="space-y-6 flex-1 overflow-y-auto pr-2"></div>
+    <div class="pt-4 border-t mt-4 flex justify-end">
+        <button onclick="closeModal('essayGradingModal')" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium text-sm">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- 7. CONFIRMATION MODAL (Unchanged) -->
+<div id="confirmationModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-scaleFade relative">
+    <div class="text-center">
+      <div id="confirmIcon" class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+         <i class="ri-alert-line text-red-600 text-2xl"></i>
+      </div>
+      <h3 class="text-lg leading-6 font-bold text-gray-900" id="confirmTitle">Confirm Action</h3>
+      <div class="mt-2"><p class="text-sm text-gray-500" id="confirmMessage">Are you sure?</p></div>
+    </div>
+    <div class="mt-6 flex gap-3">
+      <button onclick="closeModal('confirmationModal')" class="w-full px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700">Cancel</button>
+      <button type="button" id="confirmActionBtn" class="w-full px-4 py-2 bg-red-600 text-white rounded-lg">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- 8. CREATE QUIZ MODAL (UPDATED: Attempts & Publish Date) -->
+<div id="createQuizModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 relative max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-5 border-b pb-3">
+        <h2 class="text-2xl font-bold text-gray-800">Create Quiz</h2>
+        <button onclick="closeModal('createQuizModal')" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    </div>
+    <input type="hidden" id="quizCourseId" value="{{ course_id }}">
+    <input type="hidden" id="quizMaterialId" value="0">
+    <input type="hidden" id="quizIdToEdit" value="">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Quiz Title</label>
+            <input type="text" id="quizTitle" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Duration (Minutes)</label>
+            <input type="number" id="quizDuration" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <!-- NEW FIELD: Max Attempts -->
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Max Attempts</label>
+            <input type="number" id="quizMaxAttempts" min="1" value="1" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+        <!-- NEW FIELD: Publish Schedule -->
+        <div>
+            <label class="block text-gray-700 font-semibold mb-1">Schedule Publish</label>
+            <input type="datetime-local" id="quizPublishAt" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+    </div>
+    <div class="mb-6">
+        <label class="block text-gray-700 font-semibold mb-1">Description</label>
+        <textarea id="quizDescription" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" rows="2"></textarea>
+    </div>
+    <div class="bg-gray-100 p-3 rounded-lg flex flex-wrap items-center gap-3 mb-6 border border-gray-200">
+        <span class="font-semibold text-gray-700">Add Questions:</span>
+        <input type="number" id="numQuestions" class="border border-gray-300 rounded px-2 py-1 w-16 text-center" value="1" min="1">
+        <select id="questionTypeBatch" class="border border-gray-300 rounded px-2 py-1 bg-white">
+            <option value="multiple_choice">Multiple Choice</option>
+            <option value="true_false">True/False</option>
+            <option value="identification">Identification</option>
+            <option value="enumeration">Enumeration</option>
+            <option value="essay">Essay</option>
+        </select>
+        <button type="button" onclick="addMultipleQuestions()" class="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium">+ Add</button>
+    </div>
+    <div id="quizQuestionsContainer" class="space-y-6 mb-8"></div>
+    <div class="flex justify-end gap-3 pt-4 border-t">
+        <button onclick="closeModal('createQuizModal')" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Cancel</button>
+        <button onclick="submitCreateQuiz()" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg">Save Quiz</button>
+    </div>
+  </div>
+</div>
+
+<!-- 9. EXCEPTION MANAGEMENT MODAL (NEW) -->
+<div id="exceptionModal"
+     class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
+
+  <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 relative animate-scaleFade">
+
+    <div class="flex justify-between items-center mb-5 border-b pb-3">
+        <h2 class="text-xl font-bold text-gray-800">Student Exceptions</h2>
+        <button onclick="closeModal('exceptionModal')"
+                class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+    </div>
+
+    <input type="hidden" id="exceptionItemType">
+    <input type="hidden" id="exceptionItemId">
+
+    <div class="space-y-4">
+
+        <!-- STUDENT ID + AUTOCOMPLETE -->
+        <div class="relative">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+
+            <input 
+                type="text" 
+                id="exceptionStudentId"
+                oninput="searchStudentId()"
+                autocomplete="off"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Enter Student ID (e.g., 202400123)"
+            >
+
+            <!-- AUTOCOMPLETE DROPDOWN -->
+            <div id="studentIdDropdown"
+                 class="absolute w-full bg-white border border-gray-200 rounded-lg shadow-lg hidden z-50 max-h-48 overflow-y-auto"></div>
+
+            <p class="text-xs text-gray-500 mt-1">Search by the student's official Student ID.</p>
+        </div>
+
+        <!-- SELECTED STUDENT PREVIEW -->
+        <div id="selectedStudentInfo"
+             class="mt-2 p-3 bg-gray-50 border border-gray-200 rounded-lg hidden">
+            <p class="font-semibold text-gray-800">Selected Student:</p>
+            <p id="studentFullname" class="text-gray-700"></p>
+        </div>
+
+        <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Extended Due Date</label>
+            <input type="datetime-local" id="exceptionDueDate"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+        </div>
+
+        <div id="exceptionAttemptsContainer" class="hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Extra Attempts</label>
+            <input type="number" id="exceptionExtraAttempts" value="0"
+                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none">
+            <p class="text-xs text-gray-500 mt-1">Number of additional attempts to grant.</p>
+        </div>
+
+    </div>
+
+    <div class="flex justify-end gap-3 pt-6">
+        <button onclick="submitException('remove_exception')"
+                class="px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200">
+            Remove
+        </button>
+
+        <button onclick="submitException('set_exception')"
+                class="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg">
+            Save Exception
+        </button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- 10. SUCCESS MODAL (Unchanged) -->
+<div id="successModal" class="fixed inset-0 bg-black/50 hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-10 text-center animate-scaleFade">
+    <div class="w-24 h-24 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
+      <svg class="w-14 h-14 text-green-600 animate-bounceCheck" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+    </div>
+    <h3 class="text-3xl font-bold text-gray-800 mb-3">Success!</h3>
+    <p class="text-gray-600 text-lg mb-8">Action completed successfully.</p>
+    <button onclick="location.reload()" class="px-10 py-4 bg-green-600 text-white text-lg rounded-xl hover:bg-green-700 transition font-medium">Continue</button>
+  </div>
+</div>
+<!-- VIEW MATERIAL / DELETE MATERIAL MODALS (Existing code reused implicitly) -->
+<div id="viewMaterialModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-90 flex items-center justify-center p-4">
+  <div class="relative w-full h-full flex items-center justify-center p-4 max-h-screen overflow-y-auto">
+    <iframe id="viewMaterialPDF" src="" class="w-full h-full border-none rounded-lg"></iframe>
+    <div class="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 flex justify-center sm:justify-end gap-3 z-10">
+      <button onclick="closeModal('viewMaterialModal')" class="px-3 sm:px-4 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 flex items-center gap-2 text-xs sm:text-sm"><i class="ri-arrow-left-line"></i> Back</button>
+      <a href="#" id="viewMaterialDownload" download class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-xs sm:text-sm"><i class="ri-download-line"></i> Download</a>
+    </div>
+    <button onclick="closeModal('viewMaterialModal')" class="absolute top-4 right-4 text-white text-2xl sm:text-3xl hover:text-red-500 z-10"><i class="ri-close-line"></i></button>
+  </div>
+</div>
+
+<div id="deleteMaterialModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-open">
+  <div class="bg-white w-full max-w-md rounded-lg shadow-lg p-5 sm:p-6 relative">
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-900 mb-3 flex items-center">Delete Material</h2>
+    <p class="text-gray-600 mb-4 text-sm">Are you sure you want to delete this material?</p>
+    <input type="hidden" id="deleteMaterialId" />
+    <div class="flex flex-col sm:flex-row justify-end gap-2">
+      <button onclick="confirmDeleteMaterial()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm w-full sm:w-auto">Yes, Delete</button>
+      <button onclick="closeModal('deleteMaterialModal')" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm w-full sm:w-auto">Cancel</button>
+    </div>
+  </div>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      {% if category == "success" and "uploaded" in message %}
+        <script>
+          document.addEventListener('DOMContentLoaded', () => {
+             showSuccessModal();
+          });
+        </script>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<script>
+// --- CONSTANTS ---
+const submitQuizAPI = "{{ url_for('auth.submit_quiz_api') }}";
+const quizActionBaseURL = "/quiz_action";
+const getQuizDetailsBaseURL = "/get_quiz_details";
+const staticBaseUrl = "{{ url_for('static', filename='') }}";
+
+function closeModal(id) {
+    document.getElementById(id).classList.add('hidden');
+    document.body.classList.remove('modal-open');
+}
+
+// ==================== ACTIVITY LOGIC (UPDATED) ====================
+async function openCreateActivityModal(courseId, materialId, editActivityId = null) {
+    document.getElementById('activityCourseId').value = courseId;
+    document.getElementById('activityMaterialId').value = materialId || "0";
+    document.getElementById('activityEditId').value = editActivityId || "";
+    document.getElementById('activityTitle').value = "";
+    document.getElementById('activityDescription').value = "";
+    document.getElementById('activityDueDate').value = "";
+    document.getElementById('activityPoints').value = "100";
+    document.getElementById('activityPublishAt').value = ""; // Reset
+    
+    document.getElementById('activityModalTitle').innerText = "Create Activity";
+    document.getElementById('activitySaveBtn').innerText = "Create";
+
+    if (editActivityId) {
+        document.getElementById('activityModalTitle').innerText = "Edit Activity";
+        document.getElementById('activitySaveBtn').innerText = "Update";
+        try {
+            const res = await fetch(`/get_activity_details/${editActivityId}`);
+            const json = await res.json();
+            if(json.status === 'success') {
+                const data = json.data;
+                document.getElementById('activityTitle').value = data.title;
+                document.getElementById('activityDescription').value = data.description;
+                document.getElementById('activityDueDate').value = data.due_date;
+                document.getElementById('activityPoints').value = data.points;
+                document.getElementById('activityPublishAt').value = data.publish_at || ""; // Populate
+            }
+        } catch(e) { console.error(e); }
+    }
+    document.getElementById('createActivityModal').classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+async function submitActivity() {
+    const payload = {
+        action: document.getElementById('activityEditId').value ? 'edit' : 'create',
+        activity_id: document.getElementById('activityEditId').value || null,
+        course_id: document.getElementById('activityCourseId').value,
+        material_id: document.getElementById('activityMaterialId').value,
+        title: document.getElementById('activityTitle').value,
+        description: document.getElementById('activityDescription').value,
+        due_date: document.getElementById('activityDueDate').value,
+        points: document.getElementById('activityPoints').value,
+        publish_at: document.getElementById('activityPublishAt').value // Include
+    };
+    if(!payload.title || !payload.due_date) return showToast("Title and Due Date required.", "error");
+    try {
+        const res = await fetch('/manage_activity_api', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(data.status === 'success') {
+            closeModal('createActivityModal');
+            showSuccessModal(); // Shows modal, user clicks continue to reload
+        } else { showToast(data.message, "error"); }
+    } catch(e) { showToast("Error submitting activity.", "error"); }
+}
+
+async function performActivityAction(id, action) {
+    if (action === 'delete') openConfirmationModal(id, 'delete_activity');
+    else if (action === 'publish') openConfirmationModal(id, 'publish_activity');
+    else if (action === 'unpublish') openConfirmationModal(id, 'unpublish_activity');
+}
+
+async function executeActivityAction(id, action) {
+    const payload = { action: action, activity_id: id };
+    if(action === 'publish' || action === 'unpublish') payload.action = action;
+    try {
+        const res = await fetch('/manage_activity_api', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(data.status === 'success') showSuccessModal();
+        else showToast(data.message, "error");
+    } catch(e) { showToast("Action failed.", "error"); }
+}
+
+// ==================== ASSIGNMENT LOGIC (UPDATED) ====================
+async function openCreateAssignmentModal(courseId, materialId, editAssignmentId = null) {
+    document.getElementById('assignCourseId').value = courseId;
+    document.getElementById('assignMaterialId').value = materialId || "0";
+    document.getElementById('assignEditId').value = editAssignmentId || "";
+
+    // Reset UI
+    document.getElementById('assignTitle').value = "";
+    document.getElementById('assignDescription').value = "";
+    document.getElementById('assignDueDate').value = "";
+    document.getElementById('assignPoints').value = "100";
+    document.getElementById('assignPublishAt').value = ""; // Reset
+
+    document.getElementById('assignModalTitle').innerText = "Create Assignment";
+    document.getElementById('assignSaveBtn').innerText = "Create";
+
+    if (editAssignmentId) {
+        document.getElementById('assignModalTitle').innerText = "Edit Assignment";
+        document.getElementById('assignSaveBtn').innerText = "Update";
+        try {
+            const res = await fetch(`/get_assignment_details/${editAssignmentId}`);
+            const json = await res.json();
+            if(json.status === 'success') {
+                const data = json.data;
+                document.getElementById('assignTitle').value = data.title;
+                document.getElementById('assignDescription').value = data.description;
+                document.getElementById('assignDueDate').value = data.due_date;
+                document.getElementById('assignPoints').value = data.points;
+                document.getElementById('assignPublishAt').value = data.publish_at || ""; // Populate
+            }
+        } catch(e) { console.error(e); }
+    }
+    document.getElementById('createAssignmentModal').classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+async function submitAssignment() {
+    const payload = {
+        action: document.getElementById('assignEditId').value ? 'edit' : 'create',
+        assignment_id: document.getElementById('assignEditId').value || null,
+        course_id: document.getElementById('assignCourseId').value,
+        material_id: document.getElementById('assignMaterialId').value,
+        title: document.getElementById('assignTitle').value,
+        description: document.getElementById('assignDescription').value,
+        due_date: document.getElementById('assignDueDate').value,
+        points: document.getElementById('assignPoints').value,
+        publish_at: document.getElementById('assignPublishAt').value // Include
+    };
+    if(!payload.title || !payload.due_date) return showToast("Title and Due Date required.", "error");
+    try {
+        const res = await fetch('/manage_assignment_api', {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(data.status === 'success') {
+            closeModal('createAssignmentModal');
+            showSuccessModal();
+        } else {
+            showToast(data.message, "error");
+        }
+    } catch(e) { showToast("Error submitting assignment.", "error"); }
+}
+
+async function performAssignmentAction(id, action) {
+    if (action === 'delete') openConfirmationModal(id, 'delete_assignment');
+    else if (action === 'publish') openConfirmationModal(id, 'publish_assignment');
+    else if (action === 'unpublish') openConfirmationModal(id, 'unpublish_assignment');
+}
+
+async function openSubmissionGradingModal(itemId, title, maxPoints, type) {
+    const container = document.getElementById('assignmentSubmissionsList');
+    const modal = document.getElementById('assignmentGradingModal');
+    document.getElementById('gradingModalTitle').innerText = `Grading: ${title}`;
+    document.getElementById('currentGradingType').value = type;
+    
+    container.innerHTML = '<div class="text-center py-4"><i class="ri-loader-4-line animate-spin"></i> Loading...</div>';
+    modal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+
+    const url = type === 'activity' ? `/view_activity_submissions/${itemId}` : `/view_assignment_submissions/${itemId}`;
+
+    try {
+        const res = await fetch(url);
+        const json = await res.json();
+        container.innerHTML = '';
+        if(json.submissions.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-500 py-4">No submissions yet.</p>';
+            return;
+        }
+        json.submissions.forEach(sub => {
+            const gradeVal = sub.grade !== null ? sub.grade : '';
+            const fileLink = staticBaseUrl + sub.file_path;
+            const item = `
+            <div class="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row gap-4 bg-gray-50">
+                <div class="flex-1">
+                    <h4 class="font-bold text-gray-800">${sub.student_name}</h4>
+                    <p class="text-xs text-gray-500 mb-2">Submitted: ${sub.submission_date}</p>
+                    <a href="${fileLink}" target="_blank" class="text-blue-600 text-sm hover:underline"><i class="ri-file-pdf-line"></i> View File</a>
+                </div>
+                <div class="w-full sm:w-1/3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="number" id="grade-${sub.submission_id}" value="${gradeVal}" max="${maxPoints}" class="w-20 border rounded px-2 py-1 text-sm" placeholder="0">
+                        <span class="text-sm text-gray-500">/ ${maxPoints}</span>
+                    </div>
+                    <textarea id="feed-${sub.submission_id}" rows="1" class="w-full border rounded px-2 py-1 text-sm mb-2" placeholder="Feedback...">${sub.feedback || ''}</textarea>
+                    <button onclick="submitGrade(${sub.submission_id}, '${type}')" class="px-3 py-1 bg-purple-600 text-white text-xs rounded hover:bg-purple-700 w-full">Save Grade</button>
+                </div>
+            </div>`;
+            container.insertAdjacentHTML('beforeend', item);
+        });
+    } catch(e) { container.innerHTML = '<p class="text-red-500 text-center">Error loading submissions.</p>'; }
+}
+
+async function submitGrade(subId, type) {
+    const grade = document.getElementById(`grade-${subId}`).value;
+    const feed = document.getElementById(`feed-${subId}`).value;
+    const url = type === 'activity' ? '/manage_activity_api' : '/manage_assignment_api';
+    
+    try {
+        const res = await fetch(url, {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ action: 'grade', submission_id: subId, grade: grade, feedback: feed })
+        });
+        const data = await res.json();
+        if(data.status === 'success') showToast("Grade Saved!", "success");
+        else showToast(data.message, "error");
+    } catch(e) { showToast("Error saving grade.", "error"); }
+}
+
+// ==================== EXCEPTION MANAGEMENT (NEW) ====================
+function openExceptionModal(type, itemId) {
+    document.getElementById('exceptionItemType').value = type;
+    document.getElementById('exceptionItemId').value = itemId;
+
+    document.getElementById('exceptionStudentId').value = "";
+    document.getElementById('exceptionDueDate').value = "";
+
+    const attemptsContainer = document.getElementById('exceptionAttemptsContainer');
+
+    if (type === 'quiz') {
+        attemptsContainer.classList.remove('hidden');
+        document.getElementById('exceptionExtraAttempts').value = "0";
+    } else {
+        attemptsContainer.classList.add('hidden');
+    }
+
+    document.getElementById('exceptionModal').classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+async function submitException(action) {
+    const payload = {
+        action: action,
+        item_type: document.getElementById('exceptionItemType').value,
+        item_id: document.getElementById('exceptionItemId').value,
+
+        // FIXED: student_id FINAL
+        student_id: document.getElementById('exceptionStudentId').value,
+
+        extended_date: document.getElementById('exceptionDueDate').value,
+        extra_attempts: document.getElementById('exceptionExtraAttempts').value
+    };
+
+    if (!payload.student_id) {
+        return showToast("Student ID is required.", "error");
+    }
+
+    try {
+        const res = await fetch('/manage_exception_api', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (data.status === 'success') {
+            closeModal('exceptionModal');
+            showSuccessModal();
+        } else {
+            showToast(data.message, "error");
+        }
+
+    } catch (e) {
+        showToast("Error processing exception.", "error");
+    }
+}
+
+// ==================== AUTOCOMPLETE FOR STUDENT ID ====================
+async function searchStudentId() {
+    const id = document.getElementById("exceptionStudentId").value.trim();
+    const dropdown = document.getElementById("studentIdDropdown");
+
+    if (!id) {
+        dropdown.classList.add("hidden");
+        return;
+    }
+
+    const res = await fetch(`/api/get_student_by_pid?student_id=${id}`);
+    const data = await res.json();
+
+    if (data.status !== "success") return;
+
+    dropdown.innerHTML = "";
+    dropdown.classList.remove("hidden");
+
+    if (data.students.length === 0) {
+        dropdown.innerHTML = `<div class="p-2 text-gray-500 text-sm">No matching students</div>`;
+        return;
+    }
+
+    data.students.forEach(st => {
+        const item = document.createElement("div");
+        item.classList = "px-3 py-2 hover:bg-blue-100 cursor-pointer text-sm";
+        item.textContent = `${st.student_id} — ${st.full_name}`;
+
+        item.onclick = () => selectStudent(st);
+        dropdown.appendChild(item);
+    });
+}
+
+function selectStudent(st) {
+    document.getElementById("exceptionStudentId").value = st.student_id;
+
+    document.getElementById("studentIdDropdown").classList.add("hidden");
+
+    const infoBox = document.getElementById("selectedStudentInfo");
+    const nameDisplay = document.getElementById("studentFullname");
+
+    infoBox.classList.remove("hidden");
+    nameDisplay.textContent = st.full_name;
+}
+
+// ==================== CONFIRMATION & GENERAL LOGIC ====================
+let pendingId = null, pendingAction = null;
+
+function openConfirmationModal(id, action) {
+    pendingId = id; pendingAction = action;
+    const title = document.getElementById('confirmTitle'), msg = document.getElementById('confirmMessage'), btn = document.getElementById('confirmActionBtn'), icon = document.getElementById('confirmIcon').querySelector('i');
+    
+    if (action.includes('delete')) {
+        title.innerText = "Delete Item"; msg.innerText = "Are you sure?"; btn.innerText = "Yes, Delete";
+        btn.className = "w-full px-4 py-2 bg-red-600 text-white rounded-lg";
+    } else {
+        const type = action.includes('un') ? 'Unpublish' : 'Publish';
+        title.innerText = `${type} Item`; msg.innerText = "Are you sure?"; btn.innerText = "Confirm";
+        btn.className = action.includes('un') ? "w-full px-4 py-2 bg-orange-600 text-white rounded-lg" : "w-full px-4 py-2 bg-green-600 text-white rounded-lg";
+    }
+    document.getElementById('confirmationModal').classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    btn.onclick = () => {
+        if(pendingAction.includes('assignment')) executeAssignmentAction(pendingId, pendingAction.split('_')[0]);
+        else if(pendingAction.includes('activity')) executeActivityAction(pendingId, pendingAction.split('_')[0]);
+        else performQuizAction(pendingId, pendingAction);
+        closeModal('confirmationModal');
+    };
+}
+
+async function executeAssignmentAction(id, action) {
+    const payload = { action: action, assignment_id: id, status: action };
+    try {
+        const res = await fetch('/manage_assignment_api', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        if((await res.json()).status === 'success') showSuccessModal(); else showToast("Failed.", "error");
+    } catch(e) { showToast("Error.", "error"); }
+}
+async function performQuizAction(id, action) {
+    try {
+        const res = await fetch(`${quizActionBaseURL}/${id}/${action}`, { method: 'POST' });
+        if((await res.json()).status === 'success') showSuccessModal(); else showToast("Failed.", "error");
+    } catch(e) { showToast("Error.", "error"); }
+}
+
+// ==================== QUIZ CREATION/EDIT LOGIC (UPDATED) ====================
+async function editQuiz(quizId) {
+    try {
+        const res = await fetch(`${getQuizDetailsBaseURL}/${quizId}`);
+        const json = await res.json();
+        if (json.status !== 'success') throw new Error(json.message);
+        const quiz = json.data;
+        
+        document.getElementById('quizCourseId').value = quiz.course_id;
+        document.getElementById('quizMaterialId').value = quiz.material_id || "0";
+        document.getElementById('quizIdToEdit').value = quiz.quiz_id;
+        document.getElementById('quizTitle').value = quiz.title;
+        document.getElementById('quizDescription').value = quiz.description;
+        document.getElementById('quizDuration').value = quiz.duration_minutes;
+        
+        // NEW: Populate Max Attempts and Publish Date
+        document.getElementById('quizMaxAttempts').value = quiz.max_attempts || 1;
+        document.getElementById('quizPublishAt').value = quiz.publish_at || "";
+
+        document.getElementById('quizQuestionsContainer').innerHTML = '';
+        
+        quiz.questions.forEach(q => {
+            addQuizQuestion(1, q.question_type);
+            const block = document.getElementById('quizQuestionsContainer').lastElementChild;
+            block.querySelector('.question-text').value = q.question_text;
+            block.querySelector('.question-points').value = q.points;
+            if (q.question_type === 'multiple_choice') {
+                block.querySelector('.option-a').value = q.option_a;
+                block.querySelector('.option-b').value = q.option_b;
+                block.querySelector('.option-c').value = q.option_c;
+                block.querySelector('.option-d').value = q.option_d;
+            }
+            const typeSelect = block.querySelector('.question-type');
+            updateCorrectAnswer(typeSelect);
+            if (['multiple_choice', 'true_false'].includes(q.question_type)) {
+                block.querySelector('.question-correct-select').value = q.correct_answer;
+            } else {
+                block.querySelector('.question-correct-text').value = q.correct_answer_text;
+            }
+        });
+        
+        document.querySelector('#createQuizModal h2').innerText = "Edit Quiz";
+        document.getElementById('createQuizModal').classList.remove('hidden');
+        document.body.classList.add('modal-open');
+    } catch (err) { showToast("Failed to load quiz.", "error"); }
+}
+
+function openCreateQuizModal(passedCourseId, materialId) {
+    document.getElementById('quizIdToEdit').value = "";
+    document.querySelector('#createQuizModal h2').innerText = "Create Quiz";
+    document.getElementById('quizCourseId').value = passedCourseId;
+    document.getElementById('quizMaterialId').value = materialId || "0";
+    document.getElementById('quizTitle').value = '';
+    document.getElementById('quizDescription').value = '';
+    document.getElementById('quizDuration').value = '';
+    
+    // NEW: Reset Max Attempts and Publish Date
+    document.getElementById('quizMaxAttempts').value = '1';
+    document.getElementById('quizPublishAt').value = '';
+
+    document.getElementById('quizQuestionsContainer').innerHTML = '';
+    addQuizQuestion(1);
+    document.getElementById('createQuizModal').classList.remove('hidden');
+    document.body.classList.add('modal-open');
+}
+
+function addMultipleQuestions() {
+    const count = parseInt(document.getElementById('numQuestions').value) || 1;
+    const type = document.getElementById('questionTypeBatch').value;
+    addQuizQuestion(count, type);
+}
+
+function addQuizQuestion(count = 1, defaultType = 'multiple_choice') {
+    const container = document.getElementById('quizQuestionsContainer');
+    for (let i = 0; i < count; i++) {
+        const qIndex = container.children.length + 1;
+        const questionHTML = `
+        <div class="border border-gray-300 p-4 rounded-lg bg-gray-50 relative question-block shadow-sm">
+            <button type="button" onclick="this.parentElement.remove()" class="absolute top-3 right-3 text-red-400"><i class="ri-close-line text-xl"></i></button>
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div class="md:col-span-8 space-y-1"><label class="block text-sm font-bold text-gray-700">Question ${qIndex}</label><input type="text" class="w-full border border-gray-300 rounded px-3 py-2 question-text focus:border-blue-500 outline-none"></div>
+                <div class="md:col-span-4 space-y-1"><label class="block text-sm font-bold text-gray-700">Type</label><select class="w-full border border-gray-300 rounded px-3 py-2 question-type bg-white" onchange="updateCorrectAnswer(this)"><option value="multiple_choice">Multiple Choice</option><option value="true_false">True/False</option><option value="identification">Identification</option><option value="enumeration">Enumeration</option><option value="essay">Essay</option></select></div>
+                <div class="md:col-span-12 question-options grid grid-cols-1 md:grid-cols-2 gap-2 hidden"><input type="text" class="w-full border border-gray-300 rounded px-2 py-1 option-a" placeholder="A"><input type="text" class="w-full border border-gray-300 rounded px-2 py-1 option-b" placeholder="B"><input type="text" class="w-full border border-gray-300 rounded px-2 py-1 option-c" placeholder="C"><input type="text" class="w-full border border-gray-300 rounded px-2 py-1 option-d" placeholder="D"></div>
+                <div class="md:col-span-8 correct-answer-container"><label class="block text-sm font-bold text-gray-700 mb-1">Correct Answer</label><select class="w-full border border-gray-300 rounded px-3 py-2 question-correct-select bg-white hidden"></select><input type="text" class="w-full border border-gray-300 rounded px-3 py-2 question-correct-text hidden" placeholder="Key"></div>
+                <div class="md:col-span-4"><label class="block text-sm font-bold text-gray-700 mb-1">Points</label><input type="number" class="w-full border border-gray-300 rounded px-3 py-2 question-points" value="1"></div>
+            </div>
+        </div>`;
+        container.insertAdjacentHTML('beforeend', questionHTML);
+        const lastQuestion = container.lastElementChild;
+        const typeSelect = lastQuestion.querySelector('.question-type');
+        typeSelect.value = defaultType;
+        updateCorrectAnswer(typeSelect);
+    }
+}
+
+function updateCorrectAnswer(selectEl) {
+    const block = selectEl.closest('.question-block');
+    const mcqDiv = block.querySelector('.question-options');
+    const correctSelect = block.querySelector('.question-correct-select');
+    const correctText = block.querySelector('.question-correct-text');
+    const type = selectEl.value;
+    
+    mcqDiv.classList.add('hidden');
+    correctSelect.classList.add('hidden');
+    correctText.classList.add('hidden');
+
+    if (type === 'multiple_choice') {
+        mcqDiv.classList.remove('hidden');
+        correctSelect.classList.remove('hidden');
+        correctSelect.innerHTML = `<option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>`;
+    } else if (type === 'true_false') {
+        correctSelect.classList.remove('hidden');
+        correctSelect.innerHTML = `<option value="T">True</option><option value="F">False</option>`;
+    } else if (type !== 'essay') {
+        correctText.classList.remove('hidden');
+    }
+}
+
+async function submitCreateQuiz() {
+    const courseId = document.getElementById('quizCourseId').value;
+    const materialId = document.getElementById('quizMaterialId').value;
+    const quizId = document.getElementById('quizIdToEdit').value;
+    const title = document.getElementById('quizTitle').value.trim();
+    const description = document.getElementById('quizDescription').value;
+    const duration = document.getElementById('quizDuration').value;
+    
+    // NEW: Get values for Max Attempts and Publish Date
+    const maxAttempts = document.getElementById('quizMaxAttempts').value;
+    const publishAt = document.getElementById('quizPublishAt').value;
+
+    if (!title) return showToast("Title required.", "error");
+    const questions = Array.from(document.querySelectorAll('.question-block')).map(q => {
+        const type = q.querySelector('.question-type').value;
+        return {
+            text: q.querySelector('.question-text').value,
+            type,
+            a: q.querySelector('.option-a').value, b: q.querySelector('.option-b').value, c: q.querySelector('.option-c').value, d: q.querySelector('.option-d').value,
+            correct: q.querySelector('.question-correct-select').value,
+            correct_text: q.querySelector('.question-correct-text').value,
+            points: q.querySelector('.question-points').value
+        };
+    });
+
+    // NEW: Include max_attempts and publish_at in payload
+    const payload = { 
+        quiz_id: quizId || null, 
+        course_id: courseId, 
+        material_id: materialId, 
+        title, 
+        description, 
+        duration, 
+        questions,
+        max_attempts: maxAttempts,
+        publish_at: publishAt
+    };
+
+    try {
+        const res = await fetch(submitQuizAPI, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        const data = await res.json();
+        if(data.status === 'success') { closeModal('createQuizModal'); showSuccessModal(); }
+        else showToast(data.message, "error");
+    } catch(e) { showToast("Error.", "error"); }
+}
+
+// --- General Handlers ---
+document.addEventListener('DOMContentLoaded', () => {
+  const toggles = document.querySelectorAll(".material-dropdown-toggle");
+  toggles.forEach(toggle => {
+      toggle.addEventListener("click", () => {
+          const targetId = "dropdown-" + toggle.dataset.material;
+          const target = document.getElementById(targetId);
+          document.querySelectorAll(".material-dropdown-content").forEach(drop => { if (drop.id !== targetId) drop.classList.add("hidden"); });
+          target.classList.toggle("hidden");
+      });
+  });
+
+  window.openEditMaterialModal = (id, title, description, term) => {
+    document.getElementById("editMaterialId").value = id;
+    document.getElementById("editMaterialTitle").value = title;
+    document.getElementById("editMaterialDescription").value = description;
+    document.getElementById("editMaterialTerm").value = term || 'Prelims';
+    document.getElementById("editMaterialModal").classList.remove("hidden");
+    document.body.classList.add('modal-open');
+  };
+
+  window.submitEditMaterial = async () => {
+    const id = document.getElementById("editMaterialId").value;
+    const formData = new FormData();
+    formData.append("material_title", document.getElementById("editMaterialTitle").value);
+    formData.append("material_description", document.getElementById("editMaterialDescription").value);
+    formData.append("term", document.getElementById("editMaterialTerm").value);
+    try {
+      await fetch(`/edit_material/${id}`, { method: "POST", body: formData });
+      closeModal("editMaterialModal"); showSuccessModal();
+    } catch (err) { showToast("Edit failed!", "error"); }
+  };
+
+  window.openDeleteMaterialModal = (id) => {
+    document.getElementById("deleteMaterialId").value = id;
+    document.getElementById("deleteMaterialModal").classList.remove("hidden");
+    document.body.classList.add('modal-open');
+  };
+
+  window.confirmDeleteMaterial = async () => {
+    try {
+      await fetch(`{{ url_for('auth.upload_materials', course_id=course.course_id) }}?delete_material_id=${document.getElementById('deleteMaterialId').value}`, { method: 'GET' });
+      showSuccessModal();
+    } catch (error) { showToast("Delete failed.", "error"); }
+  };
+
+  window.openViewMaterialModal = (fileUrl) => {
+    document.getElementById("viewMaterialPDF").src = fileUrl;
+    document.getElementById("viewMaterialDownload").href = fileUrl;
+    document.getElementById("viewMaterialModal").classList.remove("hidden");
+    document.body.classList.add('modal-open');
+  };
+
+  const fileInput = document.getElementById("fileInput");
+  const filePreview = document.getElementById("filePreview");
+  const uploadForm = document.getElementById("uploadMaterialForm");
+  const submitBtn = uploadForm.querySelector('button[type="submit"]');
+
+  fileInput.addEventListener("change", e => {
+      filePreview.innerHTML = "";
+      Array.from(e.target.files).forEach(file => {
+          filePreview.innerHTML += `<div class="py-1 flex justify-between"><span class="truncate">${file.name}</span></div>`;
+      });
+  });
+
+  uploadForm.addEventListener("submit", async function(e) {
+    e.preventDefault();
+    submitBtn.disabled = true; submitBtn.textContent = "Uploading...";
+    try {
+      const response = await fetch(uploadForm.action, { method: "POST", body: new FormData(uploadForm) });
+      if (!response.ok) throw new Error();
+      closeUploadModal();
+      showSuccessModal();
+    } catch (error) { showToast("Upload failed", "error"); } 
+    finally { submitBtn.disabled = false; submitBtn.textContent = "Upload"; }
+  });
+
+  window.openUploadModal = () => { document.getElementById("uploadModal").classList.remove("hidden"); document.body.classList.add('modal-open'); };
+  window.closeUploadModal = () => { document.getElementById("uploadModal").classList.add("hidden"); document.body.classList.remove('modal-open'); uploadForm.reset(); filePreview.innerHTML = ""; };
+
+  const profileBtn = document.getElementById("profile-dropdown-button");
+  const profileMenu = document.getElementById("profile-dropdown-menu");
+  if (profileBtn) profileBtn.addEventListener("click", e => { e.stopPropagation(); profileMenu.classList.toggle("hidden"); });
+  document.addEventListener("click", e => { if (profileMenu && !profileMenu.contains(e.target) && !profileBtn.contains(e.target)) profileMenu.classList.add("hidden"); });
+  document.getElementById("mobileMenuBtn").addEventListener("click", () => document.getElementById("mobileNav").classList.toggle("hidden"));
+});
+// ==================== ESSAY GRADING LOGIC (Unchanged) ====================
+async function openEssayGradingModal(quizId) {
+    const container = document.getElementById('essayAnswersContainer');
+    const modal = document.getElementById('essayGradingModal');
+    
+    if (!modal || !container) return showToast("Error: Modal not found.", "error");
+
+    container.innerHTML = `<div class="text-center py-8 text-gray-500"><i class="ri-loader-4-line animate-spin text-3xl text-primary"></i><p class="mt-2">Loading answers...</p></div>`;
+    modal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+
+    try {
+        const res = await fetch(`/view_essay_answers/${quizId}`);
+        const data = await res.json();
+        if (data.status !== 'success') throw new Error(data.message || 'Error fetching data');
+        const answers = data.answers;
+        container.innerHTML = '';
+
+        if (answers.length === 0) {
+            container.innerHTML = `<div class="text-center py-8 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-300"><i class="ri-file-text-line text-4xl mb-2"></i><p>No essay answers found.</p></div>`;
+            return;
+        }
+
+        answers.forEach(ans => {
+            const isGraded = ans.essay_grade_done;
+            const scoreVal = ans.score !== null ? ans.score : '';
+            const statusBadge = isGraded ? `<span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-bold">Graded</span>` : `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-bold">Needs Grading</span>`;
+            const html = `
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow bg-gray-50">
+                    <div class="flex justify-between items-start mb-3 border-b border-gray-200 pb-2">
+                        <div><h4 class="font-bold text-gray-800">${ans.student_name}</h4><p class="text-xs text-gray-500">Submitted: ${new Date(ans.submission_date).toLocaleString()}</p></div>${statusBadge}
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-xs font-bold text-gray-500 uppercase">Question (${ans.points} pts):</p><p class="text-sm text-gray-800 mb-2 italic">"${ans.question_text}"</p>
+                        <p class="text-xs font-bold text-gray-500 uppercase">Student Answer:</p><div class="bg-white p-3 rounded border border-gray-200 text-sm text-gray-700 mt-1 max-h-40 overflow-y-auto whitespace-pre-wrap">${ans.answer_text}</div>
+                    </div>
+                    <div class="flex items-center gap-3 bg-white p-2 rounded border border-gray-200">
+                        <label class="text-sm font-semibold text-gray-700">Score:</label>
+                        <input type="number" id="score-${ans.answer_id}" class="w-24 border border-gray-300 rounded px-2 py-1 text-sm focus:ring-2 focus:ring-primary outline-none" min="0" max="${ans.points}" step="1" value="${scoreVal}" placeholder="0">
+                        <span class="text-gray-500 text-sm">/ ${ans.points}</span>
+                        <button onclick="submitEssayGrade(${ans.answer_id}, ${ans.submission_id}, ${ans.points})" class="ml-auto px-4 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700 transition shadow-sm">Save Grade</button>
+                    </div>
+                </div>`;
+            container.insertAdjacentHTML('beforeend', html);
+        });
+    } catch (error) { container.innerHTML = `<p class="text-center text-red-500 py-4">Failed to load answers.</p>`; }
+}
+
+async function submitEssayGrade(answerId, submissionId, maxPoints) {
+    const input = document.getElementById(`score-${answerId}`);
+    const score = parseFloat(input.value);
+    if (isNaN(score) || score < 0 || score > maxPoints) return showToast(`Please enter a valid score between 0 and ${maxPoints}.`, "error");
+    const btn = input.parentElement.querySelector('button');
+    const originalText = btn.innerText; btn.innerText = "Saving..."; btn.disabled = true;
+
+    try {
+        const res = await fetch('/grade_essay_answer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer_id: answerId, submission_id: submissionId, score: score }) });
+        const data = await res.json();
+        if (data.status === 'success') {
+            btn.innerText = "Saved!"; btn.classList.replace('bg-purple-600', 'bg-green-600');
+            showToast("Grade Saved!", "success");
+            setTimeout(() => { btn.innerText = originalText; btn.classList.replace('bg-green-600', 'bg-purple-600'); btn.disabled = false; }, 2000);
+        } else { showToast("Error: " + data.message, "error"); btn.innerText = originalText; btn.disabled = false; }
+    } catch (err) { showToast("Network error occurred.", "error"); btn.innerText = originalText; btn.disabled = false; }
+}
+</script>
+
+</body>
+</html>

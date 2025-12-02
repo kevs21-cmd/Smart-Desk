@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Profile</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<script>
+tailwind.config = {
+theme: {
+extend: {
+colors: {
+primary: '#3b82f6',
+secondary: '#6366f1'
+},
+borderRadius: {
+'none': '0px',
+'sm': '4px',
+DEFAULT: '8px',
+'md': '12px',
+'lg': '16px',
+'xl': '20px',
+'2xl': '24px',
+'3xl': '32px',
+'full': '9999px',
+'button': '8px'
+}
+}
+}
+}
+</script>
+<style>
+:where([class^="ri-"])::before {
+content: "\f3c2";
+}
+.password-toggle {
+cursor: pointer;
+transition: color 0.2s ease;
+}
+.password-toggle:hover {
+color: #3b82f6;
+}
+.profile-upload-overlay {
+background: rgba(0, 0, 0, 0.5);
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+.profile-container:hover .profile-upload-overlay {
+opacity: 1;
+}
+.form-field {
+transition: all 0.2s ease;
+}
+.form-field:focus-within {
+transform: translateY(-1px);
+}
+.validation-message {
+animation: slideDown 0.3s ease;
+}
+@keyframes slideDown {
+from {
+opacity: 0;
+transform: translateY(-10px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+<div class="max-w-2xl mx-auto bg-white min-h-screen">
+<header class="relative px-6 py-6 border-b border-gray-100">
+<a href="{{ url_for('auth.dashboard') }}" class="absolute left-6 top-1/2 transform -translate-y-1/2 w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+<i class="ri-arrow-left-line text-xl text-gray-600"></i>
+</a>
+<h1 class="text-2xl font-bold text-gray-900 text-center">Edit Profile</h1>
+</header>
+
+<div class="px-6 py-8">
+    
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="mb-6 space-y-2">
+            {% for category, message in messages %}
+                <div class="p-4 rounded-lg flex items-center {{ 'bg-red-50 text-red-700 border border-red-200' if category == 'danger' else 'bg-green-50 text-green-700 border border-green-200' }}">
+                    <i class="{{ 'ri-error-warning-line' if category == 'danger' else 'ri-checkbox-circle-line' }} mr-2 text-lg"></i>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<form method="POST" action="{{ url_for('auth.edit_profile') }}" enctype="multipart/form-data" class="space-y-6">
+
+    
+<!-- Full Name -->
+<div class="form-field">
+<label for="fullName" class="block text-sm font-semibold text-gray-700 mb-2">
+Full Name
+</label>
+<div class="relative">
+<input type="text"
+id="fullName"
+name="full_name" 
+value="{{ user.full_name }}"
+class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 bg-white"
+placeholder="Enter your full name">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+<i class="ri-user-line text-gray-400"></i>
+</div>
+</div>
+<div class="validation-message hidden mt-2 text-sm text-red-600">
+<i class="ri-error-warning-line mr-1"></i>
+Please enter your full name
+</div>
+</div>
+
+<!-- Email -->
+<div class="form-field">
+<label for="email" class="block text-sm font-semibold text-gray-700 mb-2">
+Email Address
+</label>
+<div class="relative">
+<input type="email"
+id="email"
+name="email"
+value="{{ user.email }}"
+class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 bg-white"
+placeholder="Enter your email address">
+<div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+<i class="ri-mail-line text-gray-400"></i>
+</div>
+</div>
+<div class="validation-message hidden mt-2 text-sm text-red-600">
+<i class="ri-error-warning-line mr-1"></i>
+Please enter a valid email address
+</div>
+</div>
+
+<!-- Removed Current Password Field Here -->
+
+<div class="border-t border-gray-100 pt-6 mt-6">
+    <h3 class="text-sm font-semibold text-gray-900 mb-4">Change Password <span class="font-normal text-gray-500">(Optional)</span></h3>
+    
+    <!-- New Password -->
+    <div class="form-field mb-6">
+        <label for="newPassword" class="block text-sm font-medium text-gray-700 mb-2">
+        New Password
+        </label>
+        <div class="relative">
+        <input type="password"
+        id="newPassword"
+        name="password"
+        class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 bg-white"
+        placeholder="Enter new password">
+        <button type="button" class="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
+        <i class="ri-eye-off-line"></i>
+        </button>
+        </div>
+        <div class="mt-2 space-y-1">
+        <div class="flex items-center text-xs text-gray-500">
+        <div class="w-2 h-2 rounded-full bg-gray-300 mr-2"></div>
+        <span>At least 8 characters</span>
+        </div>
+        <div class="flex items-center text-xs text-gray-500">
+        <div class="w-2 h-2 rounded-full bg-gray-300 mr-2"></div>
+        <span>Include uppercase and lowercase letters</span>
+        </div>
+        <div class="flex items-center text-xs text-gray-500">
+        <div class="w-2 h-2 rounded-full bg-gray-300 mr-2"></div>
+        <span>Include at least one number</span>
+        </div>
+        </div>
+    </div>
+
+    <!-- Confirm Password -->
+    <div class="form-field">
+        <label for="confirmPassword" class="block text-sm font-medium text-gray-700 mb-2">
+        Confirm New Password
+        </label>
+        <div class="relative">
+        <input type="password"
+        id="confirmPassword"
+        name="confirm_password"
+        class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-900 bg-white"
+        placeholder="Confirm new password">
+        <button type="button" class="password-toggle absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
+        <i class="ri-eye-off-line"></i>
+        </button>
+        </div>
+        <div class="validation-message hidden mt-2 text-sm text-red-600">
+        <i class="ri-error-warning-line mr-1"></i>
+        Passwords do not match
+        </div>
+    </div>
+</div>
+
+<div class="pt-6">
+<button type="submit"
+class="w-full bg-primary text-white py-3 px-6 !rounded-button font-semibold hover:bg-blue-600 focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
+<span class="flex items-center justify-center">
+<i class="ri-save-line mr-2"></i>
+Save Changes
+</span>
+</button>
+</div>
+
+<div class="text-center pt-4">
+<a href="{{ url_for('auth.dashboard') }}" class="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors">
+Cancel Changes
+</a>
+</div>
+</form>
+</div>
+</div>
+<script id="password-toggle-functionality">
+document.addEventListener('DOMContentLoaded', function() {
+const passwordToggles = document.querySelectorAll('.password-toggle');
+passwordToggles.forEach(toggle => {
+toggle.addEventListener('click', function() {
+const input = this.previousElementSibling;
+const icon = this.querySelector('i');
+if (input.type === 'password') {
+input.type = 'text';
+icon.className = 'ri-eye-line';
+} else {
+input.type = 'password';
+icon.className = 'ri-eye-off-line';
+}
+});
+});
+});
+</script>
+
+<script>
+document.getElementById('profileImageInput').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('profileImage').src = e.target.result;
+        }
+        reader.readAsDataURL(e.target.files[0]);
+    }
+});
+</script>
+
+<script id="form-validation">
+document.addEventListener('DOMContentLoaded', function() {
+const form = document.querySelector('form');
+const fullNameInput = document.getElementById('fullName');
+const emailInput = document.getElementById('email');
+// Removed currentPasswordInput
+const newPasswordInput = document.getElementById('newPassword');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+const submitButton = form.querySelector('button[type="submit"]');
+
+function showError(input, message) {
+const validationMessage = input.closest('.form-field').querySelector('.validation-message');
+validationMessage.textContent = message;
+validationMessage.classList.remove('hidden');
+input.classList.add('border-red-500', 'focus:ring-red-500');
+input.classList.remove('border-gray-200', 'focus:ring-primary');
+}
+
+function hideError(input) {
+const validationMessage = input.closest('.form-field').querySelector('.validation-message');
+validationMessage.classList.add('hidden');
+input.classList.remove('border-red-500', 'focus:ring-red-500');
+input.classList.add('border-gray-200', 'focus:ring-primary');
+}
+
+function validateEmail(email) {
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+return emailRegex.test(email);
+}
+
+function validatePassword(password) {
+const hasMinLength = password.length >= 8;
+const hasUpperCase = /[A-Z]/.test(password);
+const hasLowerCase = /[a-z]/.test(password);
+const hasNumber = /\d/.test(password);
+return hasMinLength && hasUpperCase && hasLowerCase && hasNumber;
+}
+
+function updatePasswordStrength() {
+const password = newPasswordInput.value;
+const indicators = newPasswordInput.closest('.form-field').querySelectorAll('.w-2');
+const checks = [
+password.length >= 8,
+/[A-Z]/.test(password) && /[a-z]/.test(password),
+/\d/.test(password)
+];
+indicators.forEach((indicator, index) => {
+if (checks[index]) {
+indicator.classList.remove('bg-gray-300');
+indicator.classList.add('bg-green-500');
+} else {
+indicator.classList.remove('bg-green-500');
+indicator.classList.add('bg-gray-300');
+}
+});
+}
+
+fullNameInput.addEventListener('blur', function() {
+if (this.value.trim() === '') {
+showError(this, 'Please enter your full name');
+} else {
+hideError(this);
+}
+});
+
+emailInput.addEventListener('blur', function() {
+if (this.value.trim() === '') {
+showError(this, 'Please enter your email address');
+} else if (!validateEmail(this.value)) {
+showError(this, 'Please enter a valid email address');
+} else {
+hideError(this);
+}
+});
+
+// Removed currentPasswordInput listener
+
+newPasswordInput.addEventListener('input', updatePasswordStrength);
+
+confirmPasswordInput.addEventListener('blur', function() {
+if (newPasswordInput.value && this.value !== newPasswordInput.value) {
+showError(this, 'Passwords do not match');
+} else {
+hideError(this);
+}
+});
+
+form.addEventListener('submit', function(e) {
+// 1. Validate Form
+let isValid = true;
+if (fullNameInput.value.trim() === '') {
+showError(fullNameInput, 'Please enter your full name');
+isValid = false;
+}
+if (!validateEmail(emailInput.value)) {
+showError(emailInput, 'Please enter a valid email address');
+isValid = false;
+}
+// Removed currentPasswordInput validation
+
+// Only validate new password if user typed something in it
+if (newPasswordInput.value && !validatePassword(newPasswordInput.value)) {
+showError(newPasswordInput, 'Password does not meet requirements');
+isValid = false;
+}
+if (newPasswordInput.value && confirmPasswordInput.value !== newPasswordInput.value) {
+showError(confirmPasswordInput, 'Passwords do not match');
+isValid = false;
+}
+
+// 2. Prevent default IF invalid
+if (!isValid) {
+    e.preventDefault();
+} else {
+    // 3. If Valid, allow submission but show loading state
+    submitButton.disabled = true;
+    submitButton.innerHTML = '<i class="ri-loader-4-line animate-spin mr-2"></i>Saving...';
+}
+});
+});
+</script>
+</body>
+</html>

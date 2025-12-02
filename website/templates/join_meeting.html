@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Meeting</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #f9fafb; }
+        #root { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body class="bg-gray-50 overflow-hidden">
+
+    <!-- Top Navigation Buttons -->
+    <div class="fixed top-5 left-5 z-50 flex items-center gap-3">
+        <!-- Redirect Logic -->
+        {% if role == 2 %}
+            <a href="/upload_materials/{{ course.course_id }}" 
+               class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2.5 rounded-lg shadow-sm border border-gray-300 transition-all duration-200 hover:shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span>Back to Course</span>
+            </a>
+            <input type="hidden" id="redirectUrl" value="/upload_materials/{{ course.course_id }}">
+        {% else %}
+            <a href="/materials/{{ course.course_id }}" 
+               class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-medium px-4 py-2.5 rounded-lg shadow-sm border border-gray-300 transition-all duration-200 hover:shadow-md">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                <span>Back to Course</span>
+            </a>
+            <input type="hidden" id="redirectUrl" value="/materials/{{ course.course_id }}">
+        {% endif %}
+    </div>
+
+    <!-- Zego Cloud Container -->
+    <div id="root"></div>
+
+    <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+    <script>
+        const roomID = "{{ room_code }}";
+        const userID = Math.floor(Math.random() * 100000) + "";
+        const userName = "{{ user_name|e }}";
+        const appID = 1654647643;
+        const serverSecret = "215e1f2f5e1706dec0ad97debb4e22de";
+        
+        const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, roomID, userID, userName);
+        const zp = ZegoUIKitPrebuilt.create(kitToken);
+
+        zp.joinRoom({
+            container: document.querySelector("#root"),
+            sharedLinks: [{ name: 'Meeting Link', url: window.location.href }],
+            scenario: { mode: ZegoUIKitPrebuilt.VideoConference },
+            turnOnMicrophoneWhenJoining: true,
+            turnOnCameraWhenJoining: true,
+            showLayoutButton: true,
+            showLeaveRoomConfirmDialog: true, 
+            
+            // --- FIX IS HERE ---
+            onLeaveRoom: async () => {
+                const redirectLink = document.getElementById('redirectUrl').value;
+                
+                try {
+                    // We use 'keepalive: true' to ensure the request finishes 
+                    // even if the browser redirects immediately.
+                    await fetch(`/leave_meeting/${roomID}`, { 
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        keepalive: true 
+                    });
+                } catch (err) {
+                    console.error('Error recording leave time:', err);
+                }
+
+                // Redirect to the correct page
+                window.location.href = redirectLink;
+            }
+        });
+
+        // Handle tab close / browser close
+        window.addEventListener('beforeunload', async () => {
+            fetch(`/leave_meeting/${roomID}`, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true 
+            });
+        });
+    </script>
+</body>
+</html>

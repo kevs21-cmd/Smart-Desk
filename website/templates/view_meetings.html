@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ course.course_code }} | Meetings</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        secondary: '#8b5cf6'
+      },
+      borderRadius: {
+        'none': '0px',
+        'sm': '4px',
+        DEFAULT: '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'full': '9999px',
+        'button': '8px'
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+<style>
+  :where([class^="ri-"])::before { content: "\f3c2"; }
+  #mobileNav { transition: transform .3s ease; }
+  .tab-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tab-container::-webkit-scrollbar { display: none; }
+  .tab-container { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo & Course Title -->
+<div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+
+  <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+
+  <div class="text-base sm:text-xl font-semibold text-gray-900 truncate">
+    {{ course.course_title }}
+  </div>
+
+</div>
+
+
+      <!-- Desktop Actions -->
+      <div class="hidden md:flex items-center space-x-3">
+         <!-- Profile -->
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+          <div class="text-xs sm:text-sm hidden lg:block">
+            <div id="name" class="font-medium text-gray-900">{{ user.full_name }}</div>
+            <div class="text-gray-500">Student</div>
+          </div>
+          <button id="profile-dropdown-button" class="w-6 h-6 flex items-center justify-center text-gray-400">
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+          <!-- Dropdown Menu - Now correctly positioned under the arrow -->
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-gray-600 text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+        <div class="text-sm">
+          <div id="nameMobile" class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">Student</div>
+        </div>
+      </div>
+      <button id="mobileProfileBtn" class="w-6 h-6 flex items-center justify-center text-gray-400">
+        <i class="ri-arrow-down-s-line"></i>
+      </button>
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/dashboard" class="block py-2 text-gray-700 hover:text-primary">Dashboard</a>
+      <a href="/lms" class="block py-2 text-gray-700 hover:text-primary">My Courses</a>
+      <a href="/edit_profile" class="block py-2 text-gray-700 hover:text-primary">Edit Profile</a>
+      <a href="/settings" class="block py-2 text-gray-700 hover:text-primary">Settings</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700">Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-gray-50 border-t border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <a href="/lms" class="hover:text-primary">My Courses</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class="text-gray-900 font-medium truncate">{{ course.course_code }} — {{ course.course_title }}</span>
+  </nav>
+</div>
+
+<!-- Course Title Panel -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-4 sm:py-6">
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">
+      {{course.section_name}} | {{ course.course_code }} — {{ course.course_title }}
+    </h1>
+  </div>
+</div>
+
+<!-- Tabs (Horizontal Scroll on Mobile) -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6">
+    <div class="tab-container flex space-x-6 sm:space-x-8 overflow-x-auto py-2">
+      <a href="{{ url_for('auth.course_overview', course_id=course['course_id']) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm whitespace-nowrap">
+        Overview
+      </a>
+      <a href="{{ url_for('auth.materials', course_id=course['course_id']) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm whitespace-nowrap">
+        Course Materials
+      </a>
+      <a href="{{ url_for('auth.performance_overview', course_id=course['course_id']) }}"
+        class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button whitespace-nowrap">
+        Grades
+      </a>
+      <a href="{{ url_for('auth.course_forum_student', course_id=course.course_id) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button whitespace-nowrap">
+        Forum
+      </a>
+      <a href="{{ url_for('auth.view_meetings', course_id=course.course_id) }}"
+          class="py-3 px-1 border-b-2 border-primary text-primary font-medium text-xs sm:text-sm whitespace-nowrap active">
+        Meetings
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions Toolbar -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex flex-wrap gap-2">
+      <button class="px-3 sm:px-4 py-2 bg-blue-100 text-blue-700 rounded-button hover:bg-blue-200 text-xs sm:text-sm whitespace-nowrap flex items-center">
+        <i class="ri-calendar-line mr-1 sm:mr-2"></i>Schedule
+      </button>
+      <button class="px-3 sm:px-4 py-2 bg-green-100 text-green-700 rounded-button hover:bg-green-200 text-xs sm:text-sm whitespace-nowrap flex items-center">
+        <i class="ri-mail-line mr-1 sm:mr-2"></i>Contact
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="w-full px-4 sm:px-6 lg:px-8 py-8">
+    <h2 class="text-xl font-bold mb-6 flex items-center gap-2 text-gray-800">
+        <i class="ri-video-chat-line text-blue-500"></i> Scheduled Meetings
+    </h2>
+
+    {% if meetings %}
+        <div class="flex flex-col space-y-4">
+            {% for meeting in meetings %}
+            <!-- List Item -->
+            <div class="group flex flex-col md:flex-row items-start md:items-center gap-4 bg-white p-4 sm:p-6 rounded-xl border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200">
+                
+                <!-- Date & Time Block (Left) -->
+                <div class="flex-shrink-0 w-full md:w-auto flex md:flex-col items-center md:items-center justify-between md:justify-center bg-blue-50 text-blue-700 rounded-lg p-3 md:min-w-[100px] border border-blue-100">
+                    <span class="font-bold text-sm md:text-base whitespace-nowrap">
+                        <i class="ri-calendar-line mr-1 md:hidden"></i>{{ meeting.scheduled_date }}
+                    </span>
+                    <span class="text-xs md:text-sm md:mt-1 font-medium opacity-80 whitespace-nowrap">
+                        <i class="ri-time-line mr-1 md:hidden"></i>{{ meeting.scheduled_time }}
+                    </span>
+                </div>
+
+                <!-- Main Info (Middle) -->
+                <div class="flex-1 min-w-0 w-full">
+                    <div class="flex items-center gap-2 mb-1">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 truncate">{{ meeting.title }}</h3>
+                        <!-- Optional Status Dot -->
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse" title="Active"></span>
+                    </div>
+                    
+                    <p class="text-sm text-gray-500 mb-2 line-clamp-2 md:line-clamp-1">
+                        {{ meeting.description or "No description provided." }}
+                    </p>
+                    
+                    <div class="flex items-center text-xs text-gray-400">
+                        <i class="ri-user-voice-line mr-1"></i>
+                        <span>Host: {{ meeting.created_by_name }}</span>
+                    </div>
+                </div>
+
+                <!-- Action Button (Right) -->
+                <div class="w-full md:w-auto flex-shrink-0 mt-2 md:mt-0">
+                    <a href="{{ url_for('auth.join_meeting', room_code=meeting.room_code) }}" 
+                       class="flex items-center justify-center w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg transition-colors shadow-sm hover:shadow">
+                       <i class="ri-login-box-line mr-2"></i> Join
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- Empty State (Full Width) -->
+        <div class="w-full flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+            <div class="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mb-4">
+                <i class="ri-calendar-event-line text-4xl text-gray-400"></i>
+            </div>
+            <h3 class="text-xl font-medium text-gray-900">No Meetings Scheduled</h3>
+            <p class="text-gray-500 mt-1">Your teacher hasn't scheduled any sessions yet.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile menu
+  const mobileBtn = document.getElementById('mobileMenuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  mobileBtn?.addEventListener('click', () => {
+    mobileNav.classList.toggle('hidden');
+    mobileNav.classList.toggle('flex');
+  });
+
+  // Profile dropdown
+  const profileBtn = document.getElementById('profile-dropdown-button');
+  const profileMenu = document.getElementById('profile-dropdown-menu');
+  profileBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    profileMenu.classList.toggle('hidden');
+  });
+  document.addEventListener('click', () => profileMenu.classList.add('hidden'));
+});
+
+// Image fallback
+function handleImageError() {
+  ['profileImage', 'profileImageMobile'].forEach(id => {
+    const img = document.getElementById(id);
+    const span = document.getElementById(id === 'profileImage' ? 'profileInitial' : 'profileInitialMobile');
+    const name = document.getElementById(id === 'profileImage' ? 'name' : 'nameMobile')?.textContent.trim();
+    if (img) img.style.display = 'none';
+    if (span && name) {
+      span.textContent = name.charAt(0).toUpperCase();
+      span.classList.remove('hidden');
+      span.style.display = 'flex';
+    }
+  });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const img = document.getElementById("profileImage");
+  if (img && (!img.src || img.src.trim() === "")) handleImageError();
+});
+</script>
+
+</body>
+</html>

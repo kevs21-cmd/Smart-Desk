@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Approval Management - LMS Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css" rel="stylesheet">
+    <style>
+        :where([class^="ri-"])::before {
+            content: "\f3c2";
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .custom-checkbox {
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #d1d5db;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            position: relative;
+        }
+        .custom-checkbox:checked {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .custom-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: -2px;
+            left: 1px;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#8b5cf6'
+                    },
+                    borderRadius: {
+                        'none': '0px',
+                        'sm': '4px',
+                        DEFAULT: '8px',
+                        'md': '12px',
+                        'lg': '16px',
+                        'xl': '20px',
+                        '2xl': '24px',
+                        '3xl': '32px',
+                        'full': '9999px',
+                        'button': '8px'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="flex h-screen">
+       <!-- Sidebar -->
+<aside id="sidebar" class="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col transition-all duration-300">
+<div class="p-6 border-b border-gray-200">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<i class="ri-graduation-cap-fill text-white ri-lg"></i>
+</div>
+<span class="text-xl font-medium text-gray-800">LMS</span>
+</div>
+</div>
+<nav class="flex-1 p-4 overflow-y-auto custom-scrollbar">
+<div class="space-y-6">
+<div>
+<a href="/admin-dashboard" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-dashboard-line"></i>
+</div>
+<span class="font-medium">Dashboard</span>
+</a>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">User Management</h3>
+<div class="space-y-1">
+<a href="/pending_students" data-readdy="true"class="flex items-center space-x-3 p-3 rounded-lg bg-primary text-white">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-user-add-line"></i>
+</div>
+<span>Approve Students</span>
+</a>
+<a href="/pending_teachers" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-user-star-line"></i>
+</div>
+<span>Approve Teachers</span>
+</a>
+<a href="/student_list" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-group-line"></i>
+</div>
+<span>Student List</span>
+</a>
+<a href="/teacher_list" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-user-line"></i>
+</div>
+<span>Teacher List</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Course Management</h3>
+<div class="space-y-1">
+<a href="/pending_courses" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-mark-line"></i>
+</div>
+<span>Approve Courses</span>
+</a>
+<a href="/admin_lms" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-line"></i>
+</div>
+<span>Manage All Courses</span>
+</a>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">System Mangement</h3>
+<div class="space-y-1">
+<a href="/admin-programs" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-line"></i>
+</div>
+<span>Manage All programs</span>
+<a href="/admin-sections" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-line"></i>
+</div>
+<span>Manage All sections</span>
+<a href="/admin-academicyear" class="nav-item flex items-center space-x-3 p-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+<div class="w-5 h-5 flex items-center justify-center">
+<i class="ri-book-line"></i>
+</div>
+<span>Manage Academic Terms</span>
+</a>
+</div>
+</div>
+<div class="space-y-1">
+</div>
+</div>
+</nav>
+</aside>
+
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <header class="bg-white shadow-sm border-b border-gray-200 p-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors lg:hidden">
+                            <div class="w-5 h-5 flex items-center justify-center">
+                                <i class="ri-menu-line"></i>
+                            </div>
+                        </button>
+                        <nav class="text-sm">
+                            <ol class="flex items-center space-x-2 text-gray-500">
+                                <li><a href="https://readdy.ai/home/a646b416-2b12-4339-ab61-09b597244a23/d2469336-f70d-4970-b6aa-b8e792eaf6c7" data-readdy="true" class="hover:text-gray-700">Home</a></li>
+                                <li><i class="ri-arrow-right-s-line"></i></li>
+                                <li><a href="#" class="hover:text-gray-700">User Management</a></li>
+                                <li><i class="ri-arrow-right-s-line"></i></li>
+                                <li class="text-gray-900 font-medium">Approve Students</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 overflow-y-auto custom-scrollbar p-6">
+                <div class="max-w-7xl mx-auto space-y-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-900">Student Approval Management</h1>
+                            <p class="text-gray-600 mt-2">Review and approve pending student applications</p>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button class="px-4 py-2 bg-green-600 text-white rounded-button hover:bg-green-700 transition-colors whitespace-nowrap !rounded-button">
+                                <i class="ri-download-line mr-2"></i>
+                                Export Applications
+                            </button>
+                        </div>
+                    </div>
+
+                   <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                                    <i class="ri-time-line text-red-600 ri-xl"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ pending_count }}</h3>
+                            <p class="text-gray-600 text-sm">Pending Applications</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="ri-calendar-line text-blue-600 ri-xl"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ submitted_today }}</h3>
+                            <p class="text-gray-600 text-sm">Submitted Today</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="ri-check-line text-green-600 ri-xl"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ approved_this_week }}</h3>
+                            <p class="text-gray-600 text-sm">Approved This Week</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                    <i class="ri-close-line text-orange-600 ri-xl"></i>
+                                </div>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-900 mb-1">{{ rejected_count }}</h3>
+                            <p class="text-gray-600 text-sm">Rejected Applications</p>
+                        </div>
+                    </div>
+
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+
+    <!-- Bulk Actions -->
+    <div class="flex items-center justify-between mb-4">
+        <div>
+            <button id="bulkApproveBtn" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50" disabled>
+                Approve Selected
+            </button>
+        </div>
+        <div>
+            <input type="checkbox" id="selectAllCheckbox" class="mr-2">
+            <label for="selectAllCheckbox" class="text-sm text-gray-700">Select All</label>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3"></th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Application Date</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for student in students %}
+                <tr class="application-row hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <input type="checkbox" class="studentCheckbox" value="{{ student.user_id }}">
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <img src="https://readdy.ai/api/search-image?query={{ student.full_name | urlencode }}&width=48&height=48&seq=student{{ loop.index }}&orientation=squarish" 
+                                alt="Student" class="w-12 h-12 rounded-full object-cover">
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">{{ student.full_name }}</div>
+                                <div class="text-sm text-gray-500">{{ student.email }}</div>
+                                <div class="text-xs text-gray-400">ID: {{ student.student_id }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">{{ student.program_name }}</div>
+                        <div class="text-xs text-gray-500">{{ student.program_code }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ student.date_created.strftime('%b %d, %Y') }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-medium {% if student.approved %}bg-green-100 text-green-800{% elif student.rejected %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %} rounded-full">
+                            {% if student.approved %}Approved{% elif student.rejected %}Rejected{% else %}Pending Review{% endif %}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="flex items-center space-x-2">
+                            <!-- Reject button -->
+                            {% if not student.rejected %}
+                            <button class="singleRejectBtn px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors whitespace-nowrap" 
+                                    data-student-id="{{ student.user_id }}">
+                                Reject
+                            </button>
+                            {% endif %}
+
+                            <!-- Approve button (only if not approved) -->
+                            {% if not student.approved %}
+                            <button class="singleApproveBtn px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors whitespace-nowrap" 
+                                    data-student-id="{{ student.user_id }}">
+                                Approve
+                            </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+    const studentCheckboxes = document.querySelectorAll('.studentCheckbox');
+    const bulkApproveBtn = document.getElementById('bulkApproveBtn');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+
+    // Enable bulk approve button if any checkbox is checked
+    studentCheckboxes.forEach(chk => {
+        chk.addEventListener('change', () => {
+            const anyChecked = Array.from(studentCheckboxes).some(c => c.checked);
+            bulkApproveBtn.disabled = !anyChecked;
+        });
+    });
+
+    // Select all functionality
+    selectAllCheckbox.addEventListener('change', () => {
+        const checked = selectAllCheckbox.checked;
+        studentCheckboxes.forEach(c => c.checked = checked);
+        bulkApproveBtn.disabled = !checked;
+    });
+
+    // Bulk approve
+    bulkApproveBtn.addEventListener('click', () => {
+        const selectedIds = Array.from(studentCheckboxes)
+            .filter(c => c.checked)
+            .map(c => parseInt(c.value));
+
+        if(selectedIds.length === 0) return;
+        if(!confirm(`Approve ${selectedIds.length} selected students?`)) return;
+
+        fetch('/bulk_approve_students', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ student_ids: selectedIds })
+        })
+        .then(res => res.text())
+        .then(msg => { alert(msg); location.reload(); })
+        .catch(err => alert('Error: ' + err));
+    });
+
+    // Single approve
+    document.querySelectorAll('.singleApproveBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const studentId = parseInt(btn.dataset.studentId);
+            if(!confirm('Approve this student?')) return;
+
+            fetch('/bulk_approve_students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ student_ids: [studentId] })
+            })
+            .then(res => res.text())
+            .then(msg => { alert(msg); location.reload(); })
+            .catch(err => alert('Error: ' + err));
+        });
+    });
+
+    // Single reject
+    document.querySelectorAll('.singleRejectBtn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const studentId = parseInt(btn.dataset.studentId);
+            if(!confirm('Reject this student?')) return;
+
+            fetch(`/reject_student/${studentId}`, {
+                method: 'POST'
+            })
+            .then(res => res.text())
+            .then(msg => { alert(msg); location.reload(); })
+            .catch(err => alert('Error: ' + err));
+        });
+    });
+
+});
+</script>
+
+
+
+            </main>
+
+            <footer class="bg-white border-t border-gray-200 p-4">
+                <div class="flex items-center justify-between text-sm text-gray-500">
+                    <div>
+                        <span>© 2024 LMS Platform. All rights reserved.</span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <span>Last login: Today at 9:42 AM</span>
+                        <a href="#" class="hover:text-gray-700">Help</a>
+                        <a href="#" class="hover:text-gray-700">Settings</a>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    
+
+
+
+    <script id="sidebarToggle">
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+        });
+    </script>
+
+    <script id="profileDropdown">
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileButton = document.getElementById('profileDropdown');
+            let isOpen = false;
+            
+            profileButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                isOpen = !isOpen;
+                
+                if (isOpen) {
+                    const dropdown = document.createElement('div');
+                    dropdown.className = 'absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50';
+                    dropdown.innerHTML = `
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile Settings</a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Account Preferences</a>
+                        <div class="border-t border-gray-200 my-1"></div>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign Out</a>
+                    `;
+                    
+                    profileButton.parentElement.appendChild(dropdown);
+                    
+                    document.addEventListener('click', function closeDropdown(e) {
+                        if (!profileButton.parentElement.contains(e.target)) {
+                            dropdown.remove();
+                            isOpen = false;
+                            document.removeEventListener('click', closeDropdown);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const selectedCount = document.getElementById('selectedCount');
+    const bulkApprove = document.getElementById('bulkApprove');
+    const bulkReject = document.getElementById('bulkReject');
+
+    // Update selected count and enable/disable buttons
+    function updateSelectedCount() {
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        const checkedBoxes = Array.from(rowCheckboxes).filter(cb => cb.checked);
+        const count = checkedBoxes.length;
+
+        selectedCount.textContent = `${count} selected`;
+        bulkApprove.disabled = count === 0;
+        bulkReject.disabled = count === 0;
+
+        const allChecked = checkedBoxes.length === rowCheckboxes.length && rowCheckboxes.length > 0;
+        const someChecked = checkedBoxes.length > 0 && !allChecked;
+        selectAllCheckbox.checked = allChecked;
+        selectAllCheckbox.indeterminate = someChecked;
+    }
+
+    // Handle Select All checkbox
+    selectAllCheckbox.addEventListener('change', function() {
+        const rowCheckboxes = document.querySelectorAll('.row-checkbox');
+        rowCheckboxes.forEach(cb => cb.checked = this.checked);
+        updateSelectedCount();
+    });
+
+    // Handle individual row checkboxes
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('row-checkbox')) {
+            updateSelectedCount();
+        }
+    });
+
+    // Bulk Approve
+    bulkApprove.addEventListener('click', function() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) return;
+
+        if (!confirm(`Are you sure you want to approve ${checkedBoxes.length} selected applications?`)) return;
+
+        checkedBoxes.forEach(cb => {
+            const row = cb.closest('tr');
+            const approveBtn = row.querySelector('.approve-btn');
+            const rejectBtn = row.querySelector('.reject-btn');
+
+            // Update row visuals
+            row.style.opacity = '0.5';
+            approveBtn.textContent = 'Approved';
+            approveBtn.disabled = true;
+            approveBtn.className = 'px-3 py-1 bg-green-200 text-green-800 rounded-button cursor-not-allowed whitespace-nowrap !rounded-button';
+            if (rejectBtn) rejectBtn.style.display = 'none';
+            cb.checked = false;
+        });
+
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+        updateSelectedCount();
+    });
+
+    // Bulk Reject
+    bulkReject.addEventListener('click', function() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) return;
+
+        if (!confirm(`Are you sure you want to reject ${checkedBoxes.length} selected applications?`)) return;
+
+        checkedBoxes.forEach(cb => {
+            const row = cb.closest('tr');
+            const approveBtn = row.querySelector('.approve-btn');
+            const rejectBtn = row.querySelector('.reject-btn');
+
+            // Update row visuals
+            row.style.opacity = '0.5';
+            if (approveBtn) {
+                approveBtn.textContent = 'Rejected';
+                approveBtn.disabled = true;
+                approveBtn.className = 'px-3 py-1 bg-red-200 text-red-800 rounded-button cursor-not-allowed whitespace-nowrap !rounded-button';
+            }
+            if (rejectBtn) rejectBtn.style.display = 'none';
+            cb.checked = false;
+        });
+
+        selectAllCheckbox.checked = false;
+        selectAllCheckbox.indeterminate = false;
+        updateSelectedCount();
+    });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const programFilterBtn = document.getElementById('programFilterBtn');
+    const programFilterLabel = document.getElementById('programFilterLabel');
+    const programDropdown = document.getElementById('programDropdown');
+    const tableRows = document.querySelectorAll('tbody tr');
+
+    // Handle dropdown selection
+    programDropdown.querySelectorAll('li').forEach(li => {
+        li.addEventListener('click', () => {
+            programFilterLabel.textContent = li.textContent;
+            filterTable();
+            programDropdown.classList.add('hidden');
+        });
+    });
+
+    // Toggle dropdown visibility
+    programFilterBtn.addEventListener('click', () => {
+        programDropdown.classList.toggle('hidden');
+    });
+
+    // Filter function
+    function filterTable() {
+        const searchText = searchInput.value.toLowerCase();
+        const selectedProgram = programFilterLabel.textContent;
+
+        tableRows.forEach(row => {
+            const name = row.cells[1].textContent.toLowerCase();      // Name column
+            const studentId = row.cells[2].textContent.toLowerCase(); // ID column
+            const program = row.cells[4].textContent;                 // Program column
+
+            const matchesSearch = name.includes(searchText) || studentId.includes(searchText);
+            const matchesProgram = selectedProgram === 'All Programs' || program === selectedProgram;
+
+            row.style.display = (matchesSearch && matchesProgram) ? '' : 'none';
+        });
+    }
+
+    // Search input event
+    searchInput.addEventListener('input', filterTable);
+
+    // Close dropdown if clicked outside
+    document.addEventListener('click', function(e) {
+        if (!programFilterBtn.contains(e.target)) {
+            programDropdown.classList.add('hidden');
+        }
+    });
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('confirmationModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalForm = document.getElementById('modalForm');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    document.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const action = btn.dataset.action; // approve or reject
+            const studentId = btn.dataset.studentId;
+
+            // Set modal text
+            modalTitle.textContent = action === 'approve' ? 'Approve Student?' : 'Reject Student?';
+            modalMessage.textContent = action === 'approve'
+                ? 'Are you sure you want to approve this student?'
+                : 'Are you sure you want to reject this student?';
+
+            // Set form action dynamically
+            modalForm.action = action === 'approve'
+                ? `/approve_student/${studentId}`
+                : `/reject_student/${studentId}`;
+
+            // Show modal
+            modal.classList.remove('hidden');
+        });
+    });
+
+    // Cancel button closes modal
+    cancelBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    // Close modal if clicked outside content
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
+        }
+    });
+});
+</script>
+</body>
+</html>

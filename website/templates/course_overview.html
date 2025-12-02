@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ course.course_code }} | Course Overview</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        secondary: '#8b5cf6'
+      },
+      borderRadius: {
+        'none': '0px',
+        'sm': '4px',
+        DEFAULT: '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'full': '9999px',
+        'button': '8px'
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+<link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+<style>
+  :where([class^="ri-"])::before { content: "\f3c2"; }
+  #mobileNav { transition: transform .3s ease; }
+  .tab-button { white-space: nowrap; }
+  @media (max-width: 768px) {
+    .tab-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab-container::-webkit-scrollbar { display: none; }
+    .tab-container { -ms-overflow-style: none; scrollbar-width: none; }
+  }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center justify-between">
+      <!-- Logo & Course Title -->
+<div class="flex items-center space-x-2 sm:space-x-4 flex-1 min-w-0">
+
+  <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+
+  <div class="text-base sm:text-xl font-semibold text-gray-900 truncate">
+    {{ course.course_title }}
+  </div>
+
+</div>
+
+
+      <!-- Desktop Actions -->
+      <div class="hidden md:flex items-center space-x-3">
+    
+        <!-- Profile -->
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+          <div class="text-xs sm:text-sm hidden lg:block">
+            <div id="name" class="font-medium text-gray-900">{{ user.full_name }}</div>
+            <div class="text-gray-500">Student</div>
+          </div>
+          <button id="profile-dropdown-button" class="w-6 h-6 flex items-center justify-center text-gray-400">
+            <i class="ri-arrow-down-s-line"></i>
+          </button>
+          <!-- Dropdown Menu - Now correctly positioned under the arrow -->
+          <div id="profile-dropdown-menu" class="hidden absolute top-full right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+            <div class="py-2">
+              <a href="/edit_profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Edit Profile</a>
+              <a href="/settings" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">Logout</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-gray-600 text-2xl"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 flex items-center justify-between border-b border-gray-100">
+      <div class="flex items-center space-x-2">
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+            <img id="profileImage" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+            <span id="profileInitial" class="hidden text-gray-700 text-sm sm:text-lg font-semibold">{{ user.full_name[0]|upper }}</span>
+          </div>
+        <div class="text-sm">
+          <div id="nameMobile" class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-gray-500 text-xs">Student</div>
+        </div>
+      </div>
+      <button id="mobileProfileBtn" class="w-6 h-6 flex items-center justify-center text-gray-400">
+        <i class="ri-arrow-down-s-line"></i>
+      </button>
+    </div>
+    <div class="px-4 py-2 space-y-1">
+      <a href="/dashboard" class="block py-2 text-gray-700 hover:text-primary">Dashboard</a>
+      <a href="/lms" class="block py-2 text-gray-700 hover:text-primary">My Courses</a>
+      <a href="/edit_profile" class="block py-2 text-gray-700 hover:text-primary">Edit Profile</a>
+      <a href="/settings" class="block py-2 text-gray-700 hover:text-primary">Settings</a>
+      <a href="/logout" class="block py-2 text-red-600 hover:text-red-700">Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-gray-50 border-t border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <a href="/lms" class="hover:text-primary">My Courses</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class land="text-gray-900 font-medium truncate">{{ course.course_code }} — {{ course.course_title }}</span>
+  </nav>
+</div>
+
+<!-- Course Overview Panel -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-4 sm:py-6">
+    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+      {{course.section_name}} | {{ course.course_code }} — {{ course.course_title }}
+    </h1>
+    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-gray-600">
+      <span>{{ course.start_year }} - {{ course.end_year }}</span>
+      <span>•</span>
+      <span>Semester: {{ course.semester }}</span>
+      <span>•</span>
+      <span>Instructor: {{ course.instructor_name if course.instructor_name else 'TBA' }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tabs (Horizontal Scroll on Mobile) -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6">
+    <div class="tab-container flex space-x-6 sm:space-x-8 overflow-x-auto py-2">
+      <a href="{{ url_for('auth.course_overview', course_id=course['course_id']) }}"
+         class="py-3 px-1 border-b-2 border-primary text-primary font-medium text-xs sm:text-sm tab-button active whitespace-nowrap">
+        Overview
+      </a>
+      <a href="{{ url_for('auth.materials', course_id=course['course_id']) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button whitespace-nowrap">
+        Course Materials
+      </a>
+      <a href="{{ url_for('auth.performance_overview', course_id=course['course_id']) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button whitespace-nowrap">
+        Grades
+      </a>
+      <a href="{{ url_for('auth.course_forum_student', course_id=course.course_id) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button whitespace-nowrap">
+        Forum
+      </a>
+      <a href="{{ url_for('auth.view_meetings', course_id=course.course_id) }}"
+         class="py-3 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-xs sm:text-sm tab-button whitespace-nowrap">
+        Meetings
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions Toolbar -->
+<div class="bg-white border-b border-gray-200">
+  <div class="px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="flex flex-wrap gap-2">
+      <button class="px-3 sm:px-4 py-2 bg-blue-100 text-blue-700 rounded-button hover:bg-blue-200 text-xs sm:text-sm whitespace-nowrap flex items-center">
+        <i class="ri-calendar-line mr-1 sm:mr-2"></i>Schedule
+      </button>
+      <button class="px-3 sm:px-4 py-2 bg-green-100 text-green-700 rounded-button hover:bg-green-200 text-xs sm:text-sm whitespace-nowrap flex items-center">
+        <i class="ri-mail-line mr-1 sm:mr-2"></i>Contact
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Content Area -->
+<div class="px-4 sm:px-6 py-4 sm:py-6">
+  <div class="flex flex-col lg:flex-row gap-4 sm:gap-6">
+
+    <!-- Main Content -->
+    <div class="flex-1 order-2 lg:order-1">
+
+      <!-- Course Announcements -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 mb-4 sm:mb-6">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Announcements</h3>
+
+        {% if announcements %}
+          <div class="space-y-3">
+            {% for announcement in announcements %}
+              <div class="border-l-4 border-primary bg-primary/10 p-3 sm:p-4 rounded-lg">
+                <div class="flex items-center mb-1">
+                  <i class="ri-megaphone-line text-primary mr-2 text-sm"></i>
+                  <h4 class="font-medium text-primary text-sm">{{ announcement.title }}</h4>
+                </div>
+                <div class="text-xs text-gray-500 mb-1">{{ announcement.date_posted.strftime('%B %d, %Y') }}</div>
+                <div class="text-xs sm:text-sm text-gray-700"><strong>{{ announcement.content }}</strong></div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="border-l-4 border-gray-300 bg-gray-100 p-3 sm:p-4 rounded-lg text-xs sm:text-sm">
+            <div class="flex items-center mb-1">
+              <i class="ri-notification-off-line text-gray-500 mr-2"></i>
+              <h4 class="font-medium text-gray-700">No announcements yet.</h4>
+            </div>
+            <div class="text-gray-600">Check back later for updates.</div>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Recent Activity</h3>
+
+        {% if notifications %}
+          <div class="space-y-3 max-h-64 sm:max-h-96 overflow-y-auto text-xs sm:text-sm" id="notification-list">
+            {% for note in notifications %}
+              <div class="flex items-start space-x-2">
+                <div class="w-2 h-2 bg-blue-500 rounded-full mt-1 flex-shrink-0"></div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-gray-900 truncate">
+                    <strong>{{ note.course_code if note.course_code else 'Course' }}:</strong>
+                    {{ note.message }}
+                  </p>
+                  {% if note.created_at %}
+                    <p class="text-gray-500">
+                      {{ note.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    </p>
+                  {% endif %}
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="text-gray-500 text-xs sm:text-sm">No new notifications.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Sidebar (Stacked on Mobile) -->
+    <div class="w-full lg:w-80 order-1 lg:order-2 space-y-4 sm:space-y-6">
+
+      <!-- Upcoming Events -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Upcoming</h3>
+        <div class="space-y-3 text-xs sm:text-sm">
+          <div class="flex items-start space-x-2">
+            <div class="w-2 h-2 bg-red-500 rounded-full mt-1"></div>
+            <div><p class="font-medium">Project 3 Due</p><p class="text-gray-500">Nov 15, 2024 at 11:59 PM</p></div>
+          </div>
+          <div class="flex items-start space-x-2">
+            <div class="w-2 h-2 bg-blue-500 rounded-full mt-1"></div>
+            <div><p class="font-medium">Quiz 4 Available</p><p class="text-gray-500">Until Nov 18, 2024</p></div>
+          </div>
+          <div class="flex items-start space-x-2">
+            <div class="w-2 h-2 bg-green-500 rounded-full mt-1"></div>
+            <div><p class="font-medium">Office Hours</p><p class="text-gray-500">Tuesday 2-4 PM</p></div>
+          </div>
+          <div class="flex items-start space-x-2">
+            <div class="w-2 h-2 bg-purple-500 rounded-full mt-1"></div>
+            <div><p class="font-medium">Final Presentations</p><p class="text-gray-500">Dec 18, 2024</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
+        <h3 class="text-base sm:text-lg font-medium text-gray-900 mb-3 sm:mb-4">Quick Actions</h3>
+        <div class="space-y-1 text-xs sm:text-sm">
+          <button class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 rounded flex items-center">
+            <i class="ri-calendar-line mr-2"></i>Full Schedule
+          </button>
+          <button class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 rounded flex items-center">
+            <i class="ri-mail-line mr-2"></i>Email Instructor
+          </button>
+          <button class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 rounded flex items-center">
+            <i class="ri-group-line mr-2"></i>Study Groups
+          </button>
+          <button class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 rounded flex items-center">
+            <i class="ri-download-line mr-2"></i>Resources
+          </button>
+          <button class="w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-50 rounded flex items-center">
+            <i class="ri-settings-line mr-2"></i>Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Dropdown -->
+<div id="profile-dropdown-menu" class="hidden absolute right-4 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+  <div class="py-2">
+    <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2" onclick="window.location.href='/edit_profile'">
+      <i class="ri-user-line"></i><span>Edit Profile</span>
+    </button>
+    <button class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2" onclick="window.location.href='/settings'">
+      <i class="ri-settings-3-line"></i><span>Settings</span>
+    </button>
+    <div class="border-t border-gray-100 my-1"></div>
+    <button class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2" onclick="window.location.href='/logout'">
+      <i class="ri-logout-box-line"></i><span>Logout</span>
+    </button>
+  </div>
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Mobile menu
+  const mobileBtn = document.getElementById('mobileMenuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  mobileBtn?.addEventListener('click', () => {
+    mobileNav.classList.toggle('hidden');
+    mobileNav.classList.toggle('flex');
+  });
+
+  // Profile dropdown
+  const profileBtn = document.getElementById('profile-dropdown-button');
+  const profileMenu = document.getElementById('profile-dropdown-menu');
+  profileBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    profileMenu.classList.toggle('hidden');
+  });
+  document.addEventListener('click', () => profileMenu.classList.add('hidden'));
+
+  // Limit notifications
+  const list = document.getElementById("notification-list");
+  if (list) {
+    const maxItems = 5;
+    while (list.children.length > maxItems) {
+      list.removeChild(list.lastChild);
+    }
+  }
+});
+
+// Image fallback
+function handleImageError() {
+  ['profileImage', 'profileImageMobile'].forEach(id => {
+    const img = document.getElementById(id);
+    const span = document.getElementById(id === 'profileImage' ? 'profileInitial' : 'profileInitialMobile');
+    const name = document.getElementById(id === 'profileImage' ? 'name' : 'nameMobile')?.textContent.trim();
+    if (img) img.style.display = 'none';
+    if (span && name) {
+      span.textContent = name.charAt(0).toUpperCase();
+      span.classList.remove('hidden');
+      span.style.display = 'flex';
+    }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const img = document.getElementById("profileImage");
+  if (img && (!img.src || img.src.trim() === "")) {
+    handleImageError();
+  }
+});
+</script>
+
+</body>
+</html>

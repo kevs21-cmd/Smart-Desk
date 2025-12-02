@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Course Management - Learning Management System</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#3b82f6",
+              secondary: "#8b5cf6",
+            },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <style>
+      :where([class^="ri-"])::before {
+          content: "\f3c2";
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-4">
+            <div class="text-2xl font-['Pacifico'] text-primary">logo</div>
+            <div class="text-xl font-semibold text-gray-800">
+              Advanced Web Development
+            </div>
+          </div>
+          <div class="flex items-center space-x-4">
+            <button
+              class="w-10 h-10 flex items-center justify-center text-gray-600 hover:text-primary transition-colors"
+            >
+              <i class="ri-notification-line ri-lg"></i>
+            </button>
+            <div class="flex items-center space-x-3">
+              <img
+                src="https://readdy.ai/api/search-image?query=professional%20teacher%20portrait%20smiling%20confident%20educator%20wearing%20business%20casual%20attire%20against%20clean%20white%20background%20modern%20academic%20setting&width=40&height=40&seq=teacher-profile&orientation=squarish"
+                alt="Teacher Profile"
+                class="w-10 h-10 rounded-full object-cover"
+              />
+              <div class="text-sm">
+                <div class="font-medium text-gray-900">Dr. Sarah Johnson</div>
+                <div class="text-gray-500">Instructor</div>
+              </div>
+              <button
+                class="w-6 h-6 flex items-center justify-center text-gray-400"
+              >
+                <i class="ri-arrow-down-s-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Breadcrumb -->
+      <div class="px-6 py-2 bg-gray-50 border-t border-gray-200">
+        <nav class="flex items-center space-x-2 text-sm text-gray-600">
+          <a href="#" class="hover:text-primary">Dashboard</a>
+          <i class="ri-arrow-right-s-line text-xs"></i>
+          <a href="#" class="hover:text-primary">Course Management</a>
+          <i class="ri-arrow-right-s-line text-xs"></i>
+          <span class="text-gray-900 font-medium"
+            >CS 4350 - Advanced Web Development</span
+          >
+        </nav>
+      </div>
+    </header>
+
+    <!-- Course Overview Panel -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="px-6 py-6">
+        <div class="flex items-center justify-between">
+          <div class="flex-1">
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">
+              CS 4350 - Advanced Web Development
+            </h1>
+            <div class="flex items-center space-x-6 text-sm text-gray-600">
+              <span>Fall 2024</span>
+              <span>•</span>
+              <span>42 Students Enrolled</span>
+              <span>•</span>
+              <span>Last updated 2 hours ago</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3">
+            <button
+              class="px-4 py-2 bg-gray-100 text-gray-700 rounded-button hover:bg-gray-200 transition-colors whitespace-nowrap"
+            >
+              <i class="ri-settings-line mr-2"></i>Course Settings
+            </button>
+            <button
+              class="px-4 py-2 bg-primary text-white rounded-button hover:bg-blue-600 transition-colors whitespace-nowrap"
+            >
+              <i class="ri-group-line mr-2"></i>Student Management
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Management Tabs -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="px-6">
+        <nav class="flex space-x-8">
+          <button
+            class="py-4 px-1 border-b-2 border-primary text-primary font-medium text-sm whitespace-nowrap tab-button active"
+          >
+            Materials
+          </button>
+          <button
+            class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap tab-button"
+          >
+            Assignments
+          </button>
+          <button
+            class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap tab-button"
+          >
+            Quizzes
+          </button>
+          <button
+            class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap tab-button"
+          >
+            Activities
+          </button>
+          <button
+            class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap tab-button"
+          >
+            Announcements
+          </button>
+          <button
+            class="py-4 px-1 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap tab-button"
+          >
+            Grades
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Content Creation Toolbar -->
+    <div class="bg-white border-b border-gray-200">
+      <div class="px-6 py-4">
+        <div class="flex items-center space-x-3">
+          <button
+            class="px-4 py-2 bg-green-100 text-green-700 rounded-button hover:bg-green-200 transition-colors whitespace-nowrap"
+          >
+            <i class="ri-upload-line mr-2"></i>Upload Material
+          </button>
+          <button
+            class="px-4 py-2 bg-blue-100 text-blue-700 rounded-button hover:bg-blue-200 transition-colors whitespace-nowrap"
+          >
+            <i class="ri-file-text-line mr-2"></i>Create Assignment
+          </button>
+          <button
+            class="px-4 py-2 bg-purple-100 text-purple-700 rounded-button hover:bg-purple-200 transition-colors whitespace-nowrap"
+          >
+            <i class="ri-question-line mr-2"></i>New Quiz
+          </button>
+          <button
+            class="px-4 py-2 bg-orange-100 text-orange-700 rounded-button hover:bg-orange-200 transition-colors whitespace-nowrap"
+          >
+            <i class="ri-lightbulb-line mr-2"></i>Add Activity
+          </button>
+          <button
+            class="px-4 py-2 bg-red-100 text-red-700 rounded-button hover:bg-red-200 transition-colors whitespace-nowrap"
+          >
+            <i class="ri-megaphone-line mr-2"></i>Post Announcement
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 px-6 py-6">
+      <div class="flex gap-6">
+        <!-- Content Management Grid -->
+        <div class="flex-1">
+          <!-- Materials Tab Content -->
+          <div id="materials-content" class="tab-content">
+            <div class="mb-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                Course Materials
+              </h2>
+
+              <!-- Material Upload Section -->
+              <div
+                class="bg-white rounded-lg border-2 border-dashed border-gray-300 p-8 text-center mb-6 hover:border-primary transition-colors"
+              >
+                <div
+                  class="w-12 h-12 flex items-center justify-center mx-auto mb-4 text-gray-400"
+                >
+                  <i class="ri-upload-cloud-line ri-2x"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
+                  Upload Course Materials
+                </h3>
+                <p class="text-gray-600 mb-4">
+                  Drag and drop files here or click to browse
+                </p>
+                <button
+                  class="px-6 py-2 bg-primary text-white rounded-button hover:bg-blue-600 transition-colors whitespace-nowrap"
+                >
+                  Choose Files
+                </button>
+                <p class="text-sm text-gray-500 mt-2">
+                  Supports PDF, DOC, PPT, MP4, and more
+                </p>
+              </div>
+
+              <!-- Materials Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div
+                  class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                >
+                  <div class="flex items-start justify-between mb-3">
+                    <div
+                      class="w-10 h-10 flex items-center justify-center bg-red-100 text-red-600 rounded"
+                    >
+                      <i class="ri-file-pdf-line"></i>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <h3 class="font-medium text-gray-900 mb-1">
+                    Introduction to React Hooks
+                  </h3>
+                  <p class="text-sm text-gray-600 mb-2">
+                    Lecture slides covering useState and useEffect
+                  </p>
+                  <div
+                    class="flex items-center justify-between text-xs text-gray-500"
+                  >
+                    <span>PDF • 2.4 MB</span>
+                    <span>Oct 28, 2024</span>
+                  </div>
+                </div>
+
+                <div
+                  class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                >
+                  <div class="flex items-start justify-between mb-3">
+                    <div
+                      class="w-10 h-10 flex items-center justify-center bg-blue-100 text-blue-600 rounded"
+                    >
+                      <i class="ri-video-line"></i>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <h3 class="font-medium text-gray-900 mb-1">
+                    Node.js Express Tutorial
+                  </h3>
+                  <p class="text-sm text-gray-600 mb-2">
+                    Video tutorial on building REST APIs
+                  </p>
+                  <div
+                    class="flex items-center justify-between text-xs text-gray-500"
+                  >
+                    <span>MP4 • 45 min</span>
+                    <span>Oct 25, 2024</span>
+                  </div>
+                </div>
+
+                <div
+                  class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow"
+                >
+                  <div class="flex items-start justify-between mb-3">
+                    <div
+                      class="w-10 h-10 flex items-center justify-center bg-green-100 text-green-600 rounded"
+                    >
+                      <i class="ri-code-line"></i>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <h3 class="font-medium text-gray-900 mb-1">
+                    Sample Code Repository
+                  </h3>
+                  <p class="text-sm text-gray-600 mb-2">
+                    GitHub link to course examples
+                  </p>
+                  <div
+                    class="flex items-center justify-between text-xs text-gray-500"
+                  >
+                    <span>Link • GitHub</span>
+                    <span>Oct 22, 2024</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assignments Tab Content -->
+          <div id="assignments-content" class="tab-content hidden">
+            <div class="mb-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                Assignments
+              </h2>
+
+              <!-- Assignment Creation Panel -->
+              <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Create New Assignment
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >Assignment Title</label
+                    >
+                    <input
+                      type="text"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Enter assignment title"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >Due Date</label
+                    >
+                    <input
+                      type="datetime-local"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >Points</label
+                    >
+                    <input
+                      type="number"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="100"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >Submission Type</label
+                    >
+                    <div
+                      class="w-full px-3 py-2 border border-gray-300 rounded bg-white cursor-pointer flex items-center justify-between"
+                    >
+                      <span class="text-gray-700">File Upload</span>
+                      <i class="ri-arrow-down-s-line text-gray-400"></i>
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >Description</label
+                  >
+                  <textarea
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Enter assignment description and instructions..."
+                  ></textarea>
+                </div>
+                <div class="flex items-center justify-end space-x-3">
+                  <button
+                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-button hover:bg-gray-50 transition-colors whitespace-nowrap"
+                  >
+                    Save as Draft
+                  </button>
+                  <button
+                    class="px-4 py-2 bg-primary text-white rounded-button hover:bg-blue-600 transition-colors whitespace-nowrap"
+                  >
+                    Publish Assignment
+                  </button>
+                </div>
+              </div>
+
+              <!-- Assignments List -->
+              <div class="space-y-4">
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h3 class="font-medium text-gray-900 mb-1">
+                        Project 3: Full-Stack Web Application
+                      </h3>
+                      <p class="text-sm text-gray-600 mb-2">
+                        Build a complete MERN stack application with
+                        authentication
+                      </p>
+                      <div
+                        class="flex items-center space-x-4 text-xs text-gray-500"
+                      >
+                        <span>Due: Nov 15, 2024 11:59 PM</span>
+                        <span>•</span>
+                        <span>150 points</span>
+                        <span>•</span>
+                        <span>28/42 submitted</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-4">
+                      <span
+                        class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded"
+                        >Published</span
+                      >
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h3 class="font-medium text-gray-900 mb-1">
+                        Assignment 2: React Component Library
+                      </h3>
+                      <p class="text-sm text-gray-600 mb-2">
+                        Create reusable React components with proper
+                        documentation
+                      </p>
+                      <div
+                        class="flex items-center space-x-4 text-xs text-gray-500"
+                      >
+                        <span>Due: Nov 1, 2024 11:59 PM</span>
+                        <span>•</span>
+                        <span>100 points</span>
+                        <span>•</span>
+                        <span>42/42 submitted</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-4">
+                      <span
+                        class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                        >Graded</span
+                      >
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quizzes Tab Content -->
+          <div id="quizzes-content" class="tab-content hidden">
+            <div class="mb-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">Quizzes</h2>
+
+              <!-- Quiz Builder Interface -->
+              <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Create New Quiz
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >Quiz Title</label
+                    >
+                    <input
+                      type="text"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="Enter quiz title"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >Time Limit (minutes)</label
+                    >
+                    <input
+                      type="number"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="60"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2"
+                      >Attempts Allowed</label
+                    >
+                    <input
+                      type="number"
+                      class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                      placeholder="1"
+                    />
+                  </div>
+                </div>
+
+                <!-- Question Types -->
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >Add Question</label
+                  >
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      class="px-3 py-2 bg-blue-100 text-blue-700 rounded-button hover:bg-blue-200 transition-colors whitespace-nowrap text-sm"
+                    >
+                      Multiple Choice
+                    </button>
+                    <button
+                      class="px-3 py-2 bg-green-100 text-green-700 rounded-button hover:bg-green-200 transition-colors whitespace-nowrap text-sm"
+                    >
+                      True/False
+                    </button>
+                    <button
+                      class="px-3 py-2 bg-purple-100 text-purple-700 rounded-button hover:bg-purple-200 transition-colors whitespace-nowrap text-sm"
+                    >
+                      Short Answer
+                    </button>
+                    <button
+                      class="px-3 py-2 bg-orange-100 text-orange-700 rounded-button hover:bg-orange-200 transition-colors whitespace-nowrap text-sm"
+                    >
+                      Essay
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3">
+                  <button
+                    class="px-4 py-2 text-gray-700 border border-gray-300 rounded-button hover:bg-gray-50 transition-colors whitespace-nowrap"
+                  >
+                    Preview Quiz
+                  </button>
+                  <button
+                    class="px-4 py-2 bg-primary text-white rounded-button hover:bg-blue-600 transition-colors whitespace-nowrap"
+                  >
+                    Publish Quiz
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quizzes List -->
+              <div class="space-y-4">
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h3 class="font-medium text-gray-900 mb-1">
+                        Midterm Exam: Web Development Fundamentals
+                      </h3>
+                      <p class="text-sm text-gray-600 mb-2">
+                        Comprehensive exam covering HTML, CSS, JavaScript, and
+                        React
+                      </p>
+                      <div
+                        class="flex items-center space-x-4 text-xs text-gray-500"
+                      >
+                        <span>25 questions</span>
+                        <span>•</span>
+                        <span>90 minutes</span>
+                        <span>•</span>
+                        <span>Average: 87.3%</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-4">
+                      <span
+                        class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
+                        >Completed</span
+                      >
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-eye-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h3 class="font-medium text-gray-900 mb-1">
+                        Quiz 4: Node.js and Express
+                      </h3>
+                      <p class="text-sm text-gray-600 mb-2">
+                        Quick assessment on backend development concepts
+                      </p>
+                      <div
+                        class="flex items-center space-x-4 text-xs text-gray-500"
+                      >
+                        <span>10 questions</span>
+                        <span>•</span>
+                        <span>30 minutes</span>
+                        <span>•</span>
+                        <span>38/42 completed</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-4">
+                      <span
+                        class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded"
+                        >Active</span
+                      >
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-eye-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activities Tab Content -->
+          <div id="activities-content" class="tab-content hidden">
+            <div class="mb-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                Learning Activities
+              </h2>
+
+              <!-- Activity Templates -->
+              <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Create New Activity
+                </h3>
+                <div
+                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4"
+                >
+                  <button
+                    class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors text-center"
+                  >
+                    <div
+                      class="w-8 h-8 flex items-center justify-center mx-auto mb-2 text-blue-600"
+                    >
+                      <i class="ri-chat-3-line ri-lg"></i>
+                    </div>
+                    <div class="font-medium text-gray-900 text-sm">
+                      Discussion Forum
+                    </div>
+                  </button>
+                  <button
+                    class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors text-center"
+                  >
+                    <div
+                      class="w-8 h-8 flex items-center justify-center mx-auto mb-2 text-green-600"
+                    >
+                      <i class="ri-group-line ri-lg"></i>
+                    </div>
+                    <div class="font-medium text-gray-900 text-sm">
+                      Group Project
+                    </div>
+                  </button>
+                  <button
+                    class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors text-center"
+                  >
+                    <div
+                      class="w-8 h-8 flex items-center justify-center mx-auto mb-2 text-purple-600"
+                    >
+                      <i class="ri-presentation-line ri-lg"></i>
+                    </div>
+                    <div class="font-medium text-gray-900 text-sm">
+                      Presentation
+                    </div>
+                  </button>
+                  <button
+                    class="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors text-center"
+                  >
+                    <div
+                      class="w-8 h-8 flex items-center justify-center mx-auto mb-2 text-orange-600"
+                    >
+                      <i class="ri-team-line ri-lg"></i>
+                    </div>
+                    <div class="font-medium text-gray-900 text-sm">
+                      Peer Review
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Activities List -->
+              <div class="space-y-4">
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center space-x-2 mb-2">
+                        <div
+                          class="w-6 h-6 flex items-center justify-center text-blue-600"
+                        >
+                          <i class="ri-chat-3-line"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900">
+                          Discussion: Modern JavaScript Frameworks
+                        </h3>
+                      </div>
+                      <p class="text-sm text-gray-600 mb-2">
+                        Compare and contrast React, Vue, and Angular frameworks
+                      </p>
+                      <div
+                        class="flex items-center space-x-4 text-xs text-gray-500"
+                      >
+                        <span>Started: Oct 20, 2024</span>
+                        <span>•</span>
+                        <span>156 posts</span>
+                        <span>•</span>
+                        <span>40 participants</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-4">
+                      <span
+                        class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded"
+                        >Active</span
+                      >
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center space-x-2 mb-2">
+                        <div
+                          class="w-6 h-6 flex items-center justify-center text-green-600"
+                        >
+                          <i class="ri-group-line"></i>
+                        </div>
+                        <h3 class="font-medium text-gray-900">
+                          Group Project: E-commerce Platform
+                        </h3>
+                      </div>
+                      <p class="text-sm text-gray-600 mb-2">
+                        Teams of 4 students build a complete online store
+                      </p>
+                      <div
+                        class="flex items-center space-x-4 text-xs text-gray-500"
+                      >
+                        <span>Due: Dec 10, 2024</span>
+                        <span>•</span>
+                        <span>10 teams</span>
+                        <span>•</span>
+                        <span>200 points</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center space-x-2 ml-4">
+                      <span
+                        class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded"
+                        >In Progress</span
+                      >
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Announcements Tab Content -->
+          <div id="announcements-content" class="tab-content hidden">
+            <div class="mb-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                Announcements
+              </h2>
+
+              <!-- Announcement Creation -->
+              <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">
+                  Create Announcement
+                </h3>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >Title</label
+                  >
+                  <input
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Enter announcement title"
+                  />
+                </div>
+                <div class="mb-4">
+                  <label class="block text-sm font-medium text-gray-700 mb-2"
+                    >Message</label
+                  >
+                  <textarea
+                    rows="4"
+                    class="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Write your announcement message..."
+                  ></textarea>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center space-x-4">
+                    <label class="flex items-center space-x-2">
+                      <div class="relative">
+                        <input type="checkbox" class="sr-only" />
+                        <div
+                          class="w-5 h-5 bg-white border-2 border-gray-300 rounded cursor-pointer checkbox-custom"
+                        ></div>
+                      </div>
+                      <span class="text-sm text-gray-700"
+                        >Send email notification</span
+                      >
+                    </label>
+                    <label class="flex items-center space-x-2">
+                      <div class="relative">
+                        <input type="checkbox" class="sr-only" />
+                        <div
+                          class="w-5 h-5 bg-white border-2 border-gray-300 rounded cursor-pointer checkbox-custom"
+                        ></div>
+                      </div>
+                      <span class="text-sm text-gray-700">Pin to top</span>
+                    </label>
+                  </div>
+                  <button
+                    class="px-4 py-2 bg-primary text-white rounded-button hover:bg-blue-600 transition-colors whitespace-nowrap"
+                  >
+                    Post Announcement
+                  </button>
+                </div>
+              </div>
+
+              <!-- Announcements List -->
+              <div class="space-y-4">
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                      <div
+                        class="w-6 h-6 flex items-center justify-center text-red-600"
+                      >
+                        <i class="ri-pushpin-fill"></i>
+                      </div>
+                      <h3 class="font-medium text-gray-900">
+                        Final Project Guidelines Updated
+                      </h3>
+                    </div>
+                    <span class="text-xs text-gray-500">2 hours ago</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">
+                    I've updated the final project requirements document. Please
+                    review the new submission format and grading rubric. The
+                    deadline remains December 15th at 11:59 PM.
+                  </p>
+                  <div class="flex items-center justify-between">
+                    <div
+                      class="flex items-center space-x-4 text-xs text-gray-500"
+                    >
+                      <span>42 students notified</span>
+                      <span>•</span>
+                      <span>38 viewed</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 p-4">
+                  <div class="flex items-start justify-between mb-2">
+                    <h3 class="font-medium text-gray-900">
+                      Office Hours This Week
+                    </h3>
+                    <span class="text-xs text-gray-500">1 day ago</span>
+                  </div>
+                  <p class="text-sm text-gray-600 mb-3">
+                    My office hours this week will be Tuesday 2-4 PM and
+                    Thursday 10 AM-12 PM. I'll be available to help with Project
+                    3 questions and midterm review.
+                  </p>
+                  <div class="flex items-center justify-between">
+                    <div
+                      class="flex items-center space-x-4 text-xs text-gray-500"
+                    >
+                      <span>42 students notified</span>
+                      <span>•</span>
+                      <span>42 viewed</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-primary"
+                      >
+                        <i class="ri-edit-line"></i>
+                      </button>
+                      <button
+                        class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-600"
+                      >
+                        <i class="ri-delete-bin-line"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Grades Tab Content -->
+          <div id="grades-content" class="tab-content hidden">
+            <div class="mb-6">
+              <h2 class="text-lg font-semibold text-gray-900 mb-4">
+                Grade Management
+              </h2>
+
+              <!-- Grade Overview -->
+              <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div class="text-center">
+                    <div class="text-2xl font-bold text-gray-900">85.7%</div>
+                    <div class="text-sm text-gray-600">Class Average</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">38</div>
+                    <div class="text-sm text-gray-600">Assignments Graded</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-2xl font-bold text-orange-600">12</div>
+                    <div class="text-sm text-gray-600">Pending Reviews</div>
+                  </div>
+                  <div class="text-center">
+                    <div class="text-2xl font-bold text-blue-600">42</div>
+                    <div class="text-sm text-gray-600">Total Students</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gradebook -->
+              <div
+                class="bg-white rounded-lg border border-gray-200 overflow-hidden"
+              >
+                <div class="px-6 py-4 border-b border-gray-200">
+                  <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-medium text-gray-900">Gradebook</h3>
+                    <button
+                      class="px-4 py-2 bg-primary text-white rounded-button hover:bg-blue-600 transition-colors whitespace-nowrap"
+                    >
+                      Export Grades
+                    </button>
+                  </div>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Student
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Assignment 1
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Assignment 2
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Midterm
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Project 3
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <img
+                              class="h-8 w-8 rounded-full"
+                              src="https://readdy.ai/api/search-image?query=young%20college%20student%20portrait%20professional%20headshot%20clean%20background%20academic%20setting&width=32&height=32&seq=student1&orientation=squarish"
+                              alt=""
+                            />
+                            <div class="ml-3">
+                              <div class="text-sm font-medium text-gray-900">
+                                Emma Thompson
+                              </div>
+                              <div class="text-sm text-gray-500">
+                                emma.thompson@email.com
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          95/100
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          88/100
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          92/100
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-orange-600"
+                        >
+                          Pending
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                        >
+                          91.7%
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <img
+                              class="h-8 w-8 rounded-full"
+                              src="https://readdy.ai/api/search-image?query=college%20student%20male%20portrait%20professional%20academic%20setting%20clean%20background&width=32&height=32&seq=student2&orientation=squarish"
+                              alt=""
+                            />
+                            <div class="ml-3">
+                              <div class="text-sm font-medium text-gray-900">
+                                Michael Chen
+                              </div>
+                              <div class="text-sm text-gray-500">
+                                michael.chen@email.com
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          82/100
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          90/100
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          87/100
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-orange-600"
+                        >
+                          Pending
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                        >
+                          86.3%
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Stats Sidebar -->
+        <div class="w-80">
+          <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">
+              Course Analytics
+            </h3>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">Student Engagement</span>
+                <span class="text-sm font-medium text-green-600">87%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="bg-green-500 h-2 rounded-full"
+                  style="width: 87%"
+                ></div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">Assignment Completion</span>
+                <span class="text-sm font-medium text-blue-600">92%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="bg-blue-500 h-2 rounded-full"
+                  style="width: 92%"
+                ></div>
+              </div>
+
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">Quiz Performance</span>
+                <span class="text-sm font-medium text-purple-600">85%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  class="bg-purple-500 h-2 rounded-full"
+                  style="width: 85%"
+                ></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 p-6 mb-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">
+              Recent Activity
+            </h3>
+            <div class="space-y-3">
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-green-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                  <p class="text-sm text-gray-900">
+                    Emma Thompson submitted Project 3
+                  </p>
+                  <p class="text-xs text-gray-500">2 minutes ago</p>
+                </div>
+              </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                  <p class="text-sm text-gray-900">
+                    New discussion post in Modern Frameworks
+                  </p>
+                  <p class="text-xs text-gray-500">15 minutes ago</p>
+                </div>
+              </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-orange-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                  <p class="text-sm text-gray-900">
+                    Quiz 4 deadline reminder sent
+                  </p>
+                  <p class="text-xs text-gray-500">1 hour ago</p>
+                </div>
+              </div>
+              <div class="flex items-start space-x-3">
+                <div class="w-2 h-2 bg-purple-500 rounded-full mt-2"></div>
+                <div class="flex-1">
+                  <p class="text-sm text-gray-900">
+                    Michael Chen completed Quiz 3
+                  </p>
+                  <p class="text-xs text-gray-500">2 hours ago</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">
+              Quick Actions
+            </h3>
+            <div class="space-y-2">
+              <button
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
+              >
+                <i class="ri-file-add-line mr-2"></i>Upload new material
+              </button>
+              <button
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
+              >
+                <i class="ri-mail-line mr-2"></i>Send class email
+              </button>
+              <button
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
+              >
+                <i class="ri-calendar-line mr-2"></i>Schedule office hours
+              </button>
+              <button
+                class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 rounded transition-colors"
+              >
+                <i class="ri-download-line mr-2"></i>Export attendance
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script id="tab-navigation">
+      document.addEventListener("DOMContentLoaded", function () {
+        const tabButtons = document.querySelectorAll(".tab-button");
+        const tabContents = document.querySelectorAll(".tab-content");
+
+        tabButtons.forEach((button, index) => {
+          button.addEventListener("click", function () {
+            tabButtons.forEach((btn) => {
+              btn.classList.remove("border-primary", "text-primary");
+              btn.classList.add("border-transparent", "text-gray-500");
+            });
+
+            tabContents.forEach((content) => {
+              content.classList.add("hidden");
+            });
+
+            this.classList.remove("border-transparent", "text-gray-500");
+            this.classList.add("border-primary", "text-primary");
+
+            const contentIds = [
+              "materials-content",
+              "assignments-content",
+              "quizzes-content",
+              "activities-content",
+              "announcements-content",
+              "grades-content",
+            ];
+            document.getElementById(contentIds[index]).classList.remove("hidden");
+          });
+        });
+      });
+    </script>
+
+    <script id="checkbox-functionality">
+      document.addEventListener("DOMContentLoaded", function () {
+        const checkboxes = document.querySelectorAll(".checkbox-custom");
+
+        checkboxes.forEach((checkbox) => {
+          checkbox.addEventListener("click", function () {
+            const input = this.previousElementSibling;
+            input.checked = !input.checked;
+
+            if (input.checked) {
+              this.classList.add("bg-primary", "border-primary");
+              this.classList.remove("bg-white", "border-gray-300");
+              this.innerHTML = '<i class="ri-check-line text-white text-xs"></i>';
+            } else {
+              this.classList.remove("bg-primary", "border-primary");
+              this.classList.add("bg-white", "border-gray-300");
+              this.innerHTML = "";
+            }
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

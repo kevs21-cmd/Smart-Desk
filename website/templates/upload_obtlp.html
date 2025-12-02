@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PGPC LMS | OBTLP Files</title>
+<script src="https://cdn.tailwindcss.com/3.4.16"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#3b82f6',
+        secondary: '#8b5cf6'
+      },
+      borderRadius: {
+        'none': '0px',
+        'sm': '4px',
+        DEFAULT: '8px',
+        'md': '12px',
+        'lg': '16px',
+        'xl': '20px',
+        '2xl': '24px',
+        '3xl': '32px',
+        'full': '9999px',
+        'button': '8px'
+      }
+    }
+  }
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <link rel="icon" type="image/png" sizes="500x500"
+      href="{{ url_for('static', filename='images/favi.png') }}">
+<style>
+  :where([class^="ri-"])::before { content: "\f3c2"; }
+  .modal-open { overflow: hidden; }
+  .scroll-container { -webkit-overflow-scrolling: touch; scrollbar-width: none; -ms-overflow-style: none; }
+  .scroll-container::-webkit-scrollbar { display: none; }
+  .scroll-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+  .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
+
+  @keyframes scaleFade {
+    0% { opacity: 0; transform: scale(0.8); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  .animate-scaleFade { animation: scaleFade 0.25s ease-out forwards; }
+
+  @keyframes bounceCheck {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
+  }
+  .animate-bounceCheck { animation: bounceCheck 0.6s ease; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- ==================== HEADER ==================== -->
+<header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-40">
+  <div class="px-4 sm:px-6 py-3 sm:py-4">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-4 flex-1 min-w-0">
+        <!-- Image instead of LMS -->
+  <img src="{{ url_for('static', filename='images/fav.png') }}"
+       alt="LMS Logo"
+       class="w-12 h-12 sm:w-14 sm:h-14 object-contain">
+        <div class="text-lg font-semibold text-gray-800 truncate">OBTLP FILES</div>
+      </div>
+
+      <!-- Desktop Actions -->
+      <div class="hidden md:flex items-center space-x-3">
+        <button class="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center text-gray-600 hover:text-primary transition-colors">
+          <i class="ri-notification-line text-lg sm:text-xl"></i>
+        </button>
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+          <div class="hidden lg:block text-sm">
+            <div id="name" class="font-medium text-gray-900">{{ user.full_name }}</div>
+            <div class="text-gray-500">Faculty</div>
+          </div>
+          <button id="profile-dropdown-button" class="text-gray-500 hover:text-gray-700">
+            <i class="ri-arrow-down-s-line text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <i class="ri-menu-line text-2xl text-gray-600"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Nav -->
+  <nav id="mobileNav" class="md:hidden hidden flex-col bg-white border-t border-gray-200 absolute inset-x-0 top-full shadow-lg z-50">
+    <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-8 h-8 rounded-full bg-gray-200 relative overflow-hidden flex items-center justify-center">
+          <img id="profileImageMobile" src="{{ user.profile_picture|default('') }}" alt="Profile" class="w-full h-full object-cover" onerror="this.style.display='none';this.nextElementSibling.classList.remove('hidden')"/>
+          <span id="profileInitialMobile" class="hidden text-gray-700 text-sm font-semibold">{{ user.full_name[0]|upper }}</span>
+        </div>
+        <div>
+          <div id="nameMobile" class="font-medium text-gray-900">{{ user.full_name }}</div>
+          <div class="text-xs text-gray-500">Faculty</div>
+        </div>
+      </div>
+    </div>
+    <div class="px-4 py-3 space-y-2">
+      <a href="/teachers-dashboard" class="flex items-center gap-3 py-2 text-gray-700 hover:text-primary"><i class="ri-dashboard-line"></i> Dashboard</a>
+      <a href="/edit_profile" class="flex items-center gap-3 py-2 text-gray-700 hover:text-primary"><i class="ri-user-line"></i> Edit Profile</a>
+      <a href="/settings" class="flex items-center gap-3 py-2 text-gray-700 hover:text-primary"><i class="ri-settings-3-line"></-fill"></i> Settings</a>
+      <a href="/logout" class="flex items-center gap-3 py-2 text-red-600 hover:text-red-700"><i class="ri-logout-box-line"></i> Logout</a>
+    </div>
+  </nav>
+</header>
+
+<!-- Breadcrumb -->
+<div class="px-4 sm:px-6 py-2 bg-white border-b border-gray-200 text-xs sm:text-sm">
+  <nav class="flex items-center space-x-1 flex-wrap">
+    <a href="/teachers-dashboard" class="hover:text-primary">Dashboard</a>
+    <i class="ri-arrow-right-s-line text-xs mx-1"></i>
+    <span class="text-gray-900 font-medium">Manage OBTLP</span>
+  </nav>
+</div>
+
+<!-- Main Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Search & Filters Card -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
+    <div class="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
+      <div class="flex-1 relative max-w-2xl">
+        <i class="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+        <input id="searchInput" type="text" placeholder="Search OBTLP by title, course, or keywords..."
+               class="w-full pl-12 pr-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+        <select id="programFilter" class="px-5 py-3.5 border border-gray-300 rounded-xl text-sm min-w-[180px]">
+          <option value="">All Programs</option>
+          {% for program in programs %}
+            <option value="{{ program.program_id }}">{{ program.program_name }}</option>
+          {% endfor %}
+        </select>
+
+        <select id="courseFilter" class="px-5 py-3.5 border border-gray-300 rounded-xl text-sm min-w-[200px]">
+          <option value="">All Courses</option>
+          {% for course in courses %}
+            <option value="{{ course.course_id }}" data-program="{{ course.program_id }}">
+              {{ course.course_title }}{% if course.section_name %} - {{ course.section_name }}{% endif %}
+            </option>
+          {% endfor %}
+        </select>
+
+        <button id="clearFilters" class="text-primary hover:text-blue-700 font-medium text-sm whitespace-nowrap">
+          Clear Filters
+        </button>
+
+        <button id="createBtn" class="bg-primary text-white px-6 py-3.5 rounded-xl font-medium hover:bg-blue-700 transition flex items-center gap-2 shadow-sm">
+          <i class="ri-add-line"></i>
+          Create New OBTLP
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- OBTLP List -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900">Uploaded OBTLP Files</h2>
+    </div>
+    <div class="divide-y divide-gray-200">
+      {% for file in obtlp_files %}
+      <div class="p-6 hover:bg-gray-50 transition obtlp-item"
+           data-id="{{ file.id }}"
+           data-title="{{ file.title }}"
+           data-program="{{ file.program_id }}"
+           data-course="{{ file.course_id }}"
+           data-section="{{ file.section_name or '' }}"
+           data-file-path="{{ file.static_path }}">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+          <div class="md:col-span-5 flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+              <i class="ri-file-pdf-line text-red-600 text-xl"></i>
+            </div>
+            <div class="min-w-0">
+              <h3 class="font-semibold text-gray-900 truncate">{{ file.title }}</h3>
+              <p class="text-sm text-gray-500 mt-1">{{ file.description or 'No description' }}</p>
+            </div>
+          </div>
+          <div class="md:col-span-2 text-sm text-gray-600">{{ file.program_name or 'N/A' }}</div>
+          <div class="md:col-span-2 text-sm text-gray-600 truncate">{{ file.course_title or 'N/A' }}</div>
+          <div class="md:col-span-2 text-sm text-gray-600">{{ file.section_name or 'N/A' }}</div>
+          <div class="md:col-span-1 flex items-center justify-end gap-3 text-gray-500">
+            <a href="{{ file.static_path }}" target="_blank" class="hover:text-primary transition" title="View">
+              <i class="ri-eye-line text-xl"></i>
+            </a>
+            <button class="edit-btn hover:text-primary transition" title="Edit">
+              <i class="ri-edit-line text-xl"></i>
+            </button>
+            <button class="delete-btn hover:text-red-600 transition" data-file-id="{{ file.id }}" title="Delete">
+              <i class="ri-delete-bin-line text-xl"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="p-12 text-center text-gray-500">
+        <i class="ri-file-upload-line text-5xl mb-4 text-gray-300"></i>
+        <p class="text-lg">No OBTLP files uploaded yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</main>
+
+<!-- Upload Modal -->
+<div id="uploadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div class="p-6 border-b border-gray-200 flex items-center justify-between">
+      <h2 class="text-2xl font-bold text-gray-900">Upload New OBTLP</h2>
+      <button id="closeModal" class="text-gray-400 hover:text-gray-600">
+        <i class="ri-close-line text-2xl"></i>
+      </button>
+    </div>
+    <div class="p-6">
+      <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Program</label>
+            <select name="program_id" id="programSelect" required class="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+              <option value="">Select Program</option>
+              {% for program in programs %}
+                <option value="{{ program.program_id }}">{{ program.program_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Course</label>
+            <select name="course_id" id="courseSelect" required class="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+              <option value="">Select Course</option>
+              {% for course in courses %}
+                <option value="{{ course.course_id }}" data-program="{{ course.program_id }}">
+                  {{ course.course_title }}{% if course.section_name %} - {{ course.section_name }}{% endif %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">OBTLP Title</label>
+          <input type="text" name="title" required placeholder="Enter a clear and descriptive title"
+                 class="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm">
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Description (Optional)</label>
+          <textarea name="description" rows="4" placeholder="Briefly describe the content and learning outcomes"
+                    class="w-full px-4 py-3.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary text-sm resize-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Upload File (PDF only)</label>
+          <div id="dropZone" class="border-2 border-dashed border-gray-300 rounded-xl p-10 text-center hover:border-primary transition cursor-pointer">
+            <i class="ri-upload-cloud-2-line text-5xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600 mb-1">Drag & drop your PDF here, or <span class="text-primary font-medium">click to browse</span></p>
+            <p class="text-sm text-gray-500">Maximum file size: 10MB</p>
+            <input type="file" name="files" id="fileInput" accept=".pdf" class="hidden" required>
+          </div>
+          <div id="fileInfo" class="hidden mt-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-4">
+            <i class="ri-file-pdf-line text-3xl text-red-600"></i>
+            <div class="flex-1">
+              <p id="fileName" class="font-medium text-gray-900"></p>
+              <p id="fileSize" class="text-sm text-gray-600"></p>
+            </div>
+            <button type="button" id="removeFile" class="text-gray-500 hover:text-red-600">
+              <i class="ri-close-line text-xl"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex gap-4 pt-4">
+          <button type="button" id="cancelBtn" class="flex-1 py-3.5 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50">
+            Cancel
+          </button>
+          <button type="submit" class="flex-1 py-3.5 bg-primary text-white rounded-xl font-medium hover:bg-blue-700 shadow-sm">
+            Upload OBTLP
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
+    <h3 class="text-xl font-semibold text-gray-900 mb-3">Delete OBTLP File?</h3>
+    <p class="text-gray-600 mb-6">This action can be undone later if needed.</p>
+    <div class="flex justify-end gap-3">
+      <button id="cancelDelete" class="px-6 py-3 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50">Cancel</button>
+      <a id="confirmDelete" href="#" class="px-6 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700">Delete</a>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
+    <h3 class="text-xl font-semibold text-gray-900 mb-6">Edit OBTLP Details</h3>
+    <form id="editForm" method="POST" enctype="multipart/form-data" class="space-y-6">
+      <input type="hidden" name="edit_id" id="editId">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Title</label>
+        <input type="text" id="editTitle" name="title" required class="w-full px-4 py-3.5 border border-gray-300 rounded-xl text-sm">
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Program</label>
+          <select id="editProgramSelect" name="program_id" class="w-full px-4 py-3.5 border border-gray-300 rounded-xl text-sm">
+            {% for program in programs %}<option value="{{ program.program_id }}">{{ program.program_name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Course</label>
+          <select id="editCourseSelect" name="course_id" required class="w-full px-4 py-3.5 border border-gray-300 rounded-xl text-sm">
+            <option value="">Select Course</option>
+            {% for course in courses %}
+              <option value="{{ course.course_id }}" data-program="{{ course.program_id }}">{{ course.course_title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Current File</label>
+        <a id="currentFileLink" href="#" target="_blank" class="text-primary hover:underline">View current PDF →</a>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">Replace File (Optional)</label>
+        <input type="file" name="file" accept=".pdf" class="w-full px-4 py-3.5 border border-gray-300 rounded-xl text-sm file:bg-gray-50">
+      </div>
+      <div class="flex gap-4">
+        <button type="button" id="cancelEdit" class="flex-1 py-3.5 border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50">Cancel</button>
+        <button type="submit" class="flex-1 py-3.5 bg-primary text-white rounded-xl hover:bg-blue-700">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Profile Dropdown -->
+<div id="profile-dropdown-menu" class="hidden absolute right-4 top-16 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 z-50">
+  <div class="py-2">
+    <a href="/edit_profile" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">Edit Profile</a>
+    <a href="/settings" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50">Settings</a>
+    <hr class="my-2 border-gray-200">
+    <a href="/logout" class="block px-4 py-3 text-sm text-red-600 hover:bg-red-50">Logout</a>
+  </div>
+</div>
+
+<!-- All Scripts (unchanged logic, only cleaned & consolidated) -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Mobile menu toggle
+  document.getElementById('mobileMenuBtn')?.addEventListener('click', () => {
+    document.getElementById('mobileNav').classList.toggle('hidden');
+    document.getElementById('mobileNav').classList.toggle('flex');
+  });
+
+  // Profile dropdown
+  document.getElementById('profile-dropdown-button')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('profile-dropdown-menu').classList.toggle('hidden');
+  });
+  document.addEventListener('click', () => document.getElementById('profile-dropdown-menu').classList.add('hidden'));
+
+  // Upload Modal
+  const uploadModal = document.getElementById('uploadModal');
+  const showModal = () => { uploadModal.classList.replace('hidden', 'flex'); document.body.classList.add('modal-open'); };
+  const hideModal = () => { uploadModal.classList.replace('flex', 'hidden'); document.body.classList.remove('modal-open'); };
+  document.getElementById('createBtn').addEventListener('click', showModal);
+  document.getElementById('closeModal').addEventListener('click', hideModal);
+  document.getElementById('cancelBtn').addEventListener('click', hideModal);
+  uploadModal.addEventListener('click', e => e.target === uploadModal && hideModal());
+
+  // File dropzone
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const fileInfo = document.getElementById('fileInfo');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  const removeFile = document.getElementById('removeFile');
+
+  dropZone.addEventListener('click', () => fileInput.click());
+  ['dragover', 'dragenter'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('border-primary', 'bg-blue-50'); }));
+  ['dragleave', 'drop'].forEach(evt => dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('border-primary', 'bg-blue-50'); }));
+  dropZone.addEventListener('drop', e => e.dataTransfer.files.length && handleFile(e.dataTransfer.files[0]));
+  fileInput.addEventListener('change', () => fileInput.files.length && handleFile(fileInput.files[0]));
+  removeFile.addEventListener('click', () => { fileInput.value = ''; fileInfo.classList.add('hidden'); });
+
+  function handleFile(file) {
+    fileName.textContent = file.name;
+    fileSize.textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    fileInfo.classList.remove('hidden');
+  }
+
+  // Delete Modal
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.getElementById('confirmDelete').href = `/upload_obtlp?delete_id=${btn.dataset.fileId}`;
+      document.getElementById('deleteModal').classList.replace('hidden', 'flex');
+    });
+  });
+  document.getElementById('cancelDelete').addEventListener('click', () => {
+    document.getElementById('deleteModal').classList.replace('flex', 'hidden');
+  });
+
+  // Edit Modal
+  document.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const item = btn.closest('.obtlp-item');
+      document.getElementById('editId').value = item.dataset.id;
+      document.getElementById('editTitle').value = item.dataset.title;
+      document.getElementById('editProgramSelect').value = item.dataset.program;
+      document.getElementById('currentFileLink').href = item.dataset.filePath;
+      document.getElementById('editCourseSelect').value = item.dataset.course;
+      document.getElementById('editModal').classList.replace('hidden', 'flex');
+    });
+  });
+  document.getElementById('cancelEdit').addEventListener('click', () => {
+    document.getElementById('editModal').classList.replace('flex', 'hidden');
+  });
+
+  // Search & Filter Logic (unchanged)
+  const searchInput = document.getElementById('searchInput');
+  const programFilter = document.getElementById('programFilter');
+  const courseFilter = document.getElementById('courseFilter');
+  const clearFilters = document.getElementById('clearFilters');
+  const items = document.querySelectorAll('.obtlp-item');
+  const originalCourses = Array.from(courseFilter.options).slice(1);
+
+  function updateCourses() {
+    const prog = programFilter.value;
+    courseFilter.innerHTML = '<option value="">All Courses</option>';
+    originalCourses.forEach(opt => {
+      if (!prog || opt.dataset.program === prog) courseFilter.appendChild(opt.cloneNode(true));
+    });
+  }
+
+  function filterList() {
+    const term = searchInput.value.toLowerCase();
+    const prog = programFilter.value;
+    const course = courseFilter.value;
+
+    items.forEach(item => {
+      const text = (item.dataset.title + ' ' + item.textContent).toLowerCase();
+      const matchSearch = text.includes(term);
+      const matchProg = !prog || item.dataset.program === prog;
+      const matchCourse = !course || item.dataset.course === course;
+      item.classList.toggle('hidden', !(matchSearch && matchProg && matchCourse));
+    });
+  }
+
+  programFilter.addEventListener('change', () => { updateCourses(); filterList(); });
+  courseFilter.addEventListener('change', filterList);
+  searchInput.addEventListener('input', filterList);
+  clearFilters.addEventListener('click', () => {
+    searchInput.value = programFilter.value = courseFilter.value = '';
+    updateCourses(); filterList();
+  });
+
+  updateCourses();
+  filterList();
+
+  // Image fallback
+  function handleImageError() {
+    ['profileImage', 'profileImageMobile'].forEach(id => {
+      const img = document.getElementById(id);
+      const initial = document.getElementById(id === 'profileImage' ? 'profileInitial' : 'profileInitialMobile');
+      const name = (id === 'profileImage' ? document.getElementById('name') : document.getElementById('nameMobile'))?.textContent.trim();
+      if (img && (!img.src || !img.complete)) {
+        img.style.display = 'none';
+        if (initial && name) {
+          initial.textContent = name.charAt(0).toUpperCase();
+          initial.classList.remove('hidden');
+        }
+      }
+    });
+  }
+  handleImageError();
+});
+</script>
+
+</body>
+</html>
