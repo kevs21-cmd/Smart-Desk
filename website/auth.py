@@ -1,6 +1,5 @@
 from logging import config
 import re
-import MySQLdb
 from flask import Flask, Blueprint, jsonify, render_template, request, redirect, url_for, flash, session, current_app
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
