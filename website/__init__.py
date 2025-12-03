@@ -1,6 +1,9 @@
 from flask import Flask
 import psycopg2
 from flask_mail import Mail
+import pymysql
+pymysql.install_as_MySQLdb()
+
 
 mail = Mail()
 
