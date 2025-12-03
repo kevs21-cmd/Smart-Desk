@@ -75,8 +75,10 @@ wsproto==1.2.0
 xlsxwriter==3.2.9
 zope.event==5.0
 zope.interface==7.2
+pywin32==311
 gunicorn
 requests
+
 
 
 
